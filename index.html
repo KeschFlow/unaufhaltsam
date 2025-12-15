@@ -337,6 +337,12 @@
       var toast = document.getElementById("toast");
       toast.className = "show";
       setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+   if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js");
+  });
+}
+
     }
   </script>
 </body>
