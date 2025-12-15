@@ -3,8 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="Eddie’s World – ruhig, echt, unaufhaltsam." />
-  <title>Eddie’s World – Unaufhaltsam</title>
+  <meta name="description" content="eddie-unaufhaltsam – ruhig, echt, unaufhaltsam." />
+
+  <title>eddie-unaufhaltsam</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b0b0f">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <style>
     :root{
       --bg:#0b0b0f;
@@ -181,16 +191,8 @@
       font-size:12px;
       display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;
     }
-    code.inline{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      font-size:12px;
-      padding:2px 6px;
-      border-radius:8px;
-      background: rgba(255,255,255,.06);
-      border:1px solid var(--line);
-      color:var(--text);
-    }
-    /* Notification Toast Style */
+
+    /* Toast */
     #toast {
       visibility: hidden;
       min-width: 250px;
@@ -201,7 +203,7 @@
       border-radius: 12px;
       padding: 16px;
       position: fixed;
-      z-index: 1;
+      z-index: 9999;
       left: 50%;
       bottom: 30px;
       transform: translateX(-50%);
@@ -223,7 +225,7 @@
     <div class="topbar">
       <div class="brand">
         <div class="mark" aria-hidden="true"></div>
-        <h1>Eddie's World</h1>
+        <h1>eddie-unaufhaltsam</h1>
       </div>
       <div class="pill" title="Status">
         <span style="width:8px;height:8px;border-radius:999px;background:var(--purple);display:inline-block"></span>
@@ -244,22 +246,10 @@
           </p>
 
           <div class="grid" aria-label="Kernkompetenzen">
-            <div class="kpi">
-              <p class="t">Energie</p>
-              <p class="v">Unendlich</p>
-            </div>
-            <div class="kpi">
-              <p class="t">Loyalität</p>
-              <p class="v">100% Onkelz</p>
-            </div>
-            <div class="kpi">
-              <p class="t">Mission</p>
-              <p class="v">Keschflow & Chaos</p>
-            </div>
-            <div class="kpi">
-              <p class="t">Status</p>
-              <p class="v">Der Boss</p>
-            </div>
+            <div class="kpi"><p class="t">Energie</p><p class="v">Unendlich</p></div>
+            <div class="kpi"><p class="t">Loyalität</p><p class="v">100% Onkelz</p></div>
+            <div class="kpi"><p class="t">Mission</p><p class="v">Keschflow & Chaos</p></div>
+            <div class="kpi"><p class="t">Status</p><p class="v">Der Boss</p></div>
           </div>
 
           <div class="section">
@@ -273,11 +263,9 @@
 
           <div class="ctaRow">
             <a class="btn btnPrimary" href="https://jutn.creator-spring.com/listing/eddies-world-unaufhaltsam" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M16 11V7a4 4 0 0 0-8 0v4M5 9h14l1 12H4L5 9z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               Eddie’s World (Shop)
             </a>
             <a class="btn" href="https://ko-fi.com/keschflow" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" stroke-width="2"/></svg>
               Optional unterstützen
             </a>
           </div>
@@ -303,8 +291,7 @@
               </p>
 
               <div class="ctaRow" style="margin-top:14px; flex-direction: column; align-items: stretch;">
-                 <button class="btn" onclick="copyLink()">
-                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 9h10v10H9V9Z" stroke="currentColor" stroke-width="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="2"/></svg>
+                <button class="btn" type="button" onclick="copyLink()">
                   Link zur Seite kopieren
                 </button>
               </div>
@@ -316,34 +303,35 @@
 
     <div class="footer">
       <span>© <span id="y"></span> KeschFlow</span>
-      <span>Eddie's World · System: Unaufhaltsam</span>
+      <span>eddie-unaufhaltsam · System</span>
     </div>
   </div>
 
   <div id="toast">Link in die Zwischenablage kopiert!</div>
 
- <script>
-  document.getElementById("y").textContent = new Date().getFullYear();
+  <script>
+    document.getElementById("y").textContent = new Date().getFullYear();
 
-  function copyLink() {
-    const tempInput = document.createElement("input");
-    tempInput.value = window.location.href;
-    document.body.appendChild(tempInput);
-    tempInput.select();
-    tempInput.setSelectionRange(0, 99999);
-    document.execCommand("copy");
-    document.body.removeChild(tempInput);
+    function copyLink() {
+      const tempInput = document.createElement("input");
+      tempInput.value = window.location.href;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      tempInput.setSelectionRange(0, 99999);
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
 
-    var toast = document.getElementById("toast");
-    toast.className = "show";
-    setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
-  }
+      const toast = document.getElementById("toast");
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2500);
+    }
 
-  // ✅ Service Worker Registrierung (AUßERHALB von copyLink)
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js");
-    });
-  }
-</script>
+    // Service Worker Registrierung (AUßERHALB von copyLink)
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js");
+      });
+    }
+  </script>
+</body>
 </html>
