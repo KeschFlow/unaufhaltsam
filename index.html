@@ -322,28 +322,28 @@
 
   <div id="toast">Link in die Zwischenablage kopiert!</div>
 
-  <script>
-    document.getElementById("y").textContent = new Date().getFullYear();
+ <script>
+  document.getElementById("y").textContent = new Date().getFullYear();
 
-    function copyLink() {
-      const tempInput = document.createElement("input");
-      tempInput.value = window.location.href;
-      document.body.appendChild(tempInput);
-      tempInput.select();
-      tempInput.setSelectionRange(0, 99999);
-      document.execCommand("copy");
-      document.body.removeChild(tempInput);
+  function copyLink() {
+    const tempInput = document.createElement("input");
+    tempInput.value = window.location.href;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    tempInput.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+    document.body.removeChild(tempInput);
 
-      var toast = document.getElementById("toast");
-      toast.className = "show";
-      setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
-   if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js");
-  });
-}
+    var toast = document.getElementById("toast");
+    toast.className = "show";
+    setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+  }
 
-    }
-  </script>
-</body>
+  // ✅ Service Worker Registrierung (AUßERHALB von copyLink)
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js");
+    });
+  }
+</script>
 </html>
