@@ -1,152 +1,79 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Eddie unaufhaltsam</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eddie unaufhaltsam</title>
 
-<style>
-  :root {
-    --black:#000;
-    --white:#fff;
-    --purpur:#b01fa5;
-  }
+  <!-- Social Preview -->
+  <meta property="og:title" content="Eddie unaufhaltsam" />
+  <meta property="og:description" content="UNGEFILTERT." />
+  <meta property="og:image" content="logo.eddie.png" />
+  <meta name="twitter:card" content="summary_large_image" />
 
-  * {
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family: Arial, Helvetica, sans-serif;
-  }
+  <style>
+    :root { --black:#000; --white:#fff; --purpur:#b01fa5; }
 
-  body {
-    background: var(--white);
-    color: var(--black);
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-  }
+    * { margin:0; padding:0; box-sizing:border-box; font-family: Arial, Helvetica, sans-serif; }
 
-  .wrap {
-    max-width:420px;
-    width:100%;
-  }
+    body{
+      background:var(--white);
+      color:var(--black);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:24px;
+    }
 
-  svg {
-    width:260px;
-    max-width:80%;
-    margin:0 auto 28px;
-    display:block;
-  }
+    .wrap{ max-width:520px; width:100%; }
 
-  h1 {
-    font-size:34px;
-    font-weight:900;
-    margin-bottom:6px;
-  }
+    .hero-img{
+      width:320px;
+      max-width:85%;
+      height:auto;
+      display:block;
+      margin:0 auto 22px;
+    }
 
-  .handle {
-    font-size:14px;
-    opacity:.7;
-    margin-bottom:22px;
-  }
+    h1{ font-size:36px; font-weight:900; margin-bottom:6px; }
+    .handle{ font-size:14px; opacity:.7; margin-bottom:18px; }
+    .tagline{ letter-spacing:4px; font-size:14px; margin-bottom:22px; }
 
-  .tagline {
-    letter-spacing:4px;
-    font-size:14px;
-    margin-bottom:28px;
-  }
+    .cta{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
 
-  a.button {
-    display:inline-block;
-    padding:14px 30px;
-    border:2px solid var(--black);
-    text-decoration:none;
-    color:var(--black);
-    font-weight:800;
-  }
+    a.button{
+      display:inline-block;
+      padding:14px 22px;
+      border:2px solid var(--black);
+      text-decoration:none;
+      color:var(--black);
+      font-weight:800;
+      transition:all .15s ease;
+      min-width:160px;
+    }
+    a.button:hover{ background:var(--black); color:var(--white); }
 
-  a.button:hover {
-    background:var(--black);
-    color:var(--white);
-  }
-</style>
+    a.button.secondary{ border-color: var(--purpur); }
+    a.button.secondary:hover{ background: var(--purpur); color: var(--white); border-color: var(--purpur); }
+  </style>
 </head>
 
 <body>
-<div class="wrap">
+  <div class="wrap">
+    <img class="hero-img" src="logo.eddie.png" alt="Eddie unaufhaltsam" />
 
-<!-- EDDIE – ECHTES SVG, STABIL, UNKAPUTTBAR -->
-<svg viewBox="0 0 600 720" xmlns="http://www.w3.org/2000/svg" aria-label="Eddie unaufhaltsam">
+    <h1>Eddie unaufhaltsam</h1>
+    <div class="handle">@keschflow</div>
+    <div class="tagline">UNGEFILTERT.</div>
 
-  <!-- Ohren -->
-  <path d="M140 140 C20 40 40 300 180 330 C195 260 210 190 140 140 Z" fill="#000"/>
-  <path d="M460 140 C580 40 560 300 420 330 C405 260 390 190 460 140 Z" fill="#000"/>
-
-  <!-- Kopf -->
-  <path d="M200 150
-           C130 200 120 330 160 460
-           C220 620 380 620 440 460
-           C480 330 470 200 400 150
-           C350 120 250 120 200 150 Z"
-        fill="#fff" stroke="#000" stroke-width="22" stroke-linejoin="round"/>
-
-  <!-- Augenflecken -->
-  <path d="M225 235
-           C170 270 170 360 225 395
-           C265 420 315 380 315 330
-           C315 270 265 215 225 235 Z"
-        fill="#000"/>
-  <path d="M375 235
-           C430 270 430 360 375 395
-           C335 420 285 380 285 330
-           C285 270 335 215 375 235 Z"
-        fill="#000"/>
-
-  <!-- Augen -->
-  <circle cx="255" cy="315" r="14" fill="#fff"/>
-  <circle cx="345" cy="315" r="14" fill="#fff"/>
-  <circle cx="255" cy="315" r="6" fill="#000"/>
-  <circle cx="345" cy="315" r="6" fill="#000"/>
-
-  <!-- Schnauze -->
-  <path d="M245 380
-           C270 355 330 355 355 380
-           C400 420 360 500 315 525
-           C305 530 295 530 285 525
-           C240 500 200 420 245 380 Z"
-        fill="#fff" stroke="#000" stroke-width="16"/>
-
-  <!-- Nase -->
-  <path d="M285 405
-           C295 385 325 385 335 405
-           C350 425 325 445 310 445
-           C295 445 270 425 285 405 Z"
-        fill="#000"/>
-
-  <!-- Mund -->
-  <path d="M270 455 C295 480 325 480 350 455"
-        fill="none" stroke="#000" stroke-width="10" stroke-linecap="round"/>
-
-  <!-- Zunge -->
-  <path d="M285 460
-           C270 540 280 590 310 615
-           C340 590 350 540 335 460 Z"
-        fill="var(--purpur)" stroke="#000" stroke-width="12"/>
-  <path d="M310 470 L310 600" stroke="#000" stroke-width="8" opacity=".3"/>
-
-</svg>
-
-<h1>Eddie unaufhaltsam</h1>
-<div class="handle">@keschflow</div>
-<div class="tagline">UNGEFILTERT.</div>
-
-<a class="button" href="https://www.youtube.com/@Eddie-Unaufhaltsam" target="_blank">
-▶ YouTube
-</a>
-
-</div>
+    <div class="cta">
+      <a class="button" href="https://www.youtube.com/@Eddie-Unaufhaltsam" target="_blank" rel="noopener">▶ YouTube</a>
+      <a class="button secondary" href="https://jutn.creator-spring.com/listing/eddies-world-unaufhaltsam" target="_blank" rel="noopener">Merch</a>
+      <a class="button" href="https://ko-fi.com/keschflow" target="_blank" rel="noopener">Ko-fi</a>
+    </div>
+  </div>
 </body>
 </html>
+
