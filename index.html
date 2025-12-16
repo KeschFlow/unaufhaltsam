@@ -1,337 +1,109 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="eddie-unaufhaltsam – ruhig, echt, unaufhaltsam." />
-
-  <title>eddie-unaufhaltsam</title>
-
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0b0b0f">
-  <link rel="icon" href="icon-192.png">
-  <link rel="apple-touch-icon" href="icon-192.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Eddie unaufhaltsam</title>
+  <meta name="description" content="Eddie unaufhaltsam @keschflow">
 
   <style>
     :root{
-      --bg:#0b0b0f;
-      --panel:#10101a;
-      --text:#f5f5f7;
-      --muted:#b9bac6;
-      --line:rgba(255,255,255,.10);
-      --purple:#A020F0;
-      --purple2:#7B2CFF;
-      --shadow: 0 12px 40px rgba(0,0,0,.55);
-      --radius: 18px;
+      --bg:#ffffff;
+      --text:#000000;
+      --muted:#666666;
+      --purple:#7b2cff;
     }
     *{box-sizing:border-box}
-    html,body{height:100%}
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      background:
-        radial-gradient(1200px 600px at 20% 10%, rgba(160,32,240,.18), transparent 60%),
-        radial-gradient(900px 500px at 90% 20%, rgba(123,44,255,.12), transparent 55%),
-        linear-gradient(180deg, #06060a 0%, var(--bg) 45%, #06060a 100%);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background:var(--bg);
       color:var(--text);
-      line-height:1.5;
     }
-    a{color:inherit; text-decoration:none}
-    .wrap{max-width:1080px; margin:0 auto; padding:28px 18px 60px}
-    .topbar{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:14px; padding:14px 0 26px;
+    .wrap{
+      text-align:center;
+      padding:40px 24px;
+      max-width:420px;
     }
-    .brand{
-      display:flex; align-items:center; gap:12px;
+    .logo{
+      width:220px;
+      margin:0 auto 24px;
+    }
+    h1{
+      margin:0;
+      font-size:32px;
       letter-spacing:.5px;
     }
-    .mark{
-      width:38px; height:38px; border-radius:12px;
-      background: linear-gradient(135deg, rgba(160,32,240,.95), rgba(123,44,255,.95));
-      box-shadow: 0 10px 30px rgba(160,32,240,.22);
-      position:relative;
-    }
-    .mark:after{
-      content:"";
-      position:absolute; inset:1px;
-      border-radius:11px;
-      background: linear-gradient(135deg, rgba(0,0,0,.55), rgba(0,0,0,.05));
-      mix-blend-mode:overlay;
-    }
-    .brand h1{
-      font-size:14px; margin:0; font-weight:700;
-    }
-    .pill{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:9px 12px; border:1px solid var(--line);
-      border-radius:999px;
+    .handle{
+      margin-top:6px;
       color:var(--muted);
-      background: rgba(255,255,255,.03);
-      backdrop-filter: blur(10px);
-      font-size:12px;
-      white-space:nowrap;
+      font-size:14px;
     }
-    .hero{
-      display:grid;
-      grid-template-columns: 1.25fr .75fr;
-      gap:18px;
-      align-items:stretch;
+    .claim{
+      margin:28px 0 36px;
+      font-size:18px;
+      letter-spacing:1px;
     }
-    @media (max-width: 920px){
-      .hero{grid-template-columns:1fr; }
+    .claim span{
+      display:block;
     }
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      border:1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-    .card .inner{padding:22px}
-    .headline{
-      font-size:38px; line-height:1.05;
-      margin:0 0 12px; font-weight:900;
-      letter-spacing:-.8px;
-    }
-    .sub{
-      margin:0 0 18px; color:var(--muted);
-      font-size:15px; max-width:68ch;
-    }
-    .accent{
-      color:var(--text);
-      position:relative;
+    a.btn{
       display:inline-block;
-    }
-    .accent:after{
-      content:"";
-      position:absolute; left:0; right:0; bottom:-6px; height:2px;
-      background: linear-gradient(90deg, var(--purple), var(--purple2));
-      opacity:.85;
-      border-radius:999px;
-    }
-    .grid{
-      display:grid; gap:12px;
-      grid-template-columns: 1fr 1fr;
-      margin-top:18px;
-    }
-    @media (max-width: 720px){
-      .grid{grid-template-columns:1fr;}
-      .headline{font-size:32px;}
-    }
-    .kpi{
-      padding:14px 14px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background: rgba(0,0,0,.25);
-    }
-    .kpi .t{font-size:12px; color:var(--muted); margin:0 0 6px}
-    .kpi .v{font-size:14px; margin:0; font-weight:700}
-    .side{
-      display:flex; flex-direction:column; gap:12px;
-    }
-    .quote{
-      padding:16px;
-      border-left:3px solid var(--purple);
-      background: rgba(0,0,0,.25);
-      border-top:1px solid var(--line);
-      border-right:1px solid var(--line);
-      border-bottom:1px solid var(--line);
-      border-radius:14px;
-      color:var(--text);
-    }
-    .quote p{margin:0; font-size:14px}
-    .quote small{display:block; margin-top:10px; color:var(--muted); font-size:12px}
-    .section{
-      margin-top:18px;
-      padding-top:18px;
-      border-top:1px solid var(--line);
-    }
-    .h2{
-      margin:0 0 10px;
-      font-size:14px;
-      letter-spacing:.6px;
-      text-transform:uppercase;
-      color:var(--muted);
-    }
-    .bullets{margin:0; padding:0 0 0 16px; color:var(--text)}
-    .bullets li{margin:8px 0; color:var(--text)}
-    .bullets li span{color:var(--muted)}
-    .ctaRow{
-      display:flex; flex-wrap:wrap; gap:10px;
-      margin-top:16px;
-    }
-    .btn{
-      display:inline-flex; align-items:center; justify-content:center;
-      gap:10px;
-      padding:12px 14px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.04);
-      color:var(--text);
+      padding:14px 28px;
+      border:2px solid var(--text);
       font-weight:700;
-      font-size:14px;
-      cursor:pointer;
-      transition: transform .08s ease, border-color .12s ease, background .12s ease;
-      text-decoration: none;
+      letter-spacing:1px;
+      text-decoration:none;
+      color:var(--text);
     }
-    .btn:hover{transform: translateY(-1px); border-color: rgba(160,32,240,.55); background: rgba(160,32,240,.10);}
-    .btnPrimary{
-      border:1px solid rgba(160,32,240,.55);
-      background: linear-gradient(135deg, rgba(160,32,240,.28), rgba(123,44,255,.18));
-    }
-    .btnPrimary:hover{background: linear-gradient(135deg, rgba(160,32,240,.34), rgba(123,44,255,.22));}
-    .btn svg{width:16px; height:16px; opacity:.9}
-    .footer{
-      margin-top:26px;
-      color:var(--muted);
-      font-size:12px;
-      display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;
-    }
-
-    /* Toast */
-    #toast {
-      visibility: hidden;
-      min-width: 250px;
-      background-color: var(--panel);
-      border: 1px solid var(--purple);
-      color: var(--text);
-      text-align: center;
-      border-radius: 12px;
-      padding: 16px;
-      position: fixed;
-      z-index: 9999;
-      left: 50%;
-      bottom: 30px;
-      transform: translateX(-50%);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-      font-size: 14px;
-      opacity: 0;
-      transition: opacity 0.3s, bottom 0.3s;
-    }
-    #toast.show {
-      visibility: visible;
-      opacity: 1;
-      bottom: 50px;
+    a.btn:hover{
+      background:var(--text);
+      color:#fff;
     }
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <div class="topbar">
-      <div class="brand">
-        <div class="mark" aria-hidden="true"></div>
-        <h1>eddie-unaufhaltsam</h1>
-      </div>
-      <div class="pill" title="Status">
-        <span style="width:8px;height:8px;border-radius:999px;background:var(--purple);display:inline-block"></span>
-        Unaufhaltsam
-      </div>
+
+    <!-- Eddie – Zeichen -->
+    <svg class="logo" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" aria-label="Eddie">
+      <path d="M60 90 C20 40 80 10 120 40" fill="none" stroke="#000" stroke-width="12"/>
+      <path d="M240 90 C280 40 220 10 180 40" fill="none" stroke="#000" stroke-width="12"/>
+      <path d="M80 120 C120 80 180 80 220 120
+               C250 150 250 210 220 240
+               C190 270 110 270 80 240
+               C50 210 50 150 80 120 Z"
+            fill="none" stroke="#000" stroke-width="12"/>
+      <ellipse cx="115" cy="160" rx="22" ry="28" fill="#000"/>
+      <ellipse cx="185" cy="160" rx="22" ry="28" fill="#000"/>
+      <path d="M150 190 C160 190 170 200 170 210
+               C170 225 160 235 150 235
+               C140 235 130 225 130 210
+               C130 200 140 190 150 190 Z" fill="#000"/>
+      <path d="M135 235 C135 265 165 265 165 235 Z" fill="var(--purple)"/>
+      <line x1="150" y1="235" x2="150" y2="260" stroke="#000" stroke-width="6" opacity=".4"/>
+    </svg>
+
+    <!-- Name -->
+    <h1>Eddie unaufhaltsam</h1>
+    <div class="handle">@keschflow</div>
+
+    <!-- Haltung (eine einzige) -->
+    <div class="claim">
+      <span>UNGEFILTERT.</span>
     </div>
 
-    <div class="hero">
-      <div class="card">
-        <div class="inner">
-          <h2 class="headline">
-            Ruhig. Echt.<br/>
-            <span class="accent">Unaufhaltsam.</span>
-          </h2>
-          <p class="sub">
-            Jack Russell Unaufhaltsam. Sound: Böhse Onkelz. 100% Real Talk.<br>
-            Finanzrebell & Systemarchitekt im Hintergrund.
-          </p>
+    <!-- Einziger Ausgang -->
+    <a class="btn" href="https://www.youtube.com/@Eddie-Unaufhaltsam" target="_blank">
+      ▶︎ YouTube
+    </a>
 
-          <div class="grid" aria-label="Kernkompetenzen">
-            <div class="kpi"><p class="t">Energie</p><p class="v">Unendlich</p></div>
-            <div class="kpi"><p class="t">Loyalität</p><p class="v">100% Onkelz</p></div>
-            <div class="kpi"><p class="t">Mission</p><p class="v">Keschflow & Chaos</p></div>
-            <div class="kpi"><p class="t">Status</p><p class="v">Der Boss</p></div>
-          </div>
-
-          <div class="section">
-            <div class="h2">Ziele</div>
-            <ul class="bullets">
-              <li><b>Das System brechen</b> <span>(oder zumindest das Spielzeug)</span></li>
-              <li><b>Ehrlicher Content</b> <span>Kein Filter, keine Lüge</span></li>
-              <li><b>Keschflow generieren</b> <span>durch pure Existenz</span></li>
-            </ul>
-          </div>
-
-          <div class="ctaRow">
-            <a class="btn btnPrimary" href="https://jutn.creator-spring.com/listing/eddies-world-unaufhaltsam" target="_blank" rel="noopener">
-              Eddie’s World (Shop)
-            </a>
-            <a class="btn" href="https://ko-fi.com/keschflow" target="_blank" rel="noopener">
-              Optional unterstützen
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <div class="side">
-        <div class="card">
-          <div class="inner">
-            <div class="h2" id="info">Info</div>
-            <div class="quote">
-              <p>
-                <b>Die Wahrheit tut weh, aber sie macht reich.</b><br>
-                Eddie ist der Beweis, dass man mit Haltung (und Zähnen) weiter kommt als mit Nettigkeit.
-              </p>
-              <small>Code. Cashflow. Kontrolle.</small>
-            </div>
-
-            <div class="section">
-              <div class="h2">Links</div>
-              <p style="margin:0 0 10px;color:var(--muted);font-size:13px">
-                Direktzugriff auf die wichtigen Kanäle.
-              </p>
-
-              <div class="ctaRow" style="margin-top:14px; flex-direction: column; align-items: stretch;">
-                <button class="btn" type="button" onclick="copyLink()">
-                  Link zur Seite kopieren
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="footer">
-      <span>© <span id="y"></span> KeschFlow</span>
-      <span>eddie-unaufhaltsam · System</span>
-    </div>
   </div>
-
-  <div id="toast">Link in die Zwischenablage kopiert!</div>
-
-  <script>
-    document.getElementById("y").textContent = new Date().getFullYear();
-
-    function copyLink() {
-      const tempInput = document.createElement("input");
-      tempInput.value = window.location.href;
-      document.body.appendChild(tempInput);
-      tempInput.select();
-      tempInput.setSelectionRange(0, 99999);
-      document.execCommand("copy");
-      document.body.removeChild(tempInput);
-
-      const toast = document.getElementById("toast");
-      toast.classList.add("show");
-      setTimeout(() => toast.classList.remove("show"), 2500);
-    }
-
-    // Service Worker Registrierung (AUßERHALB von copyLink)
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js");
-      });
-    }
-  </script>
 </body>
 </html>
+
