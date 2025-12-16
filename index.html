@@ -1,121 +1,148 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Eddie unaufhaltsam</title>
-  <style>
-    :root {
-      --black: #000;
-      --white: #fff;
-      --purpur: #8b2bbd;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eddie unaufhaltsam</title>
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, Helvetica, sans-serif;
-    }
+<style>
+  :root {
+    --black:#000;
+    --white:#fff;
+    --purpur:#b01fa5;
+  }
 
-    body {
-      background: var(--white);
-      color: var(--black);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      text-align: center;
-    }
+  * {
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family: Arial, Helvetica, sans-serif;
+  }
 
-    .wrap {
-      max-width: 420px;
-      width: 100%;
-    }
+  body {
+    background:var(--white);
+    color:var(--black);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    text-align:center;
+  }
 
-    svg {
-      width: 220px;
-      height: auto;
-      margin: 0 auto 24px;
-      display: block;
-    }
+  .wrap {
+    max-width:420px;
+    width:100%;
+  }
 
-    h1 {
-      font-size: 32px;
-      font-weight: 800;
-      margin-bottom: 6px;
-    }
+  svg {
+    width:260px;
+    margin:0 auto 28px;
+    display:block;
+  }
 
-    .handle {
-      font-size: 14px;
-      opacity: 0.7;
-      margin-bottom: 22px;
-    }
+  h1 {
+    font-size:34px;
+    font-weight:900;
+    margin-bottom:6px;
+  }
 
-    .tagline {
-      letter-spacing: 4px;
-      font-size: 14px;
-      margin-bottom: 28px;
-    }
+  .handle {
+    font-size:14px;
+    opacity:.7;
+    margin-bottom:20px;
+  }
 
-    a.button {
-      display: inline-block;
-      padding: 14px 26px;
-      border: 2px solid var(--black);
-      text-decoration: none;
-      color: var(--black);
-      font-weight: 700;
-      transition: 0.2s;
-    }
+  .tagline {
+    letter-spacing:4px;
+    font-size:14px;
+    margin-bottom:28px;
+  }
 
-    a.button:hover {
-      background: var(--black);
-      color: var(--white);
-    }
-  </style>
+  a.button {
+    display:inline-block;
+    padding:14px 30px;
+    border:2px solid var(--black);
+    text-decoration:none;
+    color:var(--black);
+    font-weight:800;
+  }
+
+  a.button:hover {
+    background:var(--black);
+    color:var(--white);
+  }
+</style>
 </head>
 
 <body>
-  <div class="wrap">
+<div class="wrap">
 
-    <!-- JACK RUSSELL – INLINE, NICHT EXTERN -->
-    <svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
-      <!-- Ohren -->
-      <path d="M80 40 C10 10 10 160 110 150 Z" fill="#000"/>
-      <path d="M320 40 C390 10 390 160 290 150 Z" fill="#000"/>
+<!-- JACK RUSSELL – NACH DEINEM BILD -->
+<svg viewBox="0 0 600 700" xmlns="http://www.w3.org/2000/svg">
 
-      <!-- Kopf -->
-      <ellipse cx="200" cy="220" rx="130" ry="150" fill="#fff" stroke="#000" stroke-width="14"/>
+  <!-- Ohren -->
+  <path d="M130 140 C30 20 40 280 170 300 C190 240 200 180 130 140 Z" fill="#000"/>
+  <path d="M470 140 C570 20 560 280 430 300 C410 240 400 180 470 140 Z" fill="#000"/>
 
-      <!-- Augenflecken -->
-      <ellipse cx="145" cy="210" rx="42" ry="55" fill="#000"/>
-      <ellipse cx="255" cy="210" rx="42" ry="55" fill="#000"/>
+  <!-- Kopf -->
+  <path d="M190 150
+           C130 190 110 310 150 420
+           C200 560 400 560 450 420
+           C490 310 470 190 410 150
+           C360 120 240 120 190 150 Z"
+        fill="#fff" stroke="#000" stroke-width="22" stroke-linejoin="round"/>
 
-      <!-- Augen -->
-      <circle cx="145" cy="215" r="10" fill="#fff"/>
-      <circle cx="255" cy="215" r="10" fill="#fff"/>
+  <!-- Augenflecken -->
+  <path d="M215 230 C165 260 165 350 215 375
+           C255 395 300 360 300 320
+           C300 260 255 215 215 230 Z" fill="#000"/>
+  <path d="M385 230 C435 260 435 350 385 375
+           C345 395 300 360 300 320
+           C300 260 345 215 385 230 Z" fill="#000"/>
 
-      <!-- Nase -->
-      <ellipse cx="200" cy="265" rx="22" ry="16" fill="#000"/>
+  <!-- Augen -->
+  <circle cx="245" cy="300" r="14" fill="#fff"/>
+  <circle cx="355" cy="300" r="14" fill="#fff"/>
+  <circle cx="245" cy="300" r="6" fill="#000"/>
+  <circle cx="355" cy="300" r="6" fill="#000"/>
 
-      <!-- Mund -->
-      <path d="M170 295 Q200 315 230 295" stroke="#000" stroke-width="6" fill="none"/>
+  <!-- Schnauze -->
+  <path d="M230 360
+           C260 340 340 340 370 360
+           C410 390 380 460 330 490
+           C310 505 290 505 270 490
+           C220 460 190 390 230 360 Z"
+        fill="#fff" stroke="#000" stroke-width="16"/>
 
-      <!-- Zunge -->
-      <path d="M185 305 C175 360 175 390 200 405 C225 390 225 360 215 305 Z"
-            fill="var(--purpur)"/>
-    </svg>
+  <!-- Nase -->
+  <path d="M270 385
+           C285 365 315 365 330 385
+           C345 405 325 420 300 420
+           C275 420 255 405 270 385 Z"
+        fill="#000"/>
 
-    <h1>Eddie unaufhaltsam</h1>
-    <div class="handle">@keschflow</div>
+  <!-- Mund -->
+  <path d="M255 435 C285 455 315 455 345 435"
+        fill="none" stroke="#000" stroke-width="10" stroke-linecap="round"/>
 
-    <div class="tagline">UNGEFILTERT.</div>
+  <!-- Zunge -->
+  <path d="M270 440
+           C255 520 265 560 300 585
+           C335 560 345 520 330 440 Z"
+        fill="var(--purpur)" stroke="#000" stroke-width="12"/>
+  <path d="M300 445 L300 565" stroke="#000" stroke-width="8" opacity=".3"/>
 
-    <a class="button" href="https://www.youtube.com/@Eddie-Unaufhaltsam" target="_blank">
-      ▶ YouTube
-    </a>
+</svg>
 
-  </div>
+<h1>Eddie unaufhaltsam</h1>
+<div class="handle">@keschflow</div>
+<div class="tagline">UNGEFILTERT.</div>
+
+<a class="button" href="https://www.youtube.com/@Eddie-Unaufhaltsam" target="_blank">
+▶ YouTube
+</a>
+
+</div>
 </body>
 </html>
 
