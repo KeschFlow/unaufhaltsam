@@ -1,112 +1,121 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Eddie unaufhaltsam</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eddie unaufhaltsam</title>
 
-<style>
-  :root {
-    --black: #000;
-    --white: #fff;
-    --purpur: #7a1fa2;
-  }
+  <style>
+    :root{
+      --black:#000;
+      --white:#fff;
+      --purpur:#b01fa5;
+    }
 
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
-  }
+    *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif;}
+    body{
+      background:var(--white);
+      color:var(--black);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:24px;
+    }
 
-  body {
-    background: var(--white);
-    color: var(--black);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 20px;
-  }
+    .wrap{width:100%;max-width:520px;}
 
-  .wrap {
-    max-width: 420px;
-    width: 100%;
-  }
+    .hero-img{
+      width:min(320px, 92vw);
+      height:auto;
+      display:block;
+      margin:0 auto 22px;
+    }
 
-  .logo {
-    width: 220px;
-    margin: 0 auto 28px;
-  }
+    h1{
+      font-size:clamp(28px, 6vw, 36px);
+      font-weight:900;
+      margin-bottom:6px;
+      letter-spacing:.2px;
+    }
 
-  h1 {
-    font-size: 34px;
-    font-weight: 900;
-    margin-bottom: 6px;
-  }
+    .handle{
+      font-size:14px;
+      opacity:.7;
+      margin-bottom:18px;
+    }
 
-  .handle {
-    font-size: 14px;
-    opacity: .7;
-    margin-bottom: 22px;
-  }
+    .tagline{
+      font-size:13px;
+      letter-spacing:4px;
+      margin-bottom:22px;
+    }
 
-  .tagline {
-    letter-spacing: 4px;
-    font-size: 14px;
-    margin-bottom: 32px;
-  }
+    .actions{
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      flex-wrap:wrap;
+      margin-top:6px;
+    }
 
-  .buttons {
-    display: flex;
-    gap: 14px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
+    .button{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      min-height:52px;              /* gut für Mobile-Taps */
+      padding:14px 20px;
+      border:2px solid var(--black);
+      text-decoration:none;
+      color:var(--black);
+      font-weight:900;
+      line-height:1;
+      transition:all .18s ease;
+      width:220px;                  /* gleichmäßig */
+      max-width:90vw;
+      background:transparent;
+    }
 
-  a.button {
-    padding: 14px 26px;
-    border: 2px solid var(--black);
-    text-decoration: none;
-    color: var(--black);
-    font-weight: 800;
-    transition: all 0.2s ease;
-    min-width: 140px;
-  }
+    .button:hover{background:var(--black);color:var(--white);}
+    .button:focus-visible{outline:3px solid var(--purpur);outline-offset:3px;}
 
-  a.button:hover {
-    background: var(--black);
-    color: var(--white);
-  }
-</style>
+    /* Mobile: Buttons untereinander, volle Breite */
+    @media (max-width:420px){
+      .actions{gap:10px;}
+      .button{width:100%;}
+    }
+  </style>
 </head>
 
 <body>
-<div class="wrap">
+  <div class="wrap">
+    <img
+      src="logo.eddie (2).png"
+      alt="Eddie der Jack Russell"
+      class="hero-img"
+      loading="eager"
+      decoding="async"
+    />
 
-  <!-- INLINE SVG – bleibt IM Code -->
-  <div class="logo">
-    <!-- HIER DEIN SVG VON EDDIE EINFÜGEN (so wie es jetzt passt) -->
+    <h1>Eddie unaufhaltsam</h1>
+    <div class="handle">@keschflow</div>
+    <div class="tagline">UNGEFILTERT.</div>
+
+    <div class="actions">
+      <a class="button" href="https://www.youtube.com/@Eddie-Unaufhaltsam" target="_blank" rel="noopener">
+        ▶ YouTube
+      </a>
+
+      <a class="button" href="https://jutn.creator-spring.com/listing/eddies-world-unaufhaltsam" target="_blank" rel="noopener">
+        ❤ Fans
+      </a>
+    </div>
   </div>
-
-  <h1>Eddie unaufhaltsam</h1>
-  <div class="handle">@keschflow</div>
-  <div class="tagline">UNGEFILTERT.</div>
-
-  <div class="buttons">
-    <a class="button" href="https://www.youtube.com/@Eddie-Unaufhaltsam" target="_blank">
-      ▶ YouTube
-    </a>
-
-    <a class="button" href="https://jutn.creator-spring.com/listing/eddies-world-unaufhaltsam" target="_blank">
-      🛒 Merch
-    </a>
-  </div>
-
-</div>
 </body>
 </html>
+
 
 
 
