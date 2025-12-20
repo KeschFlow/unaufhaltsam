@@ -10,39 +10,38 @@
     body{ background:var(--white); color:var(--black); min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:24px; }
     .wrap{width:100%;max-width:520px;flex-grow:1;display:flex;flex-direction:column;justify-content:center;}
     .hero-img{ width:min(320px, 92vw); height:auto; display:block; margin:0 auto 22px; }
-    h1{ font-size:clamp(28px, 6vw, 36px); font-weight:900; margin-bottom:6px; letter-spacing:.2px; }
+    h1{ font-size:clamp(28px, 6vw, 36px); font-weight:900; margin-bottom:6px; }
     .handle{ font-size:14px; opacity:.7; margin-bottom:18px; }
     .tagline{ font-size:13px; letter-spacing:4px; margin-bottom:22px; }
-    .actions{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:6px; }
-    .button{ display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:52px; padding:14px 20px; border:2px solid var(--black); text-decoration:none; color:var(--black); font-weight:900; line-height:1; transition:all .18s ease; width:220px; max-width:90vw; background:transparent; cursor: pointer; }
-    .button:hover{background:var(--black);color:var(--white);}
-    footer { margin-top: 40px; font-size: 11px; color: var(--gray); }
-    footer a { color: var(--gray); text-decoration: none; margin: 0 8px; }
-    footer a:hover { text-decoration: underline; }
-    @media (max-width:420px){ .button{width:100%;} }
+    .actions{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+    .button{ display:inline-flex; align-items:center; justify-content:center; min-height:52px; padding:14px 20px; border:2px solid var(--black); text-decoration:none; color:var(--black); font-weight:900; transition:.18s; width:220px; }
+    .button:hover{background:#000;color:#fff;}
+    footer { margin-top:40px; font-size:11px; color:var(--gray); }
+    footer a { color:var(--gray); text-decoration:none; margin:0 8px; }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <img src="logo.eddie (2).png" alt="Eddie der Jack Russell" class="hero-img" loading="eager" />
+    <img src="logo.eddie (2).png" alt="Eddie der Jack Russell" class="hero-img" />
     <h1>Eddie unaufhaltsam</h1>
     <div class="handle">@keschflow</div>
     <div class="tagline">UNGEFILTERT.</div>
+
     <div class="actions">
       <a class="button" href="https://www.youtube.com/@Eddie-Unaufhaltsam" target="_blank" rel="noopener">▶ YouTube</a>
       <a class="button" href="https://jutn.creator-spring.com/listing/eddies-world-unaufhaltsam" target="_blank" rel="noopener">❤ Fans</a>
     </div>
-    <div class="products" style="margin-top:28px;">
+
+    <div style="margin-top:28px;">
       <h2 style="font-size:16px;font-weight:900;margin-bottom:14px;">Eddie nutzt</h2>
-      <a class="button" href="https://amzn.to/48QJWdO" target="_blank" rel="noopener sponsored" style="margin: 0 auto;">🟠 Chuckit! Ball</a>
-      <div style="font-size:11px;opacity:.6;margin-top:10px;line-height:1.4;">* Affiliate-Link. Kein Aufpreis für dich.</div>
+      <a class="button" href="https://amzn.to/48QJWdO" target="_blank" rel="noopener sponsored">🟠 Chuckit! Ball</a>
+      <div style="font-size:11px;opacity:.6;margin-top:10px;">* Affiliate-Link. Kein Aufpreis für dich.</div>
     </div>
   </div>
+
   <footer>
-    <p>&copy; 2025 Eddie unaufhaltsam</p>
-    <div style="margin-top: 8px;">
-      <a href="impressum.html">Impressum</a> | <a href="datenschutz.html">Datenschutz</a>
-    </div>
+    <p>© 2025 Eddie unaufhaltsam</p>
+    <a href="impressum.html">Impressum</a> | <a href="datenschutz.html">Datenschutz</a>
   </footer>
 </body>
 </html>
