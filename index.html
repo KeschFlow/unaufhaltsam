@@ -1,179 +1,181 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Eddie’s World</title>
-<meta name="description" content="Raw. Real. Unstoppable. JRT Eddie since 2018. 24/7 real life. Full archive via Ko-fi." />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eddie’s World</title>
+  <meta name="description" content="Eddie’s World – Real life documentation since 2018. Full archive via Ko-fi.">
 
-<style>
-:root{
-  --black:#000;
-  --white:#fff;
-  --purpur:#b01fa5;
-  --light:#f5f5f5;
-  --gray:#666;
-  --max:1100px;
-}
+  <style>
+    :root{
+      --black:#000;
+      --white:#fff;
+      --purpur:#b01fa5;
+      --gray:#777;
+      --max:1100px;
+    }
 
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Arial, Helvetica, sans-serif;
-}
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, Helvetica, sans-serif;
+    }
 
-body{
-  background:var(--light);
-  color:var(--black);
-}
+    body{
+      background:#000;
+      color:#fff;
+      text-align:center;
+    }
 
-.container{
-  max-width:var(--max);
-  margin:0 auto;
-  padding:80px 20px;
-  text-align:center;
-}
+    /* HERO */
+    .hero{
+      position:relative;
+      height:80vh;
+      min-height:600px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      overflow:hidden;
+    }
 
-.hero img{
-  width:200px;
-  margin-bottom:30px;
-}
+    .hero img{
+      position:absolute;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      object-position:center;
+      filter:brightness(0.6);
+    }
 
-h1{
-  font-size:54px;
-  font-weight:900;
-  margin-bottom:25px;
-  letter-spacing:-1px;
-}
+    .hero-content{
+      position:relative;
+      z-index:2;
+      padding:20px;
+    }
 
-.manifest{
-  font-size:20px;
-  line-height:1.6;
-  margin-bottom:50px;
-  font-weight:600;
-}
+    h1{
+      font-size:clamp(42px,6vw,80px);
+      font-weight:900;
+      margin-bottom:15px;
+    }
 
-.manifest div{
-  margin-bottom:6px;
-}
+    .tagline{
+      letter-spacing:6px;
+      font-size:14px;
+      margin-bottom:40px;
+      text-transform:uppercase;
+    }
 
-.buttons{
-  display:flex;
-  justify-content:center;
-  flex-wrap:wrap;
-  gap:18px;
-  margin-bottom:80px;
-}
+    .buttons{
+      display:flex;
+      justify-content:center;
+      gap:20px;
+      flex-wrap:wrap;
+    }
 
-.button{
-  padding:18px 32px;
-  font-weight:900;
-  text-decoration:none;
-  border-radius:10px;
-  border:2px solid var(--black);
-  transition:.2s ease;
-  font-size:15px;
-  min-width:220px;
-}
+    .button{
+      padding:16px 28px;
+      font-weight:900;
+      border-radius:8px;
+      border:2px solid #fff;
+      text-decoration:none;
+      color:#fff;
+      transition:.2s ease;
+      min-width:200px;
+    }
 
-.button:hover{
-  background:var(--black);
-  color:var(--white);
-}
+    .button:hover{
+      background:#fff;
+      color:#000;
+    }
 
-.button.primary{
-  border-color:var(--purpur);
-  color:var(--purpur);
-}
+    .button.primary{
+      border-color:var(--purpur);
+      color:var(--purpur);
+    }
 
-.button.primary:hover{
-  background:var(--purpur);
-  color:var(--white);
-}
+    .button.primary:hover{
+      background:var(--purpur);
+      color:#fff;
+    }
 
-.section{
-  max-width:700px;
-  margin:0 auto 80px;
-  line-height:1.7;
-  font-size:16px;
-}
+    /* CONTENT */
+    .section{
+      max-width:var(--max);
+      margin:80px auto;
+      padding:0 20px;
+    }
 
-.section h2{
-  font-size:22px;
-  margin-bottom:15px;
-  font-weight:900;
-}
+    .section h2{
+      font-size:22px;
+      font-weight:900;
+      margin-bottom:20px;
+    }
 
-.footer{
-  font-size:12px;
-  color:var(--gray);
-}
+    .text{
+      max-width:700px;
+      margin:0 auto;
+      line-height:1.6;
+      font-size:16px;
+      color:#ccc;
+    }
 
-.footer a{
-  color:var(--gray);
-  text-decoration:none;
-  margin:0 10px;
-}
+    footer{
+      margin:60px 0 40px;
+      font-size:12px;
+      color:var(--gray);
+    }
 
-.footer a:hover{
-  text-decoration:underline;
-}
+    footer a{
+      color:var(--gray);
+      text-decoration:none;
+      margin:0 10px;
+    }
 
-@media (max-width:768px){
-  h1{ font-size:38px; }
-  .manifest{ font-size:17px; }
-}
-</style>
+    footer a:hover{
+      text-decoration:underline;
+    }
+
+  </style>
 </head>
 
 <body>
 
-<div class="container">
-
+  <!-- HERO MIT EDDY -->
   <div class="hero">
     <img src="logo.eddie%20(2).png" alt="Eddie">
-    <h1>Eddie’s World</h1>
-  </div>
 
-  <div class="manifest">
-    <div>Raw. Real. Unstoppable.</div>
-    <div>JRT Eddie since 2018.</div>
-    <div>24/7 real life.</div>
-    <div>Timeless. Relentless.</div>
-  </div>
+    <div class="hero-content">
+      <h1>Eddie’s World</h1>
+      <div class="tagline">REAL LIFE • NO STAGING</div>
 
-  <div class="buttons">
-    <a href="https://www.youtube.com/@Eddie-Unaufhaltsam" target="_blank" class="button">▶ YouTube</a>
-    <a href="https://ko-fi.com/eddiesworld" target="_blank" class="button primary">❤ Full Archive (Ko-fi)</a>
-    <a href="https://jutn.creator-spring.com/listing/eddies-world-unaufhaltsam" target="_blank" class="button">🛒 Shop</a>
-  </div>
-
-  <div class="section">
-    <h2>About</h2>
-    Eddie’s World is an ongoing documentation project.
-    No staging. No performance.
-    Real working terrier life.
-    The full image archive is available via Ko-fi.
-  </div>
-
-  <div class="section">
-    <h2>Eddie nutzt</h2>
-    <a href="https://amzn.to/48QJWdO" target="_blank" class="button">🟠 Chuckit! Ball</a>
-    <div style="margin-top:10px;font-size:13px;color:#777;">
-      *Affiliate-Link. Kein Aufpreis für dich.
+      <div class="buttons">
+        <a href="https://www.youtube.com/@Eddie-Unaufhaltsam" target="_blank" class="button">▶ YouTube</a>
+        <a href="https://ko-fi.com/eddiesworld" target="_blank" class="button primary">❤ Full Archive (Ko-fi)</a>
+        <a href="https://jutn.creator-spring.com/listing/eddies-world-unaufhaltsam" target="_blank" class="button">🛒 Shop</a>
+      </div>
     </div>
   </div>
 
-  <div class="footer">
+  <!-- INFO SECTION -->
+  <div class="section">
+    <h2>What is Eddie’s World?</h2>
+    <div class="text">
+      Seit 2018 dokumentiere ich Eddie – ungefiltert, ohne Plan, ohne Inszenierung.  
+      Videos sind öffentlich.  
+      Das vollständige Bildarchiv ist über Ko-fi zugänglich.
+    </div>
+  </div>
+
+  <footer>
     © 2025 Eddie’s World  
-    <div style="margin-top:10px;">
+    <div style="margin-top:8px;">
       <a href="impressum.html">Impressum</a> |
       <a href="datenschutz.html">Datenschutz</a>
     </div>
-  </div>
-
-</div>
+  </footer>
 
 </body>
 </html>
