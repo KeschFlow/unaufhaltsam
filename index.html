@@ -3,15 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Eddie unaufhaltsam</title>
-  <meta name="description" content="Eddies Welt — ruhig, echt, unaufhaltsam. Videos, Support und Eddies Lieblingszeug." />
+  <title>Eddie’s World – Unaufhaltsam</title>
+
+  <meta name="description" content="Eddie’s World — Roh. Echt. Ungefiltert. Full Access Archiv (Members) + offizieller Shop." />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Eddie’s World – Unaufhaltsam" />
+  <meta property="og:description" content="Roh. Echt. Ungefiltert. Full Access Archiv (Members) + offizieller Shop." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://keschflow.github.io/unaufhaltsam/" />
+  <meta property="og:image" content="https://keschflow.github.io/unaufhaltsam/logo.eddie%20(2).png" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Eddie’s World – Unaufhaltsam" />
+  <meta name="twitter:description" content="Roh. Echt. Ungefiltert. Full Access Archiv (Members) + offizieller Shop." />
+  <meta name="twitter:image" content="https://keschflow.github.io/unaufhaltsam/logo.eddie%20(2).png" />
+
   <style>
     :root{
       --black:#000;
       --white:#fff;
       --purpur:#b01fa5;
       --gray:#777;
-      --max:520px;
+      --max:560px;
     }
 
     *{ margin:0; padding:0; box-sizing:border-box; font-family:Arial,Helvetica,sans-serif; }
@@ -41,11 +56,11 @@
       width:min(320px, 92vw);
       height:auto;
       display:block;
-      margin:0 auto 22px;
+      margin:0 auto 18px;
     }
 
     h1{
-      font-size:clamp(28px, 6vw, 36px);
+      font-size:clamp(28px, 6vw, 40px);
       font-weight:900;
       margin-bottom:6px;
       letter-spacing:.2px;
@@ -54,15 +69,25 @@
     .handle{
       font-size:14px;
       opacity:.7;
-      margin-bottom:18px;
+      margin-bottom:10px;
     }
 
     .tagline{
-      font-size:13px;
-      letter-spacing:4px;
-      margin-bottom:22px;
+      font-size:12px;
+      letter-spacing:3.5px;
+      margin-bottom:14px;
       text-transform:uppercase;
     }
+
+    .micro{
+      font-size:13px;
+      line-height:1.55;
+      opacity:.9;
+      margin:0 auto 18px;
+      max-width:46ch;
+    }
+
+    .micro b{ font-weight:900; }
 
     .actions{
       display:flex;
@@ -78,18 +103,19 @@
       justify-content:center;
       gap:10px;
       min-height:52px;
-      padding:14px 20px;
+      padding:14px 18px;
       border:2px solid var(--black);
       text-decoration:none;
       color:var(--black);
       font-weight:900;
       line-height:1;
       transition:all .18s ease;
-      width:220px;
+      width:240px;
       max-width:90vw;
       background:transparent;
       cursor:pointer;
       border-radius:10px;
+      user-select:none;
     }
 
     .button:hover{
@@ -107,16 +133,26 @@
       color:var(--white);
     }
 
+    .button.ghost{
+      border-color:rgba(0,0,0,.28);
+      color:rgba(0,0,0,.78);
+    }
+    .button.ghost:hover{
+      background:rgba(0,0,0,.06);
+      color:var(--black);
+      border-color:rgba(0,0,0,.40);
+    }
+
     .section{
-      margin-top:28px;
-      padding-top:22px;
+      margin-top:26px;
+      padding-top:20px;
       border-top:1px solid rgba(0,0,0,.08);
     }
 
     .section h2{
       font-size:16px;
       font-weight:900;
-      margin-bottom:14px;
+      margin-bottom:12px;
       letter-spacing:.2px;
     }
 
@@ -127,8 +163,18 @@
       line-height:1.45;
     }
 
+    .pill{
+      display:inline-block;
+      margin-top:10px;
+      font-size:11px;
+      padding:8px 10px;
+      border:1px solid rgba(0,0,0,.14);
+      border-radius:999px;
+      opacity:.9;
+    }
+
     footer{
-      margin-top:40px;
+      margin-top:38px;
       font-size:11px;
       color:var(--gray);
     }
@@ -153,14 +199,27 @@
   <main class="wrap">
     <img src="logo.eddie%20(2).png" alt="Eddie der Jack Russell" class="hero-img" loading="eager" />
 
-    <h1>Eddie unaufhaltsam</h1>
+    <h1>Eddie’s World</h1>
     <div class="handle">@keschflow</div>
     <div class="tagline">Ungefiltert.</div>
 
+    <div class="micro">
+      <b>Roh.</b> Echt. Ohne Setup.<br/>
+      Seit 2018 dokumentiert – Handy, ohne Plan.<br/>
+      Uploads unregelmäßig. Nicht chronologisch.
+    </div>
+
     <nav class="actions" aria-label="Eddie Links">
       <a class="button" href="https://www.youtube.com/@Eddie-Unaufhaltsam" target="_blank" rel="noopener">▶ YouTube</a>
-      <a class="button purpur" href="https://jutn.creator-spring.com/listing/eddies-world-unaufhaltsam" target="_blank" rel="noopener">❤ Fans</a>
+
+      <!-- FULL ACCESS (Ko-fi Tier) -->
+      <a class="button purpur" href="https://ko-fi.com/keschflow2025" target="_blank" rel="noopener">🔒 Full Access</a>
+
+      <!-- SHOP (Spring) -->
+      <a class="button ghost" href="https://jutn.creator-spring.com/listing/eddies-world-unaufhaltsam" target="_blank" rel="noopener">🛒 Official Shop</a>
     </nav>
+
+    <div class="pill">Videos frei draußen. Bilder im Full Access.</div>
 
     <section class="section" aria-label="Eddie nutzt">
       <h2>Eddie nutzt</h2>
@@ -170,12 +229,10 @@
   </main>
 
   <footer>
-    <p>&copy; 2025 Eddie unaufhaltsam</p>
+    <p>&copy; 2025 Eddie’s World</p>
     <div style="margin-top:8px;">
       <a href="impressum.html">Impressum</a> | <a href="datenschutz.html">Datenschutz</a>
     </div>
   </footer>
 </body>
 </html>
-
-
