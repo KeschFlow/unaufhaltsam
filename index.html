@@ -4,36 +4,176 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Eddie’s World</title>
+
 <style>
-:root{ --black:#000; --white:#fff; --purpur:#b01fa5; --purpurDark:#8e1685; }
-*{ margin:0; padding:0; box-sizing:border-box; font-family:Arial, sans-serif; }
-body{ background:#fff; display:flex; align-items:center; justify-content:center; min-height:100vh; text-align:center; padding:20px; }
-.wrap{ max-width:900px; width:100%; }
-.hero{ width:100%; max-width:600px; height:auto; margin-bottom:30px; }
-h1{ font-size:clamp(32px,6vw,54px); font-weight:900; margin-bottom:10px; }
-.tagline{ letter-spacing:4px; font-size:14px; margin-bottom:40px; text-transform:uppercase; opacity:0.8; }
-.actions{ display:flex; justify-content:center; gap:15px; flex-wrap:wrap; }
-.button{ padding:16px 24px; border-radius:14px; font-weight:900; text-decoration:none; border:2px solid var(--purpur); transition:.2s ease; min-width:220px; display:inline-flex; align-items:center; justify-content:center; }
-.button.purple{ background:var(--purpur); color:var(--white); }
-.button.purple:hover{ background:var(--purpurDark); border-color:var(--purpurDark); transform:translateY(-1px); }
-.button.white{ background:var(--white); color:var(--black); border:2px solid var(--black); }
-.button.white:hover{ background:#f5f5f5; transform:translateY(-1px); }
-.button.ghost{ background:transparent; color:var(--purpur); font-size:14px; }
-footer{ margin-top:50px; font-size:12px; opacity:0.5; }
-@media (max-width:500px){ .button{ width:100%; } }
+:root{
+  --black:#000;
+  --white:#fff;
+  --purpur:#b01fa5;
+  --purpurDark:#8e1685;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+  background:var(--white);
+  color:var(--black);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:28px 16px;
+}
+
+.wrap{ width:100%; max-width:900px; }
+
+.hero{
+  width:100%;
+  max-width:900px;
+  height:auto;
+  margin:0 auto 26px;
+  display:block;
+}
+
+h1{
+  font-size:clamp(36px,6vw,64px);
+  font-weight:900;
+  margin-bottom:10px;
+  letter-spacing:-.8px;
+}
+
+.tagline{
+  letter-spacing:4px;
+  font-size:14px;
+  margin-bottom:26px;
+  opacity:.85;
+  text-transform:uppercase;
+}
+
+.subline{
+  font-size:13px;
+  opacity:.65;
+  margin-bottom:34px;
+  line-height:1.45;
+}
+
+.actions{
+  display:flex;
+  justify-content:center;
+  gap:16px;
+  flex-wrap:wrap;
+}
+
+.button{
+  padding:16px 22px;
+  border-radius:14px;
+  font-weight:900;
+  text-decoration:none;
+  border:2px solid var(--purpur);
+  transition:.18s ease;
+  min-width:230px;
+  max-width:92vw;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  line-height:1;
+  cursor:pointer;
+}
+
+/* Membership - Der Verkauf */
+.button.purpur{
+  background:var(--purpur);
+  color:var(--white);
+  border-color:var(--purpur);
+}
+.button.purpur:hover{ background:var(--purpurDark); border-color:var(--purpurDark); transform:translateY(-1px); }
+
+/* Tresor - Das Produkt */
+.button.white{
+  background:var(--white);
+  color:var(--black);
+  border:2px solid var(--black);
+}
+.button.white:hover{ background:#f2f2f2; transform:translateY(-1px); }
+
+/* Reichweite */
+.button.ghost{
+  background:transparent;
+  color:var(--purpur);
+  border:2px solid var(--purpur);
+  opacity:.8;
+  font-size:14px;
+}
+.button.ghost:hover{ opacity:1; background:rgba(176,31,165,.06); transform:translateY(-1px); }
+
+.links{
+  margin-top:34px;
+  display:flex;
+  gap:18px;
+  justify-content:center;
+  flex-wrap:wrap;
+  font-size:12px;
+  opacity:.65;
+}
+.links a{
+  color:var(--black);
+  text-decoration:none;
+}
+.links a:hover{ text-decoration:underline; }
+
+footer{
+  margin-top:46px;
+  font-size:12px;
+  opacity:.55;
+}
+
+@media (max-width:520px){
+  .button{ width:100%; }
+}
 </style>
 </head>
+
 <body>
-<div class="wrap">
-  <img src="logo.png" alt="Eddie" class="hero">
-  <h1>Eddie’s World</h1>
-  <div class="tagline">REAL LIFE · NO STAGING</div>
-  <div class="actions">
-    <a class="button purple" href="https://ko-fi.com/eddiesworld" target="_blank">🔐 MITGLIED WERDEN</a>
-    <a class="button white" href="https://ko-fi.com/eddiesworld/posts" target="_blank">📂 TRESOR ÖFFNEN</a>
-    <a class="button ghost" href="https://www.youtube.com/@Eddie-Unaufhaltsam" target="_blank">▶ YOUTUBE</a>
-  </div>
-  <footer>© 2025 Eddie’s World | Unaufhaltsam.</footer>
-</div>
+  <main class="wrap">
+    <img src="logo.png" alt="Eddie" class="hero" loading="eager">
+
+    <h1>Eddie’s World</h1>
+    <div class="tagline">REAL LIFE · NO STAGING</div>
+    <div class="subline">
+      Support = Zugang.<br>
+      Nur aktive Mitglieder sehen den Feed.
+    </div>
+
+    <nav class="actions">
+      <a class="button purpur" href="https://ko-fi.com/eddiesworld" target="_blank" rel="noopener">
+        🔐 Mitglied werden (9€)
+      </a>
+
+      <a class="button white" href="https://ko-fi.com/eddiesworld/posts" target="_blank" rel="noopener">
+        📂 Tresor öffnen (Feed)
+      </a>
+
+      <a class="button ghost" href="https://www.youtube.com/@Eddie-Unaufhaltsam" target="_blank" rel="noopener">
+        ▶ YouTube
+      </a>
+    </nav>
+
+    <div class="links">
+      <a href="https://jutn.creator-spring.com/listing/eddies-world-unaufhaltsam" target="_blank" rel="noopener">Shop</a>
+      <a href="https://www.tiktok.com/@keschflow" target="_blank" rel="noopener">TikTok</a>
+      <a href="https://www.reddit.com/u/KeSchFlow" target="_blank" rel="noopener">Reddit</a>
+      <a href="impressum.html">Impressum</a>
+      <a href="datenschutz.html">Datenschutz</a>
+    </div>
+
+    <footer>© 2026 Eddie’s World | Unaufhaltsam.</footer>
+  </main>
 </body>
 </html>
