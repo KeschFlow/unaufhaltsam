@@ -10,6 +10,7 @@
   --black:#000;
   --white:#fff;
   --purpur:#b01fa5;
+  --purpurDark:#8e1685;
 }
 
 *{
@@ -55,46 +56,83 @@ h1{
 .actions{
   display:flex;
   justify-content:center;
-  gap:20px;
+  gap:16px;
   flex-wrap:wrap;
 }
 
 .button{
-  padding:16px 28px;
+  padding:16px 22px;
   border-radius:14px;
   font-weight:900;
   text-decoration:none;
   border:2px solid var(--purpur);
-  color:var(--purpur);
-  transition:.2s ease;
-  min-width:200px;
+  transition:.18s ease;
+  min-width:230px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
 }
 
-/* Außen Buttons – Purpur */
+/* Membership - Der Verkauf */
 .button.purple{
   background:var(--purpur);
   color:var(--white);
 }
 
 .button.purple:hover{
-  background:#8e1685;
+  background:var(--purpurDark);
+  border-color:var(--purpurDark);
+  transform:translateY(-1px);
 }
 
-/* Mitte – Weiß */
+/* Tresor - Das Produkt */
 .button.white{
   background:var(--white);
   color:var(--black);
-  border:2px solid var(--white);
+  border:2px solid var(--black);
 }
 
 .button.white:hover{
-  background:#eee;
+  background:#f2f2f2;
+  transform:translateY(-1px);
+}
+
+/* Reichweite - YouTube */
+.button.ghost{
+  background:transparent;
+  color:var(--black);
+  border:2px solid #eee;
+  opacity:0.8;
+}
+
+.button.ghost:hover{
+  opacity:1;
+  background:#fafafa;
+}
+
+.links{
+  margin-top:40px;
+  display:flex;
+  gap:20px;
+  justify-content:center;
+  font-size:12px;
+  opacity:0.6;
+}
+
+.links a{
+  color:var(--black);
+  text-decoration:none;
 }
 
 footer{
-  margin-top:60px;
+  margin-top:40px;
   font-size:12px;
-  opacity:.6;
+  opacity:.4;
+}
+
+@media (max-width:520px){
+  .button{ width:100%; }
 }
 
 </style>
@@ -110,15 +148,27 @@ footer{
 <div class="tagline">REAL LIFE · NO STAGING</div>
 
 <div class="actions">
-  <a class="button purple" href="https://www.youtube.com/@Eddie-Unaufhaltsam" target="_blank">▶ YouTube</a>
+  <a class="button purple" href="https://ko-fi.com/eddiesworld" target="_blank" rel="noopener">
+    🔐 Mitglied werden (9€)
+  </a>
 
-  <a class="button white" href="https://ko-fi.com/eddiesworld" target="_blank">❤ Full Archive (Ko-fi)</a>
+  <a class="button white" href="https://ko-fi.com/eddiesworld/posts" target="_blank" rel="noopener">
+    📂 Tresor öffnen (Feed)
+  </a>
 
-  <a class="button purple" href="https://jutn.creator-spring.com" target="_blank">🛒 Shop</a>
+  <a class="button ghost" href="https://www.youtube.com/@Eddie-Unaufhaltsam" target="_blank" rel="noopener">
+    ▶ YouTube
+  </a>
+</div>
+
+<div class="links">
+  <a href="https://jutn.creator-spring.com" target="_blank">Merch Shop</a>
+  <a href="https://www.tiktok.com/@keschflow" target="_blank">TikTok</a>
+  <a href="impressum.html">Impressum</a>
 </div>
 
 <footer>
-© 2025 Eddie’s World
+© 2026 Eddie’s World | Unaufhaltsam.
 </footer>
 
 </div>
