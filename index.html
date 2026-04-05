@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Eddie’s World</title>
-  <meta name="description" content="Eddie’s World. Real life. Unfiltered. Zugang und Shop." />
+  <meta name="description" content="Eddie’s World. Real life. Unfiltered. Access, shop and tools." />
   <link rel="preload" as="image" href="logo.png" />
 
   <style>
@@ -63,9 +63,15 @@
     .tagline{
       letter-spacing:4px;
       font-size:14px;
-      margin-bottom:40px;
+      margin-bottom:30px;
       opacity:.85;
       text-transform:uppercase;
+    }
+
+    .subline{
+      margin-bottom:40px;
+      font-size:13px;
+      opacity:.7;
     }
 
     .actions{
@@ -110,6 +116,12 @@
     .button.white{
       background:var(--white);
       color:var(--black);
+      border-color:var(--black);
+    }
+
+    .button.dark{
+      background:var(--black);
+      color:var(--white);
       border-color:var(--black);
     }
 
@@ -161,13 +173,17 @@
     <h1>Eddie’s World</h1>
     <div class="tagline">REAL LIFE · UNFILTERED · NO STAGING</div>
 
-    <nav class="actions" aria-label="Hauptnavigation">
+    <div class="subline">
+      From your photos → print-ready books.
+    </div>
+
+    <nav class="actions" aria-label="Main navigation">
+
       <a
         class="button purpur"
         href="https://ko-fi.com/eddiesworld"
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Zugang zu Eddie’s World auf Ko-fi öffnen"
       >
         🔐 ACCESS
       </a>
@@ -177,10 +193,19 @@
         href="https://jutn.creator-spring.com/listing/eddies-world-unaufhaltsam"
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Shop von Eddie’s World öffnen"
       >
         🛒 SHOP
       </a>
+
+      <a
+        class="button dark"
+        href="https://keschflow.github.io/eddies-print-engine-public/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        🚀 CREATE YOUR BOOK
+      </a>
+
     </nav>
 
     <div class="links">
