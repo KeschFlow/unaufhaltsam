@@ -4,21 +4,32 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Eddie’s World</title>
-  <link rel="preload" as="image" href="logo.png">
+  <meta name="description" content="Eddie’s World. Real life. Unfiltered. Zugang und Shop." />
+  <link rel="preload" as="image" href="logo.png" />
 
   <style>
     :root{
       --black:#000;
       --white:#fff;
       --purpur:#b01fa5;
-      --purpurDark:#8e1685;
+      --purpur-dark:#8e1685;
     }
 
-    *{ margin:0; padding:0; box-sizing:border-box; font-family:Arial, Helvetica, sans-serif; }
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, Helvetica, sans-serif;
+    }
 
-    body{
+    html, body{
+      width:100%;
+      min-height:100%;
       background:var(--white);
       color:var(--black);
+    }
+
+    body{
       min-height:100vh;
       display:flex;
       align-items:center;
@@ -27,21 +38,26 @@
       padding:28px 16px;
     }
 
-    .wrap{ width:100%; max-width:900px; }
+    .wrap{
+      width:100%;
+      max-width:900px;
+    }
 
     .hero{
       width:100%;
-      max-width:420px; /* Logo-Dominanz erhöht */
+      max-width:420px;
       height:auto;
       margin:0 auto 26px;
       display:block;
+      user-select:none;
+      -webkit-user-drag:none;
     }
 
     h1{
-      font-size:clamp(36px,6vw,64px);
+      font-size:clamp(36px, 6vw, 64px);
       font-weight:900;
       margin-bottom:10px;
-      letter-spacing:-.8px;
+      letter-spacing:-0.8px;
     }
 
     .tagline{
@@ -64,8 +80,7 @@
       border-radius:14px;
       font-weight:900;
       text-decoration:none;
-      border:2px solid var(--purpur);
-      transition:opacity .18s ease; /* Hover nur über Opacity */
+      transition:opacity .18s ease, transform .18s ease;
       min-width:260px;
       max-width:92vw;
       display:inline-flex;
@@ -73,20 +88,30 @@
       justify-content:center;
       gap:10px;
       line-height:1;
+      border:2px solid transparent;
+    }
+
+    .button:hover{
+      opacity:.92;
+      transform:translateY(-1px);
+    }
+
+    .button:focus-visible{
+      outline:3px solid rgba(176,31,165,.28);
+      outline-offset:3px;
     }
 
     .button.purpur{
       background:var(--purpur);
       color:var(--white);
+      border-color:var(--purpur);
     }
-    .button.purpur:hover{ opacity:.92; }
 
     .button.white{
       background:var(--white);
       color:var(--black);
-      border:2px solid var(--black);
+      border-color:var(--black);
     }
-    .button.white:hover{ opacity:.92; }
 
     .links{
       margin-top:50px;
@@ -97,44 +122,71 @@
       font-size:13px;
       opacity:.6;
     }
-    .links a{ color:var(--black); text-decoration:none; }
-    .links a:hover{ text-decoration:underline; }
+
+    .links a{
+      color:var(--black);
+      text-decoration:none;
+    }
+
+    .links a:hover,
+    .links a:focus-visible{
+      text-decoration:underline;
+    }
 
     footer{
       margin-top:60px;
       font-size:11px;
       opacity:.3;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      text-transform:uppercase;
+      letter-spacing:1px;
     }
 
     @media (max-width:520px){
-      .button{ width:100%; }
+      .button{
+        width:100%;
+      }
+
+      .tagline{
+        font-size:12px;
+        letter-spacing:3px;
+      }
     }
   </style>
 </head>
 
 <body>
   <main class="wrap">
-    <img src="logo.png" alt="Eddie's World" class="hero">
+    <img src="logo.png" alt="Eddie’s World Logo" class="hero" />
 
     <h1>Eddie’s World</h1>
-    <div class="tagline">REAL LIFE · NO STAGING</div>
+    <div class="tagline">REAL LIFE · UNFILTERED · NO STAGING</div>
 
-    <nav class="actions">
-      <a class="button purpur" href="https://ko-fi.com/eddiesworld" target="_blank" rel="noopener">
-        🔐 ZUGANG
+    <nav class="actions" aria-label="Hauptnavigation">
+      <a
+        class="button purpur"
+        href="https://ko-fi.com/eddiesworld"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Zugang zu Eddie’s World auf Ko-fi öffnen"
+      >
+        🔐 ACCESS
       </a>
 
-      <a class="button white" href="https://jutn.creator-spring.com/listing/eddies-world-unaufhaltsam" target="_blank" rel="noopener">
+      <a
+        class="button white"
+        href="https://jutn.creator-spring.com/listing/eddies-world-unaufhaltsam"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Shop von Eddie’s World öffnen"
+      >
         🛒 SHOP
       </a>
     </nav>
 
     <div class="links">
-      <a href="https://www.youtube.com/@Eddie-Unaufhaltsam" target="_blank">YouTube</a>
-      <a href="https://www.tiktok.com/@keschflow" target="_blank">TikTok</a>
-      <a href="https://www.reddit.com/u/KeSchFlow" target="_blank">Reddit</a>
+      <a href="https://www.youtube.com/@Eddie-Unaufhaltsam" target="_blank" rel="noopener noreferrer">YouTube</a>
+      <a href="https://www.tiktok.com/@keschflow" target="_blank" rel="noopener noreferrer">TikTok</a>
+      <a href="https://www.reddit.com/u/KeSchFlow" target="_blank" rel="noopener noreferrer">Reddit</a>
       <a href="impressum.html">Impressum</a>
       <a href="datenschutz.html">Datenschutz</a>
     </div>
