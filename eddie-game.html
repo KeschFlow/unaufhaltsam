@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>UNAUFHALTSAM | V5.4 Release Ready</title>
+  <title>UNAUFHALTSAM | V5.5</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
@@ -23,15 +23,14 @@
     .value.good{ color:var(--purpur); }
     .game-shell{ position:relative; width:100%; background:#fff; border:2px solid #000; border-radius:24px; overflow:hidden; box-shadow:0 10px 30px var(--shadow); }
     canvas{ display:block; width:100%; height:auto; cursor:default; background:linear-gradient(to bottom, #ffffff 0%, #ffffff 72%, var(--grass) 72%, var(--grass) 100%); touch-action: manipulation; user-select: none; -webkit-tap-highlight-color: transparent; }
-    .overlay{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(255,255,255,.9); text-align:center; z-index:50; }
+    .overlay{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(255,255,255,.95); text-align:center; z-index:100; }
     .overlay.hidden{ display:none; }
     .card{ width:min(100%, 480px); background:#fff; border:2px solid #000; border-radius:22px; padding:30px 20px; box-shadow:0 10px 30px rgba(0,0,0,.08); }
-    .card h2{ font-size:32px; font-weight:900; margin-bottom:12px; }
     .leaderboard-container { background:#fff; border:2px solid #000; border-radius:22px; padding:20px; margin-top:10px; }
     .leaderboard-title { font-weight:900; text-transform:uppercase; margin-bottom:12px; font-size:16px; border-bottom: 2px solid #000; padding-bottom: 8px; }
-    .leaderboard-entry { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee; font-weight:700; font-size: 14px; }
+    .leaderboard-entry { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee; font-weight:700; }
     #nameInput { border:2px solid #000; padding:14px; border-radius:12px; width:100%; font-size:18px; font-weight:900; text-align:center; margin-bottom:15px; outline:none; text-transform: uppercase; }
-    .bottom-note{ text-align:center; font-size:12px; opacity:.5; font-weight: 700; margin-top: 10px; }
+    .bottom-note{ text-align:center; font-size:11px; opacity:.5; font-weight: 700; margin-top: 10px; text-transform: uppercase; }
     @media (max-width:720px){ .hud{ grid-template-columns:repeat(2, minmax(0,1fr)); } .btn{ width:100%; } }
   </style>
 </head>
@@ -49,12 +48,13 @@
     </section>
     <section class="game-shell">
       <canvas id="gameCanvas" width="960" height="540"></canvas>
-      <div class="overlay" id="startOverlay"><div class="card"><h2>START</h2><p>Eddie shows you the focus ring. Then the boxes shuffle.</p><button class="btn" id="startBtn" style="margin-top:20px;">START GAME</button></div></div>
+      <div class="overlay" id="startOverlay"><div class="card"><h2>START</h2><p>Eddie shows the ring. Verfolgst du ihn?</p><button class="btn" id="startBtn" style="margin-top:20px;">START GAME</button></div></div>
       <div class="overlay hidden" id="nameOverlay"><div class="card"><h2>NEW HIGHSCORE!</h2><input type="text" id="nameInput" placeholder="YOUR NAME" maxlength="12"><button class="btn" id="saveScoreBtn">SAVE SCORE</button></div></div>
       <div class="overlay hidden" id="gameOverOverlay"><div class="card"><h2>FOCUS LOST</h2><div style="font-size:48px; font-weight:900; color:var(--purpur); margin:10px 0;" id="finalScore">0</div><p id="bestLine" style="font-weight:700; margin-bottom:20px;">Best: 0</p><button class="btn" id="restartBtn">PLAY AGAIN</button></div></div>
       <div class="overlay hidden" id="statsOverlay"><div class="card"><h2 style="font-weight:900;">TEST STATS</h2><div id="statsContent" style="text-align:left; margin:16px 0; font-weight:700; line-height:1.6; font-size:15px;"></div><button class="btn" id="closeStatsBtn">CLOSE</button></div></div>
     </section>
     <section class="leaderboard-container"><div class="leaderboard-title">Eddie's Top 10</div><ul class="leaderboard-list" id="leaderboardList"></ul></section>
+    <div class="bottom-note">Protocol V5.5 Active. Unstoppable.</div>
   </main>
 
   <script>
@@ -148,7 +148,6 @@
           const brH = brW * (imgBrand.height / imgBrand.width || 0.2);
           const brX = b.x + b.w / 2 - brW / 2;
           const brY = y + b.h + 10;
-
           ctx.save();
           ctx.fillStyle = "rgba(255,255,255,0.96)";
           ctx.strokeStyle = "#000";
@@ -271,36 +270,16 @@
     function resetGame() { state.running = false; state.score = 0; state.round = 1; state.boxCount = 2; buildRound(); updateHud(); gameOverOverlay.classList.add("hidden"); nameOverlay.classList.add("hidden"); startOverlay.classList.remove("hidden"); }
 
     function startGame() {
-      state.running = true;
-      state.score = 0;
-      state.round = 1;
-      state.boxCount = 2;
-      state.selectedBoxId = null;
-      state.hoverBoxId = null;
-      state.result = null;
-      state.activeSwap = null;
-      eddie.happyFlash = 0;
-      eddie.sadFlash = 0;
-
-      buildRound();
-      updateHud();
-
-      startOverlay.classList.add("hidden");
-      gameOverOverlay.classList.add("hidden");
-      nameOverlay.classList.add("hidden");
-
-      if (!localStorage.getItem(TRACK_PLAYED)) {
-        localStorage.setItem(TRACK_PLAYED, "true");
-      }
+      state.running = true; state.score = 0; state.round = 1; state.boxCount = 2; state.selectedBoxId = null; state.hoverBoxId = null; state.result = null; state.activeSwap = null; eddie.happyFlash = 0; eddie.sadFlash = 0;
+      buildRound(); updateHud();
+      startOverlay.classList.add("hidden"); gameOverOverlay.classList.add("hidden"); nameOverlay.classList.add("hidden");
+      if (!localStorage.getItem(TRACK_PLAYED)) localStorage.setItem(TRACK_PLAYED, "true");
     }
 
     function loop(ts) { const dt = Math.min(0.033, (ts - state.lastTs) / 1000); state.lastTs = ts; ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#fff"; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#eef9ee"; ctx.fillRect(0, 400, canvas.width, 140); updateBoxes(ts); updateEddie(dt); updateParticles(dt); drawParticles(); drawBallMarker(); drawBoxes(); drawEddie(); requestAnimationFrame(loop); }
     
     canvas.addEventListener("mousemove", (e) => {
-      if (state.phase !== "pick") {
-        state.hoverBoxId = null;
-        return;
-      }
+      if (state.phase !== "pick") { state.hoverBoxId = null; return; }
       const rect = canvas.getBoundingClientRect(), x = (e.clientX - rect.left) * (canvas.width/rect.width), y = (e.clientY - rect.top) * (canvas.height/rect.height); 
       state.hoverBoxId = null; 
       boxes.forEach(b => { if (x >= b.x && x <= b.x+b.w && y >= (b.y - b.lift) && y <= (b.y - b.lift)+b.h) state.hoverBoxId = b.id; }); 
@@ -323,21 +302,10 @@
     nameInput.onkeydown = (e) => { if(e.key === 'Enter') saveScore(); };
 
     let loaded = 0;
-    const done = () => {
-      loaded++;
-      if (loaded >= 3) {
-        updateLeaderboardUI();
-        resetGame();
-        requestAnimationFrame(loop);
-      }
-    };
-
-    imgEddieHead.onload = done;
-    imgEddieHead.onerror = done;
-    imgEddieTongue.onload = done;
-    imgEddieTongue.onerror = done;
-    imgBrand.onload = done;
-    imgBrand.onerror = done;
+    const done = () => { loaded++; if (loaded >= 3) { updateLeaderboardUI(); resetGame(); requestAnimationFrame(loop); } };
+    imgEddieHead.onload = done; imgEddieHead.onerror = done;
+    imgEddieTongue.onload = done; imgEddieTongue.onerror = done;
+    imgBrand.onload = done; imgBrand.onerror = done;
   </script>
 </body>
 </html>
