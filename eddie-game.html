@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>UNAUFHALTSAM | V5.7 Logic Fix</title>
+  <title>UNAUFHALTSAM | V5.9 Clean Character</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
     :root{ --black:#000; --white:#fff; --purpur:#b01fa5; --bg:#f5f5f7; --grass:#e7f7e7; --shadow:rgba(0,0,0,.08); }
     *{ margin:0; padding:0; box-sizing:border-box; font-family:Arial, Helvetica, sans-serif; }
@@ -29,10 +31,7 @@
 </head>
 <body>
   <main class="wrap">
-    <div class="topbar">
-      <div class="title"><h1>UNAUFHALTSAM</h1></div>
-      <div class="actions"><button class="btn" id="restartTop">RESTART GAME</button></div>
-    </div>
+    <div class="topbar"><div class="title"><h1>UNAUFHALTSAM</h1></div><div class="actions"><button class="btn" id="restartTop">RESTART GAME</button></div></div>
     <section class="hud">
       <div class="stat"><div class="label">Score</div><div class="value" style="color:var(--purpur);" id="scoreValue">0</div></div>
       <div class="stat"><div class="label">Round</div><div class="value" id="roundValue">1</div></div>
@@ -63,8 +62,8 @@
   const BEST_KEY = "eddieBoxBest_v1", LEADERBOARD_KEY = "eddieLeaderboard_v1", TRACK_PLAYED = "eddie_played_once", TRACK_RETRIES = "eddie_retry_count", TRACK_RUNS = "eddie_runs_history";
 
   let eddieTapTimes = [];
-  const state = { running: false, score: 0, round: 1, boxCount: 2, best: Number(localStorage.getItem(BEST_KEY) || 0), phase: "idle", phaseStartedAt: 0, selectedBoxId: null, correctBoxId: null, hoverBoxId: null, result: null, showBallTime: 1400, shuffleDuration: 2200, swapsRemaining: 0, activeSwap: null, lastTs: 0, glowPulse: 0, startBoxId: null, startSlotX: null, startSlotY: null, breatherMs: 300 };
-  const eddie = { x: canvas.width / 2, y: 80, lookTargetX: canvas.width / 2, lookTargetY: 300, happyFlash: 0, sadFlash: 0, blinkTimer: 0, idleBob: 0 };
+  const state = { running: false, score: 0, round: 1, boxCount: 2, best: Number(localStorage.getItem(BEST_KEY) || 0), phase: "idle", phaseStartedAt: 0, selectedBoxId: null, correctBoxId: null, hoverBoxId: null, result: null, showBallTime: 1400, shuffleDuration: 2200, swapsRemaining: 0, activeSwap: null, lastTs: 0, glowPulse: 0, startBoxId: null, startSlotX: null, startSlotY: null, breatherMs: 220 };
+  const eddie = { x: canvas.width / 2, y: 80, happyFlash: 0, sadFlash: 0, idleBob: 0 };
   const boxes = [];
 
   function nowMs() { return performance.now(); }
@@ -73,34 +72,40 @@
   function easeInOutQuad(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
   function roundRect(c, x, y, w, h, r, f, s) { c.beginPath(); c.moveTo(x + r, y); c.lineTo(x + w - r, y); c.quadraticCurveTo(x + w, y, x + w, y + r); c.lineTo(x + w, y + h - r); c.quadraticCurveTo(x + w, y + h, x + w - r, y + h); c.lineTo(x + r, y + h); c.quadraticCurveTo(x, y + h, x, y + h - r); c.lineTo(x, y + r); c.quadraticCurveTo(x, y, x + r, y); c.closePath(); if (f) c.fill(); if (s) c.stroke(); }
 
-  // --- NEW: CIRCLE TEXT RENDERER ---
   function drawCircleText(text, cx, cy, radius) {
-    const chars = text.split("");
-    const step = (Math.PI * 2) / chars.length;
-    const rot = performance.now() / 8000;
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.font = "900 11px Arial"; ctx.fillStyle = "#000";
+    const chars = text.split(""); const step = (Math.PI * 2) / chars.length; const rot = performance.now() / 8000;
+    ctx.save(); ctx.translate(cx, cy); ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.font = "900 11px Arial"; ctx.fillStyle = "#000";
     chars.forEach((char, i) => {
-      const angle = i * step + rot;
-      const x = Math.cos(angle) * radius;
-      const y = Math.sin(angle) * radius;
-      ctx.save(); ctx.translate(x, y); ctx.rotate(angle + Math.PI / 2);
-      ctx.fillText(char, 0, 0); ctx.restore();
+      const angle = i * step + rot; const x = Math.cos(angle) * radius; const y = Math.sin(angle) * radius;
+      ctx.save(); ctx.translate(x, y); ctx.rotate(angle + Math.PI / 2); ctx.fillText(char, 0, 0); ctx.restore();
     });
     ctx.restore();
   }
 
   function getLeaderboard() { return JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || "[]"); }
   function updateLeaderboardUI() { const scores = getLeaderboard(); leaderboardList.innerHTML = scores.length ? scores.map((s, i) => `<li class="leaderboard-entry"><span>#${i + 1}</span><span>${s.name}</span><span>${s.score}</span></li>`).join("") : 'No entries'; }
-  function saveScore() { const name = nameInput.value.trim().toUpperCase() || "ANONYMOUS"; let scores = getLeaderboard(); scores.push({ name, score: state.score, date: Date.now() }); scores.sort((a, b) => b.score - a.score); localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(scores.slice(0, 10))); updateLeaderboardUI(); nameOverlay.classList.add("hidden"); gameOverOverlay.classList.remove("hidden"); }
-  function renderStatsOverlay() { const played = localStorage.getItem(TRACK_PLAYED) === "true" ? "Yes" : "No"; const r = Number(localStorage.getItem(TRACK_RETRIES) || 0); const runs = JSON.parse(localStorage.getItem(TRACK_RUNS) || "[]"); statsContent.innerHTML = `<div>Played: ${played}</div><div>Retries: ${r}</div><div>Runs: ${runs.length}</div>`; statsOverlay.classList.remove("hidden"); }
+  
+  function saveScore() {
+    const name = nameInput.value.trim().toUpperCase() || "ANONYMOUS";
+    let scores = getLeaderboard();
+    scores.push({ name, score: state.score, date: Date.now() });
+    scores.sort((a, b) => b.score - a.score || a.date - b.date);
+    localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(scores.slice(0, 10)));
+    updateLeaderboardUI(); nameOverlay.classList.add("hidden"); gameOverOverlay.classList.remove("hidden");
+  }
+
+  function renderStatsOverlay() {
+    const played = localStorage.getItem(TRACK_PLAYED) === "true" ? "Yes" : "No";
+    const retries = Number(localStorage.getItem(TRACK_RETRIES) || 0);
+    const runs = JSON.parse(localStorage.getItem(TRACK_RUNS) || "[]");
+    const avg = runs.length ? (runs.reduce((sum, r) => sum + Number(r.s || 0), 0) / runs.length).toFixed(1) : "0.0";
+    statsContent.innerHTML = `<div>Played once: ${played}</div><div>Total Retries: ${retries}</div><div>Runs saved: ${runs.length}</div><div>Avg Score: ${avg}</div>`;
+    statsOverlay.classList.remove("hidden");
+  }
 
   function buildRound() {
-    boxes.length = 0; state.activeSwap = null; state.selectedBoxId = null; state.hoverBoxId = null;
-    const count = state.boxCount;
-    let cols = Math.ceil(Math.sqrt(count));
+    boxes.length = 0; state.activeSwap = null; state.selectedBoxId = null; state.hoverBoxId = null; state.result = null;
+    const count = state.boxCount; let cols = Math.ceil(Math.sqrt(count));
     if (count <= 6) cols = count; else if (count <= 12) cols = Math.ceil(count / 2); else cols = Math.ceil(count / 3);
     const rows = Math.ceil(count / cols), spacing = 24, avW = canvas.width - 160, avH = canvas.height - 200;
     const boxW = Math.min(92, Math.min(avW / cols - spacing, avH / rows - spacing));
@@ -120,10 +125,9 @@
   function startNextSwap() {
     const cur = boxes.find(b => b.id === state.correctBoxId);
     if (state.swapsRemaining <= 0) {
-      // --- ROBUST FORCED DEPARTURE CHECK ---
       if (cur && Math.abs(cur.x - state.startSlotX) < 0.1 && Math.abs(cur.y - state.startSlotY) < 0.1) {
         let t; do { t = boxes[Math.floor(Math.random() * boxes.length)]; } while (t.id === state.correctBoxId);
-        state.activeSwap = { aId: cur.id, bId: t.id, aStartX: cur.x, bStartX: t.x, aStartY: cur.y, bStartY: t.y, aTargetX: t.x, bTargetX: cur.x, aTargetY: t.y, bTargetY: cur.y, start: nowMs(), duration: 350, fake: false };
+        state.activeSwap = { aId: cur.id, bId: t.id, aStartX: cur.x, bStartX: t.x, aStartY: cur.y, bStartY: t.y, aTargetX: t.x, bTargetX: cur.x, aTargetY: t.y, bTargetY: cur.y, start: nowMs(), duration: 350 };
         return;
       }
       state.activeSwap = null; setPhase("wait"); return;
@@ -131,7 +135,7 @@
     let a = Math.floor(Math.random() * boxes.length), b = Math.floor(Math.random() * boxes.length);
     while (b === a) b = Math.floor(Math.random() * boxes.length);
     const boxA = boxes[a], boxB = boxes[b];
-    state.activeSwap = { aId: boxA.id, bId: boxB.id, aStartX: boxA.x, bStartX: boxB.x, aStartY: boxA.y, bStartY: boxB.y, aTargetX: boxB.x, bTargetX: boxA.x, aTargetY: boxB.y, bTargetY: boxA.y, start: nowMs(), duration: Math.max(260, state.shuffleDuration / 5.2), fake: false };
+    state.activeSwap = { aId: boxA.id, bId: boxB.id, aStartX: boxA.x, bStartX: boxB.x, aStartY: boxA.y, bStartY: boxB.y, aTargetX: boxB.x, bTargetX: boxA.x, aTargetY: boxB.y, bTargetY: boxA.y, start: nowMs(), duration: Math.max(260, state.shuffleDuration / 5.2) };
     state.swapsRemaining--;
   }
 
@@ -143,50 +147,41 @@
       const eased = easeInOutQuad(p);
       bA.x = lerp(s.aStartX, s.aTargetX, eased); bB.x = lerp(s.bStartX, s.bTargetX, eased);
       bA.y = lerp(s.aStartY, s.aTargetY, eased); bB.y = lerp(s.bStartY, s.bTargetY, eased);
-      if (p >= 1) { 
-        bA.x = s.aTargetX; bA.y = s.aTargetY; bB.x = s.bTargetX; bB.y = s.bTargetY;
-        // --- LOGIC FIX: DON'T SWAP CORRECT_ID, JUST MOVE BOXES ---
-        state.activeSwap = null;
-      }
+      if (p >= 1) { bA.x = s.aTargetX; bA.y = s.aTargetY; bB.x = s.bTargetX; bB.y = s.bTargetY; state.activeSwap = null; }
     } 
     else if (state.phase === "wait") { if (ts - state.phaseStartedAt > state.breatherMs) setPhase("pick"); }
     else if (state.phase === "reveal") {
       const sel = boxes.find(b => b.id === state.selectedBoxId), cor = boxes.find(b => b.id === state.correctBoxId);
-      if (sel) sel.lift = Math.min(sel.h * 0.8, sel.lift + 5); if (cor) cor.lift = Math.min(cor.h * 0.8, cor.lift + 5);
+      if (sel) sel.lift = Math.min(sel.h * 0.8, sel.lift + 5); 
+      if (cor && cor.id !== state.selectedBoxId) cor.lift = Math.min(cor.h * 0.8, cor.lift + 5);
       if (ts - state.phaseStartedAt > 1200) {
-        if (state.selectedBoxId === state.correctBoxId) { state.score++; state.round++; state.boxCount = Math.min(18, 2 + Math.floor(state.score / 1.5)); buildRound(); updateHud(); }
-        else gameOver();
+        if (state.selectedBoxId === state.correctBoxId) { 
+          state.score++; state.round++; state.boxCount = Math.min(18, 2 + Math.floor(state.score / 1.5)); buildRound(); updateHud(); 
+        } else gameOver();
       }
     }
     if (state.phase !== "reveal") boxes.forEach(b => b.lift = Math.max(0, b.lift - 6));
-    const target = boxes.find(b => b.id === state.correctBoxId);
-    if (target) { eddie.lookTargetX = target.x + target.w / 2; eddie.lookTargetY = target.y + target.h / 2; }
   }
 
-  function updateEddie(dt) { eddie.blinkTimer -= dt; if (eddie.blinkTimer < 0) eddie.blinkTimer = Math.random() * 4 + 2; eddie.idleBob = Math.sin(nowMs() / 400) * 2; }
+  function updateEddie(dt) { eddie.happyFlash = Math.max(0, eddie.happyFlash - dt); eddie.sadFlash = Math.max(0, eddie.sadFlash - dt); eddie.idleBob = Math.sin(nowMs() / 400) * 2; }
 
   function drawBallMarker() {
     if (state.phase !== "show") return;
     const b = boxes.find(bx => bx.id === state.correctBoxId); if (!b) return;
     const cx = b.x + b.w / 2, cy = b.y + b.h + (b.h * 0.25), r = b.w * 0.22;
-    ctx.save();
-    ctx.fillStyle = "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(cx, cy, r + 6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-    ctx.strokeStyle = "#b01fa5"; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(cx, cy, r + 1, 0, Math.PI * 2); ctx.stroke();
-    drawCircleText("UNAUFHALTSAM", cx, cy, r - 2);
-    ctx.restore();
+    ctx.save(); ctx.fillStyle = "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(cx, cy, r + 6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = "#b01fa5"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, cy, r + 1, 0, Math.PI * 2); ctx.stroke();
+    drawCircleText("UNAUFHALTSAM", cx, cy, r - 2); ctx.restore();
   }
 
+  // --- FIX: NO GOOGLY EYES ---
   function drawEddie() {
     ctx.save(); ctx.translate(eddie.x, eddie.y + eddie.idleBob); ctx.scale(0.85, 0.85);
+    if (eddie.sadFlash > 0) ctx.rotate(0.08);
     ctx.drawImage(imgEddieHead, -50, -50, 100, 100);
-    ctx.fillStyle = "white";
-    if (eddie.blinkTimer > 0.1) {
-      ctx.beginPath(); ctx.arc(-15, -10, 5, 0, Math.PI * 2); ctx.arc(15, -10, 5, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = "black";
-      const dx = (eddie.lookTargetX - eddie.x) * 0.01, dy = (eddie.lookTargetY - eddie.y) * 0.01;
-      ctx.beginPath(); ctx.arc(-15 + dx, -10 + dy, 2, 0, Math.PI * 2); ctx.arc(15 + dx, -10 + dy, 2, 0, Math.PI * 2); ctx.fill();
+    if (eddie.happyFlash > 0) {
+      const tongueW = 28; const tongueH = 34;
+      ctx.drawImage(imgEddieTongue, -tongueW / 2, 4, tongueW, tongueH);
     }
     ctx.restore();
   }
@@ -194,12 +189,18 @@
   function drawBoxes() {
     boxes.forEach(b => {
       const isH = state.phase === "pick" && state.hoverBoxId === b.id;
-      const y = b.y - b.lift;
+      const y = b.y - b.lift; const cx = b.x + b.w / 2; const cy = y + b.h / 2;
       ctx.save();
+      let tilt = 0; if (state.phase === "shuffle" && state.activeSwap) { if (b.id === state.activeSwap.aId) tilt = -0.06; else if (b.id === state.activeSwap.bId) tilt = 0.06; }
+      ctx.translate(cx, cy); ctx.rotate(tilt); ctx.translate(-cx, -cy);
       ctx.fillStyle = isH ? "#eee" : "white"; ctx.strokeStyle = "black"; ctx.lineWidth = 3;
       roundRect(ctx, b.x, y, b.w, b.h, 12, true, true);
       ctx.drawImage(imgEddieTongue, b.x + b.w * 0.25, y + b.h * 0.25, b.w * 0.5, b.h * 0.5);
       if (isH) { ctx.strokeStyle = "#b01fa5"; ctx.lineWidth = 5; roundRect(ctx, b.x - 4, y - 4, b.w + 8, b.h + 8, 14, false, true); }
+      if (state.phase === "reveal" && state.selectedBoxId === b.id) {
+        ctx.strokeStyle = state.selectedBoxId === state.correctBoxId ? "#0f9d58" : "#d92d20";
+        ctx.lineWidth = 5; roundRect(ctx, b.x - 4, y - 4, b.w + 8, b.h + 8, 14, false, true);
+      }
       if (state.phase === "reveal" && b.id === state.correctBoxId) {
         const brW = b.w * 0.7; ctx.drawImage(imgBrand, b.x + b.w/2 - brW/2, y + b.h + 5, brW, 20);
       }
@@ -209,6 +210,7 @@
 
   function gameOver() {
     state.running = false; setPhase("gameover");
+    if (state.score > state.best) { state.best = state.score; localStorage.setItem(BEST_KEY, String(state.best)); }
     finalScoreDisplay.textContent = state.score; updateHud();
     let history = JSON.parse(localStorage.getItem(TRACK_RUNS) || "[]");
     history.push({ s: state.score, t: Date.now() }); localStorage.setItem(TRACK_RUNS, JSON.stringify(history.slice(-20)));
@@ -218,12 +220,20 @@
 
   function updateHud() { scoreValue.textContent = state.score; roundValue.textContent = state.round; boxValue.textContent = state.boxCount; bestValue.textContent = state.best; }
   function resetGame() { state.running = false; state.score = 0; state.round = 1; state.boxCount = 2; buildRound(); updateHud(); gameOverOverlay.classList.add("hidden"); nameOverlay.classList.add("hidden"); startOverlay.classList.remove("hidden"); }
-  function startGame() { state.running = true; state.score = 0; state.round = 1; buildRound(); updateHud(); startOverlay.classList.add("hidden"); gameOverOverlay.classList.add("hidden"); }
+  
+  // --- FIX: STARTGAME RESET ---
+  function startGame() {
+    state.running = true; state.score = 0; state.round = 1; state.boxCount = 2;
+    state.selectedBoxId = null; state.hoverBoxId = null; state.result = null; state.activeSwap = null;
+    eddie.happyFlash = 0; eddie.sadFlash = 0;
+    buildRound(); updateHud();
+    startOverlay.classList.add("hidden"); gameOverOverlay.classList.add("hidden"); nameOverlay.classList.add("hidden");
+    if (!localStorage.getItem(TRACK_PLAYED)) localStorage.setItem(TRACK_PLAYED, "true");
+  }
 
   function loop(ts) {
     const dt = (ts - state.lastTs) / 1000 || 0; state.lastTs = ts;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#eef9ee"; ctx.fillRect(0, 400, canvas.width, 140);
+    ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = "#eef9ee"; ctx.fillRect(0, 400, canvas.width, 140);
     updateBoxes(ts); updateEddie(dt); drawBallMarker(); drawBoxes(); drawEddie();
     requestAnimationFrame(loop);
   }
@@ -231,14 +241,23 @@
   canvas.addEventListener("mousemove", (e) => {
     if (state.phase !== "pick") { state.hoverBoxId = null; return; }
     const rect = canvas.getBoundingClientRect(), x = (e.clientX - rect.left) * (canvas.width / rect.width), y = (e.clientY - rect.top) * (canvas.height / rect.height);
-    state.hoverBoxId = null;
-    boxes.forEach(b => { if (x >= b.x && x <= b.x + b.w && y >= b.y - b.lift && y <= b.y - b.lift + b.h) state.hoverBoxId = b.id; });
+    state.hoverBoxId = null; boxes.forEach(b => { if (x >= b.x && x <= b.x + b.w && y >= b.y - b.lift && y <= b.y - b.lift + b.h) state.hoverBoxId = b.id; });
   });
 
   canvas.addEventListener("click", (e) => {
     const rect = canvas.getBoundingClientRect(), x = (e.clientX - rect.left) * (canvas.width / rect.width), y = (e.clientY - rect.top) * (canvas.height / rect.height);
-    if (x > 430 && x < 530 && y > 30 && y < 130) { eddieTapTimes.push(Date.now()); if (eddieTapTimes.length > 5) { renderStatsOverlay(); eddieTapTimes = []; } }
-    if (state.phase === "pick" && state.hoverBoxId !== null) { state.selectedBoxId = state.hoverBoxId; setPhase("reveal"); }
+    const ex = eddie.x, ey = eddie.y + eddie.idleBob, ew = 120, eh = 110;
+    if (x >= ex - ew / 2 && x <= ex + ew / 2 && y >= ey - eh / 2 && y <= ey + eh / 2) {
+      const now = Date.now(); eddieTapTimes = eddieTapTimes.filter(t => now - t < 1200); eddieTapTimes.push(now);
+      if (eddieTapTimes.length >= 5) { eddieTapTimes = []; renderStatsOverlay(); return; }
+    }
+    // --- FIX: CLICK HANDLER LOGIC ---
+    if (state.phase === "pick" && state.hoverBoxId !== null) {
+      state.selectedBoxId = state.hoverBoxId;
+      if (state.selectedBoxId === state.correctBoxId) { state.result = "correct"; eddie.happyFlash = 0.5; eddie.sadFlash = 0; } 
+      else { state.result = "wrong"; eddie.sadFlash = 0.45; eddie.happyFlash = 0; }
+      setPhase("reveal");
+    }
   });
 
   let loaded = 0; const check = () => { loaded++; if (loaded >= 3) { updateLeaderboardUI(); resetGame(); requestAnimationFrame(loop); } };
@@ -246,6 +265,7 @@
 
   startBtn.onclick = startGame; restartTop.onclick = resetGame; saveScoreBtn.onclick = saveScore; closeStatsBtn.onclick = () => statsOverlay.classList.add("hidden");
   restartBtn.onclick = () => { let r = Number(localStorage.getItem(TRACK_RETRIES) || 0); localStorage.setItem(TRACK_RETRIES, r + 1); startGame(); };
+  nameInput.onkeydown = (e) => { if (e.key === "Enter") saveScore(); };
 </script>
 </body>
 </html>
