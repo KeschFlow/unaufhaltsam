@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>UNAUFHALTSAM | V5.6 Final Loop</title>
+  <title>UNAUFHALTSAM | V5.7</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
@@ -50,7 +50,16 @@
     <section class="game-shell">
       <canvas id="gameCanvas" width="960" height="540"></canvas>
       <div class="overlay" id="startOverlay"><div class="card"><h2>START</h2><p>Eddie shows the ring. Stay focused.</p><button class="btn" id="startBtn" style="margin-top:20px;">START GAME</button></div></div>
-      <div class="overlay hidden" id="nameOverlay"><div class="card"><h2>NEW HIGHSCORE!</h2><input type="text" id="nameInput" placeholder="YOUR NAME" maxlength="12"><button class="btn" id="saveScoreBtn">SAVE SCORE</button></div></div>
+      
+      <div class="overlay hidden" id="nameOverlay">
+        <div class="card">
+          <h2>NEW HIGHSCORE!</h2>
+          <input type="text" id="nameInput" placeholder="YOUR NAME" maxlength="12">
+          <button class="btn" id="saveScoreBtn">SAVE SCORE</button>
+          <a href="https://keschflow.github.io/eddies-print-engine-public/?v=1" class="btn engine">BACK TO PRINT ENGINE</a>
+        </div>
+      </div>
+
       <div class="overlay hidden" id="gameOverOverlay">
         <div class="card">
           <h2>FOCUS LOST</h2>
@@ -60,10 +69,11 @@
           <a href="https://keschflow.github.io/eddies-print-engine-public/?v=1" class="btn engine">BACK TO PRINT ENGINE</a>
         </div>
       </div>
+
       <div class="overlay hidden" id="statsOverlay"><div class="card"><h2 style="font-weight:900;">TEST STATS</h2><div id="statsContent" style="text-align:left; margin:16px 0; font-weight:700; line-height:1.6; font-size:15px;"></div><button class="btn" id="closeStatsBtn">CLOSE</button></div></div>
     </section>
     <section class="leaderboard-container"><div class="leaderboard-title">Eddie's Top 10</div><ul class="leaderboard-list" id="leaderboardList"></ul></section>
-    <div class="bottom-note">Loop Protocol V5.6 Active.</div>
+    <div class="bottom-note">Loop Protocol V5.7 Active.</div>
   </main>
 
   <script>
