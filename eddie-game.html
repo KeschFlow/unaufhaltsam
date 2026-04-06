@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Play with Eddie</title>
+  <meta name="description" content="Play with Eddie. Time the throw, let Eddie catch the ball, avoid 3 misses." />
+  <style>
+    :root{
+      --black:#000;
+      --white:#fff;
+      --purpur:#b01fa5;
+      --bg:#f5f5f7;
+      --line:#111;
+      --grass:#e7f7e7;
+      --red:#d92d20;
+      --green:#0f9d58;
+    }
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, Helvetica, sans-serif;
+    }
+
+    body{
+      background:var(--bg);
+      color:var(--black);
+      min-height:100vh;
+      padding:20px 14px 40px;
+    }
+
+    .wrap{
+      width:100%;
+      max-width:980px;
+      margin:0 auto;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .title h1{
+      font-size:clamp(28px, 5vw, 52px);
+      line-height:1;
+      margin-bottom:8px;
+      font-weight:900;
+      letter-spacing:-0.8px;
+    }
+
+    .title p{
+      font-size:14px;
+      opacity:.75;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      appearance:none;
+      border:none;
+      background:#000;
+      color:#fff;
+      padding:14px 18px;
+      border-radius:14px;
+      font-weight:900;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:180px;
+      transition:transform .15s ease, opacity .15s ease;
+    }
+
+    .btn:hover{
+      transform:translateY(-1px);
+      opacity:.94;
+    }
+
+    .btn.alt{
+      background:#fff;
+      color:#000;
+      border:2px solid #000;
+    }
+
+    .panel{
+      background:#fff;
+      border:2px solid #000;
+      border-radius:22px;
+      padding:16px;
+    }
+
+    .hud{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:12px;
+    }
+
+    .stat{
+      border:2px solid #000;
+      border-radius:18px;
+      padding:14px 12px;
+      background:#fff;
+      text-align:center;
+    }
+
+    .stat .label{
+      font-size:12px;
+      opacity:.7;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      margin-bottom:6px;
+    }
+
+    .stat .value{
+      font-size:clamp(22px, 4vw, 34px);
+      font-weight:900;
+      line-height:1;
+    }
+
+    .value.good{ color:var(--green); }
+    .value.bad{ color:var(--red); }
+
+    .game-shell{
+      position:relative;
+      width:100%;
+      background:#fff;
+      border:2px solid #000;
+      border-radius:24px;
+      overflow:hidden;
+    }
+
+    canvas{
+      display:block;
+      width:100%;
+      height:auto;
+      background:
+        linear-gradient(to bottom, #ffffff 0%, #ffffff 72%, var(--grass) 72%, var(--grass) 100%);
+      cursor:crosshair;
+    }
+
+    .overlay{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      background:rgba(255,255,255,.88);
+      text-align:center;
+    }
+
+    .overlay.hidden{
+      display:none;
+    }
+
+    .card{
+      width:min(100%, 520px);
+      background:#fff;
+      border:2px solid #000;
+      border-radius:22px;
+      padding:24px 18px;
+      box-shadow:0 10px 30px rgba(0,0,0,.08);
+    }
+
+    .card h2{
+      font-size:clamp(24px, 4vw, 36px);
+      margin-bottom:12px;
+      line-height:1.05;
+    }
+
+    .card p{
+      font-size:15px;
+      line-height:1.45;
+      opacity:.8;
+      margin-bottom:14px;
+    }
+
+    .card .big{
+      font-size:38px;
+      font-weight:900;
+      margin:10px 0 14px;
+    }
+
+    .legend{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:6px;
+      justify-content:center;
+    }
+
+    .pill{
+      border:2px solid #000;
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:12px;
+      font-weight:700;
+      background:#fff;
+    }
+
+    .bottom-note{
+      text-align:center;
+      font-size:13px;
+      opacity:.65;
+      line-height:1.4;
+    }
+
+    @media (max-width:720px){
+      .hud{
+        grid-template-columns:repeat(2, minmax(0,1fr));
+      }
+
+      .btn{
+        width:100%;
+      }
+
+      .actions{
+        width:100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="topbar">
+      <div class="title">
+        <h1>Play with Eddie</h1>
+        <p>Time the throw. Eddie catches the ball. 3 misses = game over.</p>
+      </div>
+
+      <div class="actions">
+        <a class="btn alt" href="index.html">← Back</a>
+        <button class="btn" id="restartTop">Restart Game</button>
+      </div>
+    </div>
+
+    <section class="hud">
+      <div class="stat">
+        <div class="label">Score</div>
+        <div class="value good" id="scoreValue">0</div>
+      </div>
+      <div class="stat">
+        <div class="label">Misses</div>
+        <div class="value bad" id="missValue">0 / 3</div>
+      </div>
+      <div class="stat">
+        <div class="label">Speed</div>
+        <div class="value" id="speedValue">1.00×</div>
+      </div>
+      <div class="stat">
+        <div class="label">Best</div>
+        <div class="value" id="bestValue">0</div>
+      </div>
+    </section>
+
+    <section class="game-shell panel">
+      <canvas id="game" width="960" height="540" aria-label="Eddie game area"></canvas>
+
+      <div class="overlay" id="startOverlay">
+        <div class="card">
+          <h2>Eddie Catch Challenge</h2>
+          <p>
+            Eddie runs left and right.<br>
+            Click anywhere in the play area to throw the ball.
+          </p>
+          <p>
+            If the ball reaches Eddie at the right moment, he catches it.<br>
+            Every catch gives you a point and makes Eddie faster.
+          </p>
+          <p>
+            Miss 3 times and the run is over.
+          </p>
+          <div class="legend">
+            <div class="pill">✅ Catch = +1</div>
+            <div class="pill">❌ 3 misses = end</div>
+            <div class="pill">⚡ Eddie gets faster</div>
+          </div>
+          <div style="margin-top:18px;">
+            <button class="btn" id="startBtn">Start Game</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="overlay hidden" id="gameOverOverlay">
+        <div class="card">
+          <h2>Game Over</h2>
+          <p>Eddie missed the ball 3 times.</p>
+          <div class="big" id="finalScore">0</div>
+          <p id="bestLine">Best run: 0</p>
+          <div class="legend">
+            <div class="pill">Top monthly score can win access</div>
+          </div>
+          <div style="margin-top:18px;">
+            <button class="btn" id="restartBtn">Play Again</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="bottom-note">
+      This is version 1 of the Eddie challenge.<br>
+      First we nail the game feel. Leaderboard comes after that.
+    </div>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+
+    const scoreValue = document.getElementById("scoreValue");
+    const missValue = document.getElementById("missValue");
+    const speedValue = document.getElementById("speedValue");
+    const bestValue = document.getElementById("bestValue");
+
+    const startOverlay = document.getElementById("startOverlay");
+    const gameOverOverlay = document.getElementById("gameOverOverlay");
+    const startBtn = document.getElementById("startBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const restartTop = document.getElementById("restartTop");
+    const finalScore = document.getElementById("finalScore");
+    const bestLine = document.getElementById("bestLine");
+
+    const BEST_KEY = "eddieCatchBest";
+
+    const state = {
+      running: false,
+      score: 0,
+      misses: 0,
+      best: Number(localStorage.getItem(BEST_KEY) || 0),
+      baseSpeed: 210,
+      speedMultiplier: 1,
+      throwLocked: false,
+      lastTime: 0,
+    };
+
+    const groundY = 430;
+    const eddie = {
+      x: 480,
+      y: groundY,
+      width: 92,
+      height: 58,
+      dir: 1,
+      mouthOpen: false,
+      catchFlash: 0,
+      missFlash: 0
+    };
+
+    const ball = {
+      active: false,
+      returning: true,
+      radius: 12,
+      startX: 480,
+      startY: 385,
+      x: 480,
+      y: 385,
+      startTime: 0,
+      duration: 0.65,
+      targetX: 480,
+      targetY: 300,
+      peakHeight: 120,
+    };
+
+    function resetGame() {
+      state.score = 0;
+      state.misses = 0;
+      state.speedMultiplier = 1;
+      state.throwLocked = false;
+      state.running = false;
+      state.lastTime = 0;
+
+      eddie.x = canvas.width / 2;
+      eddie.dir = 1;
+      eddie.mouthOpen = false;
+      eddie.catchFlash = 0;
+      eddie.missFlash = 0;
+
+      resetBall();
+      updateHud();
+
+      startOverlay.classList.remove("hidden");
+      gameOverOverlay.classList.add("hidden");
+    }
+
+    function startGame() {
+      state.running = true;
+      state.throwLocked = false;
+      state.lastTime = 0;
+      state.score = 0;
+      state.misses = 0;
+      state.speedMultiplier = 1;
+
+      eddie.x = canvas.width / 2;
+      eddie.dir = 1;
+      eddie.catchFlash = 0;
+      eddie.missFlash = 0;
+
+      resetBall();
+      updateHud();
+
+      startOverlay.classList.add("hidden");
+      gameOverOverlay.classList.add("hidden");
+    }
+
+    function resetBall() {
+      ball.active = false;
+      ball.returning = true;
+      ball.x = canvas.width / 2;
+      ball.y = 385;
+      ball.startX = canvas.width / 2;
+      ball.startY = 385;
+      ball.targetX = canvas.width / 2;
+      ball.targetY = 300;
+      ball.startTime = 0;
+      ball.duration = 0.65;
+    }
+
+    function updateHud() {
+      scoreValue.textContent = state.score;
+      missValue.textContent = `${state.misses} / 3`;
+      speedValue.textContent = `${state.speedMultiplier.toFixed(2)}×`;
+      bestValue.textContent = state.best;
+    }
+
+    function gameOver() {
+      state.running = false;
+      state.throwLocked = true;
+
+      if (state.score > state.best) {
+        state.best = state.score;
+        localStorage.setItem(BEST_KEY, String(state.best));
+      }
+
+      updateHud();
+      finalScore.textContent = `Score: ${state.score}`;
+      bestLine.textContent = `Best run: ${state.best}`;
+      gameOverOverlay.classList.remove("hidden");
+    }
+
+    function throwBall(mouseX, mouseY) {
+      if (!state.running || state.throwLocked || ball.active) return;
+
+      const clampedX = Math.max(30, Math.min(canvas.width - 30, mouseX));
+      const clampedY = Math.max(110, Math.min(groundY - 50, mouseY));
+
+      ball.active = true;
+      ball.returning = false;
+      ball.startX = canvas.width / 2;
+      ball.startY = 385;
+      ball.x = ball.startX;
+      ball.y = ball.startY;
+      ball.targetX = clampedX;
+      ball.targetY = clampedY;
+      ball.startTime = performance.now() / 1000;
+      ball.duration = 0.70;
+      ball.peakHeight = Math.max(90, 180 - (clampedY * 0.15));
+
+      state.throwLocked = true;
+    }
+
+    function updateBall(now) {
+      if (!ball.active) return;
+
+      const t = (now - ball.startTime) / ball.duration;
+      const p = Math.min(1, Math.max(0, t));
+
+      const x = lerp(ball.startX, ball.targetX, p);
+      const yLinear = lerp(ball.startY, ball.targetY, p);
+      const arc = Math.sin(Math.PI * p) * ball.peakHeight;
+
+      ball.x = x;
+      ball.y = yLinear - arc;
+
+      if (!ball.returning) {
+        const mouthX = eddie.x;
+        const mouthY = eddie.y - 22;
+        const dx = ball.x - mouthX;
+        const dy = ball.y - mouthY;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist < 28) {
+          catchBall();
+          return;
+        }
+      }
+
+      if (p >= 1) {
+        if (!ball.returning) {
+          missBall();
+        } else {
+          ball.active = false;
+          state.throwLocked = false;
+        }
+      }
+    }
+
+    function catchBall() {
+      state.score += 1;
+      state.speedMultiplier += 0.18;
+      eddie.catchFlash = 0.35;
+      eddie.mouthOpen = true;
+
+      ball.active = false;
+      state.throwLocked = false;
+      resetBall();
+      updateHud();
+    }
+
+    function missBall() {
+      state.misses += 1;
+      eddie.missFlash = 0.35;
+
+      ball.active = true;
+      ball.returning = true;
+      ball.startX = ball.targetX;
+      ball.startY = ball.targetY;
+      ball.targetX = canvas.width / 2;
+      ball.targetY = 385;
+      ball.startTime = performance.now() / 1000;
+      ball.duration = 0.55;
+      ball.peakHeight = 70;
+
+      updateHud();
+
+      if (state.misses >= 3) {
+        setTimeout(gameOver, 260);
+      }
+    }
+
+    function updateEddie(dt) {
+      if (!state.running) return;
+
+      const speed = state.baseSpeed * state.speedMultiplier;
+      eddie.x += eddie.dir * speed * dt;
+
+      const leftLimit = 70;
+      const rightLimit = canvas.width - 70;
+
+      if (eddie.x <= leftLimit) {
+        eddie.x = leftLimit;
+        eddie.dir = 1;
+      } else if (eddie.x >= rightLimit) {
+        eddie.x = rightLimit;
+        eddie.dir = -1;
+      }
+
+      if (eddie.catchFlash > 0) eddie.catchFlash -= dt;
+      if (eddie.missFlash > 0) eddie.missFlash -= dt;
+
+      if (eddie.catchFlash <= 0) {
+        eddie.mouthOpen = false;
+      }
+    }
+
+    function drawBackground() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#f3f4f6";
+      ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
+
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, groundY);
+      ctx.lineTo(canvas.width, groundY);
+      ctx.stroke();
+
+      for (let i = 0; i < canvas.width; i += 28) {
+        ctx.strokeStyle = "rgba(0,0,0,0.10)";
+        ctx.beginPath();
+        ctx.moveTo(i, groundY);
+        ctx.lineTo(i + 8, groundY + 10);
+        ctx.stroke();
+      }
+    }
+
+    function drawBall() {
+      ctx.save();
+      ctx.fillStyle = "#b01fa5";
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(ball.x - 7, ball.y);
+      ctx.lineTo(ball.x + 7, ball.y);
+      ctx.moveTo(ball.x, ball.y - 7);
+      ctx.lineTo(ball.x, ball.y + 7);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawEddie() {
+      ctx.save();
+      ctx.translate(eddie.x, eddie.y);
+
+      if (eddie.dir < 0) {
+        ctx.scale(-1, 1);
+      }
+
+      const flashCatch = eddie.catchFlash > 0;
+      const flashMiss = eddie.missFlash > 0;
+
+      // tail
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(-34, -8);
+      ctx.quadraticCurveTo(-56, -24, -48, -44);
+      ctx.stroke();
+
+      // body
+      ctx.fillStyle = flashCatch ? "#e9d5ff" : flashMiss ? "#ffe2e0" : "#fff";
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 3;
+      roundRect(ctx, -35, -35, 78, 42, 14, true, true);
+
+      // legs
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(-18, 6); ctx.lineTo(-18, 26);
+      ctx.moveTo(2, 6);   ctx.lineTo(2, 26);
+      ctx.moveTo(18, 6);  ctx.lineTo(18, 26);
+      ctx.stroke();
+
+      // head
+      ctx.fillStyle = "#fff";
+      roundRect(ctx, 15, -56, 46, 40, 14, true, true);
+
+      // ears
+      ctx.beginPath();
+      ctx.moveTo(24, -52);
+      ctx.lineTo(18, -74);
+      ctx.lineTo(33, -58);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(52, -52);
+      ctx.lineTo(58, -74);
+      ctx.lineTo(44, -58);
+      ctx.fill();
+      ctx.stroke();
+
+      // eyes
+      ctx.fillStyle = "#000";
+      ctx.beginPath();
+      ctx.arc(31, -41, 3, 0, Math.PI * 2);
+      ctx.arc(47, -41, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // nose
+      ctx.beginPath();
+      ctx.arc(58, -32, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // mouth
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 2.5;
+      if (eddie.mouthOpen) {
+        ctx.beginPath();
+        ctx.arc(52, -24, 8, 0.2, 2.9);
+        ctx.stroke();
+
+        // ball in mouth
+        ctx.fillStyle = "#b01fa5";
+        ctx.beginPath();
+        ctx.arc(54, -22, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        ctx.moveTo(52, -24);
+        ctx.quadraticCurveTo(56, -18, 61, -24);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+      if (typeof radius === "number") {
+        radius = { tl: radius, tr: radius, br: radius, bl: radius };
+      } else {
+        radius = { tl: 0, tr: 0, br: 0, bl: 0, ...radius };
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(x + radius.tl, y);
+      ctx.lineTo(x + width - radius.tr, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
+      ctx.lineTo(x + width, y + height - radius.br);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
+      ctx.lineTo(x + radius.bl, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
+      ctx.lineTo(x, y + radius.tl);
+      ctx.quadraticCurveTo(x, y, x + radius.tl, y);
+      ctx.closePath();
+      if (fill) ctx.fill();
+      if (stroke) ctx.stroke();
+    }
+
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
+
+    function loop(ts) {
+      const now = ts / 1000;
+      if (!state.lastTime) state.lastTime = now;
+      const dt = Math.min(0.033, now - state.lastTime);
+      state.lastTime = now;
+
+      drawBackground();
+      updateEddie(dt);
+      updateBall(now);
+      drawBall();
+      drawEddie();
+
+      requestAnimationFrame(loop);
+    }
+
+    canvas.addEventListener("click", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = (e.clientX - rect.left) * scaleX;
+      const y = (e.clientY - rect.top) * scaleY;
+      throwBall(x, y);
+    });
+
+    startBtn.addEventListener("click", startGame);
+    restartBtn.addEventListener("click", startGame);
+    restartTop.addEventListener("click", resetGame);
+
+    bestValue.textContent = state.best;
+    resetGame();
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
