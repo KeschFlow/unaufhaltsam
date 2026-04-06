@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>UNAUFHALTSAM | V5.5 Final Stable</title>
+  <title>UNAUFHALTSAM | Final Stable Build</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
@@ -29,7 +29,6 @@
     .leaderboard-container { background:#fff; border:2px solid #000; border-radius:22px; padding:20px; margin-top:10px; }
     .leaderboard-title { font-weight:900; text-transform:uppercase; margin-bottom:12px; font-size:16px; border-bottom: 2px solid #000; padding-bottom: 8px; }
     .leaderboard-entry { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee; font-weight:700; font-size: 14px; }
-    @media (max-width:720px){ .hud{ grid-template-columns:repeat(2, minmax(0,1fr)); } .btn{ width:100%; } }
   </style>
 </head>
 <body>
@@ -227,8 +226,8 @@
       let tilt = 0; if (state.phase === "shuffle" && state.activeSwap) { if (b.id === state.activeSwap.aId) tilt = -0.06; else if (b.id === state.activeSwap.bId) tilt = 0.06; }
       ctx.translate(cx, cy); ctx.rotate(tilt); ctx.translate(-cx, -cy);
       ctx.fillStyle = isH ? "#e9e9e9" : "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 3; roundRect(ctx, x, y, b.w, b.h, 12, true, true);
-      ctx.drawImage(imgEddieTongue, cx - (b.w * 0.5) / 2, cy - (b.h * 0.5) / 2, b.w * 0.5, b.h * 0.5);
-      if (isH && state.phase === "pick") { ctx.strokeStyle = "#000"; ctx.lineWidth = 5; roundRect(ctx, x - 4, y - 4, b.w + 8, boxH + 8, 14, false, true); }
+      const tW = b.w * 0.5, tH = b.h * 0.5; ctx.drawImage(imgEddieTongue, cx - tW / 2, cy - tH / 2, tW, tH);
+      if (isH && state.phase === "pick") { ctx.strokeStyle = "#000"; ctx.lineWidth = 5; roundRect(ctx, x - 4, y - 4, b.w + 8, b.h + 8, 14, false, true); }
       if (isS && state.phase === "reveal") { ctx.strokeStyle = state.result === "correct" ? "#0f9d58" : "#d92d20"; ctx.lineWidth = 4; roundRect(ctx, x - 4, y - 4, b.w + 8, b.h + 8, 14, false, true); }
       if (isC) { const brW = b.w * 0.7, brH = brW * (imgBrand.height / imgBrand.width); ctx.drawImage(imgBrand, cx - brW / 2, y + b.h + 5, brW, brH); }
       ctx.restore();
@@ -243,9 +242,7 @@
   }
 
   function updateHud() { scoreValue.textContent = state.score; roundValue.textContent = state.round; boxValue.textContent = state.boxCount; bestValue.textContent = state.best; }
-
   function resetGame() { state.running = false; state.score = 0; state.round = 1; state.boxCount = 2; buildRound(); updateHud(); gameOverOverlay.classList.add("hidden"); nameOverlay.classList.add("hidden"); startOverlay.classList.remove("hidden"); }
-
   function startGame() { state.running = true; state.score = 0; state.round = 1; state.boxCount = 2; buildRound(); updateHud(); startOverlay.classList.add("hidden"); gameOverOverlay.classList.add("hidden"); nameOverlay.classList.add("hidden"); if (!localStorage.getItem(TRACK_PLAYED)) localStorage.setItem(TRACK_PLAYED, "true"); }
 
   function loop(ts) {
