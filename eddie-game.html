@@ -95,13 +95,6 @@
       border:2px solid #000;
     }
 
-    .panel{
-      background:#fff;
-      border:2px solid #000;
-      border-radius:22px;
-      padding:16px;
-    }
-
     .hud{
       display:grid;
       grid-template-columns:repeat(4, minmax(0,1fr));
@@ -262,4 +255,480 @@
       </div>
       <div class="stat">
         <div class="label">Best</div>
-        <div class="value" id="bestValue">0</
+        <div class="value" id="bestValue">0</div>
+      </div>
+    </section>
+
+    <section class="game-shell">
+      <canvas id="gameCanvas" width="960" height="540"></canvas>
+
+      <div class="overlay" id="startOverlay">
+        <div class="card">
+          <h2>Eddie Catch Challenge</h2>
+          <p>
+            Eddie runs left and right.<br>
+            Aim with the crosshair and click to throw.
+          </p>
+          <p>
+            If the ball reaches Eddie at the perfect moment, he catches it.<br>
+            Each catch gives you 1 point and makes Eddie faster.
+          </p>
+          <p>
+            Miss 3 times and the run is over.
+          </p>
+          <div class="legend">
+            <div class="pill">✅ Catch = +1</div>
+            <div class="pill">❌ 3 misses = end</div>
+            <div class="pill">⚡ Eddie gets faster</div>
+          </div>
+          <div style="margin-top:18px;">
+            <button class="btn" id="startBtn">Start Game</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="overlay hidden" id="gameOverOverlay">
+        <div class="card">
+          <h2>Game Over</h2>
+          <p>Eddie missed the ball 3 times.</p>
+          <div class="big" id="finalScore">0</div>
+          <p id="bestLine">Best run: 0</p>
+          <div style="margin-top:18px;">
+            <button class="btn" id="restartBtn">Play Again</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="bottom-note">
+      Version 1. Mechanic first. Leaderboard after game feel.
+    </div>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const scoreValue = document.getElementById("scoreValue");
+    const missValue = document.getElementById("missValue");
+    const speedValue = document.getElementById("speedValue");
+    const bestValue = document.getElementById("bestValue");
+
+    const startOverlay = document.getElementById("startOverlay");
+    const gameOverOverlay = document.getElementById("gameOverOverlay");
+    const startBtn = document.getElementById("startBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const restartTop = document.getElementById("restartTop");
+    const finalScore = document.getElementById("finalScore");
+    const bestLine = document.getElementById("bestLine");
+
+    const BEST_KEY = "eddieCatchBest_v1";
+
+    const state = {
+      running: false,
+      score: 0,
+      misses: 0,
+      best: Number(localStorage.getItem(BEST_KEY) || 0),
+      baseSpeed: 190,
+      speedMultiplier: 1,
+      throwLocked: false,
+      lastTime: 0,
+      gameOverShown: false
+    };
+
+    const crosshair = {
+      x: canvas.width / 2,
+      y: 180,
+      visible: true
+    };
+
+    const eddie = {
+      x: canvas.width / 2,
+      y: 428,
+      dir: 1,
+      catchFlash: 0,
+      missFlash: 0
+    };
+
+    const ball = {
+      active: false,
+      x: 0,
+      y: 0,
+      startX: 0,
+      startY: 0,
+      targetX: 0,
+      targetY: 0,
+      peakHeight: 0,
+      startTime: 0,
+      duration: 0.62,
+      caught: false
+    };
+
+    function updateHud() {
+      scoreValue.textContent = state.score;
+      missValue.textContent = `${state.misses} / 3`;
+      speedValue.textContent = `${state.speedMultiplier.toFixed(2)}×`;
+      bestValue.textContent = state.best;
+    }
+
+    function resetBall() {
+      ball.active = false;
+      ball.caught = false;
+    }
+
+    function resetGame() {
+      state.running = false;
+      state.score = 0;
+      state.misses = 0;
+      state.speedMultiplier = 1;
+      state.throwLocked = false;
+      state.lastTime = 0;
+      state.gameOverShown = false;
+
+      eddie.x = canvas.width / 2;
+      eddie.dir = 1;
+      eddie.catchFlash = 0;
+      eddie.missFlash = 0;
+
+      resetBall();
+      updateHud();
+
+      gameOverOverlay.classList.add("hidden");
+      startOverlay.classList.remove("hidden");
+    }
+
+    function startGame() {
+      state.running = true;
+      state.score = 0;
+      state.misses = 0;
+      state.speedMultiplier = 1;
+      state.throwLocked = false;
+      state.lastTime = 0;
+      state.gameOverShown = false;
+
+      eddie.x = canvas.width / 2;
+      eddie.dir = 1;
+      eddie.catchFlash = 0;
+      eddie.missFlash = 0;
+
+      resetBall();
+      updateHud();
+
+      startOverlay.classList.add("hidden");
+      gameOverOverlay.classList.add("hidden");
+    }
+
+    function gameOver() {
+      if (state.gameOverShown) return;
+      state.gameOverShown = true;
+      state.running = false;
+      state.throwLocked = true;
+
+      if (state.score > state.best) {
+        state.best = state.score;
+        localStorage.setItem(BEST_KEY, String(state.best));
+      }
+
+      updateHud();
+      finalScore.textContent = `Score: ${state.score}`;
+      bestLine.textContent = `Best run: ${state.best}`;
+      gameOverOverlay.classList.remove("hidden");
+    }
+
+    function throwBall(x, y) {
+      if (!state.running || state.throwLocked || ball.active) return;
+
+      const clampedX = Math.max(60, Math.min(canvas.width - 60, x));
+      const clampedY = Math.max(110, Math.min(330, y));
+
+      ball.active = true;
+      ball.caught = false;
+      ball.startX = clampedX;
+      ball.startY = -40;
+      ball.targetX = clampedX;
+      ball.targetY = clampedY;
+      ball.peakHeight = 0;
+      ball.startTime = performance.now() / 1000;
+      ball.duration = 0.62;
+      ball.x = ball.startX;
+      ball.y = ball.startY;
+
+      state.throwLocked = true;
+    }
+
+    function catchBall() {
+      state.score += 1;
+      state.speedMultiplier += 0.16;
+      eddie.catchFlash = 0.32;
+      ball.caught = true;
+      ball.active = false;
+      state.throwLocked = false;
+      updateHud();
+    }
+
+    function missBall() {
+      state.misses += 1;
+      eddie.missFlash = 0.32;
+      ball.active = false;
+      state.throwLocked = false;
+      updateHud();
+
+      if (state.misses >= 3) {
+        setTimeout(gameOver, 180);
+      }
+    }
+
+    function updateBall(now) {
+      if (!ball.active) return;
+
+      const t = (now - ball.startTime) / ball.duration;
+      const p = Math.max(0, Math.min(1, t));
+
+      ball.x = ball.startX + (ball.targetX - ball.startX) * p;
+      ball.y = ball.startY + (ball.targetY - ball.startY) * p;
+
+      const mouthX = eddie.x + (eddie.dir > 0 ? 26 : -26);
+      const mouthY = eddie.y - 32;
+
+      const dx = ball.x - mouthX;
+      const dy = ball.y - mouthY;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist < 24 && p > 0.72) {
+        catchBall();
+        return;
+      }
+
+      if (p >= 1) {
+        missBall();
+      }
+    }
+
+    function updateEddie(dt) {
+      if (!state.running) return;
+
+      const speed = state.baseSpeed * state.speedMultiplier;
+      eddie.x += eddie.dir * speed * dt;
+
+      if (eddie.x < 90) {
+        eddie.x = 90;
+        eddie.dir = 1;
+      }
+      if (eddie.x > canvas.width - 90) {
+        eddie.x = canvas.width - 90;
+        eddie.dir = -1;
+      }
+
+      if (eddie.catchFlash > 0) eddie.catchFlash -= dt;
+      if (eddie.missFlash > 0) eddie.missFlash -= dt;
+    }
+
+    function drawBackground() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#eef9ee";
+      ctx.fillRect(0, 390, canvas.width, 150);
+
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, 390);
+      ctx.lineTo(canvas.width, 390);
+      ctx.stroke();
+    }
+
+    function drawCrosshair() {
+      ctx.save();
+      ctx.strokeStyle = "rgba(0,0,0,0.75)";
+      ctx.lineWidth = 2;
+
+      ctx.beginPath();
+      ctx.arc(crosshair.x, crosshair.y, 16, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(crosshair.x - 24, crosshair.y);
+      ctx.lineTo(crosshair.x - 8, crosshair.y);
+      ctx.moveTo(crosshair.x + 8, crosshair.y);
+      ctx.lineTo(crosshair.x + 24, crosshair.y);
+      ctx.moveTo(crosshair.x, crosshair.y - 24);
+      ctx.lineTo(crosshair.x, crosshair.y - 8);
+      ctx.moveTo(crosshair.x, crosshair.y + 8);
+      ctx.lineTo(crosshair.x, crosshair.y + 24);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawBall() {
+      if (!ball.active) return;
+
+      ctx.save();
+      ctx.fillStyle = "#b01fa5";
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 2;
+
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, 12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(ball.x - 7, ball.y);
+      ctx.lineTo(ball.x + 7, ball.y);
+      ctx.moveTo(ball.x, ball.y - 7);
+      ctx.lineTo(ball.x, ball.y + 7);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawEddie() {
+      ctx.save();
+      ctx.translate(eddie.x, eddie.y);
+
+      if (eddie.dir < 0) {
+        ctx.scale(-1, 1);
+      }
+
+      const fillColor = eddie.catchFlash > 0
+        ? "#f0dcff"
+        : eddie.missFlash > 0
+        ? "#ffe6e3"
+        : "#fff";
+
+      // tail
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(-42, -6);
+      ctx.quadraticCurveTo(-65, -20, -58, -42);
+      ctx.stroke();
+
+      // body
+      ctx.fillStyle = fillColor;
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 4;
+      roundRect(-38, -34, 74, 42, 14, true, true);
+
+      // legs
+      ctx.beginPath();
+      ctx.moveTo(-18, 7); ctx.lineTo(-18, 28);
+      ctx.moveTo(0, 7); ctx.lineTo(0, 28);
+      ctx.moveTo(16, 7); ctx.lineTo(16, 28);
+      ctx.stroke();
+
+      // neck
+      ctx.beginPath();
+      ctx.moveTo(20, -18);
+      ctx.lineTo(32, -30);
+      ctx.stroke();
+
+      // head
+      ctx.fillStyle = "#fff";
+      roundRect(22, -62, 44, 38, 14, true, true);
+
+      // ears
+      ctx.beginPath();
+      ctx.moveTo(30, -56);
+      ctx.lineTo(24, -78);
+      ctx.lineTo(38, -61);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(56, -56);
+      ctx.lineTo(62, -78);
+      ctx.lineTo(48, -61);
+      ctx.fill();
+      ctx.stroke();
+
+      // eyes
+      ctx.fillStyle = "#000";
+      ctx.beginPath();
+      ctx.arc(39, -46, 3, 0, Math.PI * 2);
+      ctx.arc(53, -46, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // nose
+      ctx.beginPath();
+      ctx.arc(64, -38, 3.8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // tongue / catch mouth
+      if (eddie.catchFlash > 0) {
+        ctx.fillStyle = "#b01fa5";
+        ctx.beginPath();
+        ctx.arc(60, -29, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      } else {
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(56, -28);
+        ctx.quadraticCurveTo(61, -23, 66, -28);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function roundRect(x, y, width, height, radius, fill, stroke) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+
+      if (fill) ctx.fill();
+      if (stroke) ctx.stroke();
+    }
+
+    function loop(timestamp) {
+      const now = timestamp / 1000;
+      if (!state.lastTime) state.lastTime = now;
+      const dt = Math.min(0.033, now - state.lastTime);
+      state.lastTime = now;
+
+      drawBackground();
+      updateEddie(dt);
+      updateBall(now);
+      drawBall();
+      drawEddie();
+      if (state.running && !ball.active) drawCrosshair();
+
+      requestAnimationFrame(loop);
+    }
+
+    canvas.addEventListener("mousemove", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      crosshair.x = (e.clientX - rect.left) * scaleX;
+      crosshair.y = (e.clientY - rect.top) * scaleY;
+      crosshair.y = Math.max(110, Math.min(330, crosshair.y));
+      crosshair.x = Math.max(60, Math.min(canvas.width - 60, crosshair.x));
+    });
+
+    canvas.addEventListener("click", () => {
+      throwBall(crosshair.x, crosshair.y);
+    });
+
+    startBtn.addEventListener("click", startGame);
+    restartBtn.addEventListener("click", startGame);
+    restartTop.addEventListener("click", resetGame);
+
+    bestValue.textContent = state.best;
+    resetGame();
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
