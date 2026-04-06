@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Where’s Eddie’s Ball? | Unaufhaltsam</title>
+  <title>UNAUFHALTSAM | Find the Focus Ring</title>
   <style>
     :root{
       --black:#000;
@@ -47,10 +47,10 @@
     <div class="topbar">
       <div class="title">
         <h1>UNAUFHALTSAM</h1>
-        <p>FINDE DEN FOKUS-RING</p>
+        <p>FIND THE FOCUS RING</p>
       </div>
       <div class="actions">
-        <button class="btn" id="restartTop">Reset</button>
+        <button class="btn" id="restartTop">RESTART GAME</button>
       </div>
     </div>
 
@@ -63,27 +63,30 @@
 
     <section class="game-shell">
       <canvas id="gameCanvas" width="960" height="540"></canvas>
+      
       <div class="overlay" id="startOverlay">
         <div class="card">
-          <h2 style="font-weight:900;">STARTEN</h2>
-          <p>Eddie versteckt den Fokus. Verlier ihn nicht.</p>
-          <button class="btn" id="startBtn">SPIEL STARTEN</button>
+          <h2 style="font-weight:900;">START</h2>
+          <p>Eddie shows you the focus ring. Then the boxes shuffle.</p>
+          <button class="btn" id="startBtn" style="margin-top:15px;">START GAME</button>
         </div>
       </div>
+
       <div class="overlay hidden" id="nameOverlay">
         <div class="card">
-          <h2 style="font-weight:900;">NEUER HIGHSCORE!</h2>
-          <p>Trag dich in die Liste ein:</p>
-          <input type="text" id="nameInput" placeholder="DEIN NAME" maxlength="12">
-          <button class="btn" id="saveScoreBtn">SPEICHERN</button>
+          <h2 style="font-weight:900;">NEW HIGHSCORE!</h2>
+          <p>Add your name to the list:</p>
+          <input type="text" id="nameInput" placeholder="YOUR NAME" maxlength="12">
+          <button class="btn" id="saveScoreBtn">SAVE SCORE</button>
         </div>
       </div>
+
       <div class="overlay hidden" id="gameOverOverlay">
         <div class="card">
-          <h2 style="font-weight:900;">FOKUS VERLOREN</h2>
+          <h2 style="font-weight:900;">FOCUS LOST</h2>
           <div style="font-size:38px; font-weight:900; color:var(--purpur); margin:10px 0;" id="finalScore">0</div>
-          <p id="bestLine">Rekord: 0</p>
-          <button class="btn" id="restartBtn">NOCHMAL</button>
+          <p id="bestLine">Best: 0</p>
+          <button class="btn" id="restartBtn" style="margin-top:15px;">PLAY AGAIN</button>
         </div>
       </div>
     </section>
@@ -146,10 +149,10 @@
     function getLeaderboard() { return JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || "[]"); }
     function updateLeaderboardUI() {
       const scores = getLeaderboard();
-      leaderboardList.innerHTML = scores.length ? scores.map((s, i) => `<li class="leaderboard-entry"><span class="leaderboard-rank">#${i+1}</span><span class="leaderboard-name">${s.name}</span><span class="leaderboard-score">${s.score}</span></li>`).join('') : '<li class="leaderboard-entry">Keine Einträge</li>';
+      leaderboardList.innerHTML = scores.length ? scores.map((s, i) => `<li class="leaderboard-entry"><span class="leaderboard-rank">#${i+1}</span><span class="leaderboard-name">${s.name}</span><span class="leaderboard-score">${s.score}</span></li>`).join('') : '<li class="leaderboard-entry">No entries yet</li>';
     }
     function saveScore() {
-      const name = nameInput.value.trim() || "Unaufhaltsam";
+      const name = nameInput.value.trim() || "UNAUFHALTSAM";
       let scores = getLeaderboard();
       scores.push({ name, score: state.score, date: Date.now() });
       scores.sort((a, b) => b.score - a.score);
@@ -163,7 +166,7 @@
       const startX = (canvas.width - totalW) / 2, baseY = 315;
       for (let i = 0; i < count; i++) boxes.push({ id: i, x: startX + i * (boxW + spacing), y: baseY, w: boxW, h: 92, lift: 0 });
       state.correctBoxId = Math.floor(Math.random() * count);
-      state.startBoxId = state.correctBoxId; // Fix: Startposition merken
+      state.startBoxId = state.correctBoxId;
       eddie.lookTargetX = boxes[state.correctBoxId].x + 46;
       state.shuffleDuration = Math.max(1200, 2400 - state.score * 55);
       state.swapsRemaining = Math.max(4, 4 + Math.floor(count * 1.4));
@@ -172,7 +175,7 @@
 
     function startNextSwap() {
       if (state.swapsRemaining <= 0) {
-        if (state.correctBoxId === state.startBoxId) { // Fix: Forced Departure
+        if (state.correctBoxId === state.startBoxId) { 
           let targetIdx; do { targetIdx = Math.floor(Math.random() * boxes.length); } while (targetIdx === state.correctBoxId);
           state.swapsRemaining = 1;
           const boxA = boxes.find(b => b.id === state.correctBoxId), boxB = boxes[targetIdx];
@@ -276,7 +279,17 @@
     function spawnParticles(x, y) { for (let i = 0; i < 14; i++) particles.push({ x, y, vx: (Math.random() - 0.5) * 5, vy: -Math.random() * 4 - 1, life: 1, size: Math.random() * 4 + 2 }); }
     function updateParticles(dt) { for (let i = particles.length - 1; i >= 0; i--) { const p = particles[i]; p.x += p.vx * 60 * dt; p.y += p.vy * 60 * dt; p.vy += 0.12; p.life -= 1.8 * dt; if (p.life <= 0) particles.splice(i, 1); } }
     function drawParticles() { for (const p of particles) { ctx.save(); ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = "#b01fa5"; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill(); ctx.restore(); } }
-    function gameOver() { state.running = false; setPhase("gameover"); if (state.score > state.best) { state.best = state.score; localStorage.setItem(BEST_KEY, String(state.best)); } finalScoreDisplay.textContent = state.score; bestLineDisplay.textContent = `Rekord: ${state.best}`; updateHud(); if (state.score > 0 && (getLeaderboard().length < 10 || state.score > getLeaderboard()[9].score)) nameOverlay.classList.remove("hidden"); else gameOverOverlay.classList.remove("hidden"); }
+    
+    function gameOver() { 
+      state.running = false; setPhase("gameover"); 
+      if (state.score > state.best) { state.best = state.score; localStorage.setItem(BEST_KEY, String(state.best)); } 
+      finalScoreDisplay.textContent = state.score; 
+      bestLineDisplay.textContent = `Best: ${state.best}`; 
+      updateHud(); 
+      if (state.score > 0 && (getLeaderboard().length < 10 || state.score > getLeaderboard()[9].score)) nameOverlay.classList.remove("hidden"); 
+      else gameOverOverlay.classList.remove("hidden"); 
+    }
+
     function updateHud() { scoreValue.textContent = state.score; roundValue.textContent = state.round; boxValue.textContent = state.boxCount; bestValue.textContent = state.best; }
     function resetGame() { state.running = false; state.score = 0; state.round = 1; state.boxCount = 2; buildRound(); updateHud(); gameOverOverlay.classList.add("hidden"); nameOverlay.classList.add("hidden"); startOverlay.classList.remove("hidden"); }
     function startGame() { state.running = true; state.score = 0; state.round = 1; buildRound(); updateHud(); startOverlay.classList.add("hidden"); gameOverOverlay.classList.add("hidden"); nameOverlay.classList.add("hidden"); }
