@@ -1,6 +1,1047 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>Hier ist der vollständige Code mit der neuen **Rotations-Logik** in der drawBoxes-Funktion. Die Kisten neigen sich jetzt während des Shuffles leicht gegeneinander, was die Bewegung deutlich natürlicher und weniger statisch wirken lässt.
+```html
+<!DOCTYPE html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Where’s Eddie’s Ball?</title>
+  <meta name="description" content="Find Eddie’s ball under the right box. Higher score wins." />
+  <style>
+    :root{
+      --black:#000;
+      --white:#fff;
+      --purpur:#b01fa5;
+      --bg:#f5f5f7;
+      --grass:#e7f7e7;
+      --red:#d92d20;
+      --green:#0f9d58;
+      --shadow:rgba(0,0,0,.08);
+    }
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, Helvetica, sans-serif;
+    }
+
+    body{
+      background:var(--bg);
+      color:var(--black);
+      min-height:100vh;
+      padding:20px 14px 40px;
+    }
+
+    .wrap{
+      width:100%;
+      max-width:980px;
+      margin:0 auto;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .title h1{
+      font-size:clamp(28px, 5vw, 52px);
+      line-height:1;
+      margin-bottom:8px;
+      font-weight:900;
+      letter-spacing:-0.8px;
+    }
+
+    .title p{
+      font-size:14px;
+      opacity:.75;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      appearance:none;
+      border:none;
+      background:#000;
+      color:#fff;
+      padding:14px 18px;
+      border-radius:14px;
+      font-weight:900;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:180px;
+      transition:transform .15s ease, opacity .15s ease;
+    }
+
+    .btn:hover{
+      transform:translateY(-1px);
+      opacity:.94;
+    }
+
+    .btn.alt{
+      background:#fff;
+      color:#000;
+      border:2px solid #000;
+    }
+
+    .hud{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:12px;
+    }
+
+    .stat{
+      border:2px solid #000;
+      border-radius:18px;
+      padding:14px 12px;
+      background:#fff;
+      text-align:center;
+    }
+
+    .stat .label{
+      font-size:12px;
+      opacity:.7;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      margin-bottom:6px;
+    }
+
+    .stat .value{
+      font-size:clamp(22px, 4vw, 34px);
+      font-weight:900;
+      line-height:1;
+    }
+
+    .value.good{ color:var(--green); }
+    .value.bad{ color:var(--red); }
+
+    .game-shell{
+      position:relative;
+      width:100%;
+      background:#fff;
+      border:2px solid #000;
+      border-radius:24px;
+      overflow:hidden;
+      box-shadow:0 10px 30px var(--shadow);
+    }
+
+    canvas{
+      display:block;
+      width:100%;
+      height:auto;
+      background:
+        linear-gradient(to bottom, #ffffff 0%, #ffffff 72%, var(--grass) 72%, var(--grass) 100%);
+    }
+
+    .overlay{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      background:rgba(255,255,255,.9);
+      text-align:center;
+    }
+
+    .overlay.hidden{
+      display:none;
+    }
+
+    .card{
+      width:min(100%, 560px);
+      background:#fff;
+      border:2px solid #000;
+      border-radius:22px;
+      padding:24px 18px;
+      box-shadow:0 10px 30px rgba(0,0,0,.08);
+    }
+
+    .card h2{
+      font-size:clamp(24px, 4vw, 36px);
+      margin-bottom:12px;
+      line-height:1.05;
+    }
+
+    .card p{
+      font-size:15px;
+      line-height:1.45;
+      opacity:.8;
+      margin-bottom:14px;
+    }
+
+    .card .big{
+      font-size:38px;
+      font-weight:900;
+      margin:10px 0 14px;
+    }
+
+    .legend{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:6px;
+      justify-content:center;
+    }
+
+    .pill{
+      border:2px solid #000;
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:12px;
+      font-weight:700;
+      background:#fff;
+    }
+
+    .bottom-note{
+      text-align:center;
+      font-size:13px;
+      opacity:.65;
+      line-height:1.4;
+    }
+
+    @media (max-width:720px){
+      .hud{
+        grid-template-columns:repeat(2, minmax(0,1fr));
+      }
+
+      .btn{
+        width:100%;
+      }
+
+      .actions{
+        width:100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="topbar">
+      <div class="title">
+        <h1>Where’s Eddie’s Ball?</h1>
+        <p>Watch carefully. Pick the right box. One mistake and the run is over.</p>
+      </div>
+
+      <div class="actions">
+        <a class="btn alt" href="index.html">← Back</a>
+        <button class="btn" id="restartTop">Restart Game</button>
+      </div>
+    </div>
+
+    <section class="hud">
+      <div class="stat">
+        <div class="label">Score</div>
+        <div class="value good" id="scoreValue">0</div>
+      </div>
+      <div class="stat">
+        <div class="label">Round</div>
+        <div class="value" id="roundValue">1</div>
+      </div>
+      <div class="stat">
+        <div class="label">Boxes</div>
+        <div class="value" id="boxValue">2</div>
+      </div>
+      <div class="stat">
+        <div class="label">Best</div>
+        <div class="value" id="bestValue">0</div>
+      </div>
+    </section>
+
+    <section class="game-shell">
+      <canvas id="gameCanvas" width="960" height="540"></canvas>
+
+      <div class="overlay" id="startOverlay">
+        <div class="card">
+          <h2>Find Eddie’s Ball</h2>
+          <p>
+            Eddie shows you where the ball is.<br>
+            Then the boxes shuffle.
+          </p>
+          <p>
+            Click the correct box.<br>
+            Every correct choice gives you 1 point and adds more difficulty.
+          </p>
+          <p>
+            One wrong pick = game over.
+          </p>
+          <div class="legend">
+            <div class="pill">✅ Right box = +1</div>
+            <div class="pill">📦 More boxes over time</div>
+            <div class="pill">⚡ Faster shuffle later</div>
+          </div>
+          <div style="margin-top:18px;">
+            <button class="btn" id="startBtn">Start Game</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="overlay hidden" id="gameOverOverlay">
+        <div class="card">
+          <h2>Game Over</h2>
+          <p>You picked the wrong box.</p>
+          <div class="big" id="finalScore">Score: 0</div>
+          <p id="bestLine">Best run: 0</p>
+          <div class="legend">
+            <div class="pill">Highest monthly score can win access</div>
+          </div>
+          <div style="margin-top:18px;">
+            <button class="btn" id="restartBtn">Play Again</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="bottom-note">
+      Eddie watches the boxes. You follow Eddie.<br>
+      First nail the game feel. Leaderboard comes after that.
+    </div>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const scoreValue = document.getElementById("scoreValue");
+    const roundValue = document.getElementById("roundValue");
+    const boxValue = document.getElementById("boxValue");
+    const bestValue = document.getElementById("bestValue");
+
+    const startOverlay = document.getElementById("startOverlay");
+    const gameOverOverlay = document.getElementById("gameOverOverlay");
+    const startBtn = document.getElementById("startBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const restartTop = document.getElementById("restartTop");
+    const finalScore = document.getElementById("finalScore");
+    const bestLine = document.getElementById("bestLine");
+
+    const BEST_KEY = "eddieBoxBest_v1";
+
+    const state = {
+      running: false,
+      score: 0,
+      round: 1,
+      boxCount: 2,
+      best: Number(localStorage.getItem(BEST_KEY) || 0),
+      phase: "idle", // idle, show, shuffle, pick, reveal, gameover
+      phaseStartedAt: 0,
+      selectedBoxId: null,
+      correctBoxId: null,
+      hoverBoxId: null,
+      result: null, // correct / wrong
+      showBallTime: 1400,
+      shuffleDuration: 2200,
+      swapsRemaining: 0,
+      activeSwap: null,
+      lastTs: 0
+    };
+
+    const eddie = {
+      x: 145,
+      y: 415,
+      lookTargetX: 0,
+      tongue: false,
+      happyFlash: 0,
+      sadFlash: 0
+    };
+
+    const boxes = [];
+    const particles = [];
+
+    function spawnParticles(x, y) {
+      for (let i = 0; i < 14; i++) {
+        particles.push({
+          x,
+          y,
+          vx: (Math.random() - 0.5) * 5,
+          vy: -Math.random() * 4 - 1,
+          life: 1,
+          size: Math.random() * 4 + 2
+        });
+      }
+    }
+
+    function updateParticles(dt) {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx * 60 * dt;
+        p.y += p.vy * 60 * dt;
+        p.vy += 0.12;
+        p.life -= 1.8 * dt;
+
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+        }
+      }
+    }
+
+    function drawParticles() {
+      for (const p of particles) {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = "#b01fa5";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function nowMs() {
+      return performance.now();
+    }
+
+    function setPhase(next) {
+      state.phase = next;
+      state.phaseStartedAt = nowMs();
+    }
+
+    function updateHud() {
+      scoreValue.textContent = state.score;
+      roundValue.textContent = state.round;
+      boxValue.textContent = state.boxCount;
+      bestValue.textContent = state.best;
+    }
+
+    function resetGame() {
+      state.running = false;
+      state.score = 0;
+      state.round = 1;
+      state.boxCount = 2;
+      state.selectedBoxId = null;
+      state.correctBoxId = null;
+      state.hoverBoxId = null;
+      state.result = null;
+      state.lastTs = 0;
+
+      eddie.tongue = false;
+      eddie.happyFlash = 0;
+      eddie.sadFlash = 0;
+
+      buildRound();
+      updateHud();
+
+      gameOverOverlay.classList.add("hidden");
+      startOverlay.classList.remove("hidden");
+    }
+
+    function startGame() {
+      state.running = true;
+      state.score = 0;
+      state.round = 1;
+      state.boxCount = 2;
+      state.selectedBoxId = null;
+      state.correctBoxId = null;
+      state.hoverBoxId = null;
+      state.result = null;
+      state.lastTs = 0;
+
+      eddie.tongue = false;
+      eddie.happyFlash = 0;
+      eddie.sadFlash = 0;
+
+      buildRound();
+      updateHud();
+
+      startOverlay.classList.add("hidden");
+      gameOverOverlay.classList.add("hidden");
+    }
+
+    function gameOver() {
+      state.running = false;
+      setPhase("gameover");
+
+      if (state.score > state.best) {
+        state.best = state.score;
+        localStorage.setItem(BEST_KEY, String(state.best));
+      }
+
+      updateHud();
+      finalScore.textContent = `Score: ${state.score}`;
+      bestLine.textContent = `Best run: ${state.best}`;
+      gameOverOverlay.classList.remove("hidden");
+    }
+
+    function nextRound() {
+      state.score += 1;
+      state.round += 1;
+      state.boxCount = Math.min(8, 2 + Math.floor(state.score / 1));
+      eddie.happyFlash = 0.55;
+      eddie.tongue = true;
+      buildRound();
+      updateHud();
+    }
+
+    function buildRound() {
+      boxes.length = 0;
+      state.selectedBoxId = null;
+      state.result = null;
+      state.hoverBoxId = null;
+      state.activeSwap = null;
+
+      const count = state.boxCount;
+      const spacing = 20;
+      const boxW = 92;
+      const boxH = 92;
+      const totalW = count * boxW + (count - 1) * spacing;
+      const startX = (canvas.width - totalW) / 2;
+      const baseY = 315;
+
+      for (let i = 0; i < count; i++) {
+        boxes.push({
+          id: i,
+          x: startX + i * (boxW + spacing),
+          y: baseY,
+          w: boxW,
+          h: boxH,
+          targetX: startX + i * (boxW + spacing),
+          lift: 0
+        });
+      }
+
+      state.correctBoxId = Math.floor(Math.random() * count);
+      eddie.lookTargetX = boxes[state.correctBoxId].x + boxes[state.correctBoxId].w / 2;
+      state.showBallTime = Math.max(700, 1400 - state.score * 45);
+      state.shuffleDuration = Math.max(900, 2200 - state.score * 70);
+      state.swapsRemaining = Math.max(4, 4 + Math.floor(count * 1.4));
+      setPhase("show");
+    }
+
+    function startNextSwap() {
+      if (state.swapsRemaining <= 0) {
+        state.activeSwap = null;
+        setPhase("pick");
+        return;
+      }
+
+      let a = Math.floor(Math.random() * boxes.length);
+      let b = Math.floor(Math.random() * boxes.length);
+
+      while (b === a) {
+        b = Math.floor(Math.random() * boxes.length);
+      }
+
+      const boxA = boxes[a];
+      const boxB = boxes[b];
+
+      const MIN_SWAP_DURATION = 180;
+      const calculatedDuration = Math.max(
+        MIN_SWAP_DURATION,
+        state.shuffleDuration / Math.max(4, state.swapsRemaining)
+      );
+
+      const isFakeSwap = state.score >= 3 && Math.random() < 0.22;
+
+      state.activeSwap = {
+        aId: boxA.id,
+        bId: boxB.id,
+        aStartX: boxA.x,
+        bStartX: boxB.x,
+        aTargetX: boxB.x,
+        bTargetX: boxA.x,
+        start: nowMs(),
+        duration: calculatedDuration,
+        fake: isFakeSwap
+      };
+
+      state.swapsRemaining -= 1;
+    }
+
+    function updateBoxes(ts) {
+      if (state.phase === "show") {
+        if (ts - state.phaseStartedAt > state.showBallTime) {
+          setPhase("shuffle");
+          startNextSwap();
+        }
+      } else if (state.phase === "shuffle") {
+        if (!state.activeSwap) {
+          startNextSwap();
+          return;
+        }
+
+        const swap = state.activeSwap;
+        const p = Math.min(1, (ts - swap.start) / swap.duration);
+        const eased = easeInOutQuad(p);
+
+        const boxA = boxes.find(b => b.id === swap.aId);
+        const boxB = boxes.find(b => b.id === swap.bId);
+
+        const baseY = 315;
+
+        if (swap.fake) {
+          const fakeProgress = Math.sin(p * Math.PI);
+          const midAX = (swap.aStartX + swap.aTargetX) / 2;
+          const midBX = (swap.bStartX + swap.bTargetX) / 2;
+
+          boxA.x = lerp(swap.aStartX, midAX, fakeProgress);
+          boxB.x = lerp(swap.bStartX, midBX, fakeProgress);
+
+          boxA.y = baseY - Math.sin(p * Math.PI) * 28;
+          boxB.y = baseY + Math.sin(p * Math.PI) * 8;
+        } else {
+          boxA.x = lerp(swap.aStartX, swap.aTargetX, eased);
+          boxB.x = lerp(swap.bStartX, swap.bTargetX, eased);
+
+          boxA.y = baseY - Math.sin(p * Math.PI) * 40;
+          boxB.y = baseY + Math.sin(p * Math.PI) * 10;
+        }
+
+        if (p >= 1) {
+          boxA.y = baseY;
+          boxB.y = baseY;
+
+          if (!swap.fake) {
+            if (state.correctBoxId === boxA.id) {
+              state.correctBoxId = boxB.id;
+            } else if (state.correctBoxId === boxB.id) {
+              state.correctBoxId = boxA.id;
+            }
+          }
+
+          state.activeSwap = null;
+        }
+      } else if (state.phase === "reveal") {
+        const chosen = boxes.find(b => b.id === state.selectedBoxId);
+        const correct = boxes.find(b => b.id === state.correctBoxId);
+
+        if (chosen) chosen.lift = Math.min(72, chosen.lift + 5);
+        if (correct && correct.id !== state.selectedBoxId) {
+          correct.lift = Math.min(72, correct.lift + 5);
+        }
+
+        if (ts - state.phaseStartedAt > 1050) {
+          if (state.result === "correct") {
+            nextRound();
+          } else {
+            gameOver();
+          }
+        }
+      }
+
+      for (const box of boxes) {
+        if (state.phase !== "reveal") {
+          box.lift = Math.max(0, box.lift - 6);
+        }
+      }
+    }
+
+    function updateEddie(dt) {
+      if (eddie.happyFlash > 0) eddie.happyFlash -= dt;
+      if (eddie.sadFlash > 0) eddie.sadFlash -= dt;
+      if (eddie.happyFlash <= 0) eddie.tongue = false;
+    }
+
+    function pickBox(id) {
+      if (!state.running || state.phase !== "pick") return;
+
+      state.selectedBoxId = id;
+
+      if (id === state.correctBoxId) {
+        state.result = "correct";
+        eddie.happyFlash = 0.55;
+        eddie.tongue = true;
+
+        const correctBox = boxes.find(b => b.id === state.correctBoxId);
+        if (correctBox) {
+          spawnParticles(
+            correctBox.x + correctBox.w / 2,
+            correctBox.y + correctBox.h + 22
+          );
+        }
+      } else {
+        state.result = "wrong";
+        eddie.sadFlash = 0.55;
+      }
+
+      setPhase("reveal");
+    }
+
+    function drawBackground() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#eef9ee";
+      ctx.fillRect(0, 400, canvas.width, 140);
+
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, 400);
+      ctx.lineTo(canvas.width, 400);
+      ctx.stroke();
+    }
+
+    function drawTitleLine() {
+      ctx.save();
+      ctx.fillStyle = "rgba(0,0,0,.75)";
+      ctx.font = "700 18px Arial";
+      let text = "";
+
+      if (state.phase === "show") text = "Watch carefully.";
+      if (state.phase === "shuffle") text = "Follow the right box.";
+      if (state.phase === "pick") text = "Pick the box with Eddie’s ball.";
+      if (state.phase === "reveal" && state.result === "correct") text = "Correct.";
+      if (state.phase === "reveal" && state.result === "wrong") text = "Wrong box.";
+
+      ctx.fillText(text, 34, 42);
+      ctx.restore();
+    }
+
+    function drawBallMarker() {
+      if (state.phase !== "show") return;
+
+      const box = boxes.find(b => b.id === state.correctBoxId);
+      if (!box) return;
+
+      const cx = box.x + box.w / 2;
+      const cy = box.y + box.h + 22;
+
+      ctx.save();
+      ctx.fillStyle = "#b01fa5";
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 2;
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(cx - 7, cy);
+      ctx.lineTo(cx + 7, cy);
+      ctx.moveTo(cx, cy - 7);
+      ctx.lineTo(cx, cy + 7);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawBoxes() {
+      for (const box of boxes) {
+        const isHovered = state.phase === "pick" && state.hoverBoxId === box.id;
+        const isSelected = state.selectedBoxId === box.id;
+        const isCorrect = state.phase === "reveal" && state.correctBoxId === box.id;
+
+        const x = box.x;
+        const y = box.y - box.lift;
+
+        ctx.save();
+
+        const cx = x + box.w / 2;
+        const cy = y + box.h / 2;
+
+        let tilt = 0;
+        if (state.phase === "shuffle" && state.activeSwap) {
+          if (box.id === state.activeSwap.aId) {
+            tilt = -0.06;
+          } else if (box.id === state.activeSwap.bId) {
+            tilt = 0.06;
+          }
+        }
+
+        ctx.translate(cx, cy);
+        ctx.rotate(tilt);
+        ctx.translate(-cx, -cy);
+
+        ctx.fillStyle = isHovered ? "#f8f8f8" : "#ffffff";
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 3;
+        roundRect(ctx, x, y, box.w, box.h, 12, true, true);
+
+        ctx.beginPath();
+        ctx.moveTo(x + 14, y + 20);
+        ctx.lineTo(x + box.w - 14, y + 20);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x + box.w / 2, y + 20);
+        ctx.lineTo(x + box.w / 2, y + box.h - 14);
+        ctx.stroke();
+
+        if (isSelected && state.phase === "reveal") {
+          ctx.strokeStyle = state.result === "correct" ? "#0f9d58" : "#d92d20";
+          ctx.lineWidth = 4;
+          roundRect(ctx, x - 4, y - 4, box.w + 8, box.h + 8, 14, false, true);
+        }
+
+        if (isCorrect) {
+          const ballX = x + box.w / 2;
+          const ballY = y + box.h + 22;
+
+          ctx.fillStyle = "#b01fa5";
+          ctx.strokeStyle = "#000";
+          ctx.lineWidth = 2;
+
+          ctx.beginPath();
+          ctx.arc(ballX, ballY, 14, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.moveTo(ballX - 7, ballY);
+          ctx.lineTo(ballX + 7, ballY);
+          ctx.moveTo(ballX, ballY - 7);
+          ctx.lineTo(ballX, ballY + 7);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+    }
+
+    function drawEddie() {
+      ctx.save();
+      ctx.translate(eddie.x, eddie.y);
+
+      const targetDir = eddie.lookTargetX >= eddie.x ? 1 : -1;
+      if (targetDir < 0) {
+        ctx.scale(-1, 1);
+      }
+
+      const isHappy = eddie.happyFlash > 0;
+      const isSad = eddie.sadFlash > 0;
+
+      if (isSad) {
+        ctx.rotate(0.08);
+      }
+
+      const fillColor = isHappy
+        ? "#f0dcff"
+        : isSad
+        ? "#ffe6e3"
+        : "#fff";
+
+      // tail
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(-42, -4);
+      ctx.quadraticCurveTo(-62, -16, -56, -38);
+      ctx.stroke();
+
+      // body
+      ctx.fillStyle = fillColor;
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 4;
+      roundRect(ctx, -38, -34, 78, 40, 14, true, true);
+
+      // black patch on back
+      ctx.fillStyle = "#000";
+      ctx.beginPath();
+      ctx.arc(-8, -16, 12, 0, Math.PI * 2);
+      ctx.fill();
+
+      // short legs
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(-18, 6); ctx.lineTo(-18, 18);
+      ctx.moveTo(-2, 6); ctx.lineTo(-2, 18);
+      ctx.moveTo(14, 6); ctx.lineTo(14, 18);
+      ctx.stroke();
+
+      // neck
+      ctx.beginPath();
+      ctx.moveTo(22, -16);
+      ctx.lineTo(34, -30);
+      ctx.stroke();
+
+      // head
+      ctx.fillStyle = "#fff";
+      roundRect(ctx, 24, -62, 46, 38, 14, true, true);
+
+      // black ears
+      ctx.fillStyle = "#000";
+
+      if (isSad) {
+        ctx.beginPath();
+        ctx.moveTo(31, -58);
+        ctx.lineTo(27, -38);
+        ctx.lineTo(40, -54);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(58, -58);
+        ctx.lineTo(62, -38);
+        ctx.lineTo(49, -54);
+        ctx.fill();
+        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        ctx.moveTo(32, -56);
+        ctx.lineTo(24, -82);
+        ctx.lineTo(40, -62);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(58, -56);
+        ctx.lineTo(66, -82);
+        ctx.lineTo(50, -62);
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      // eye mask
+      ctx.beginPath();
+      ctx.arc(41, -45, 11, 0, Math.PI * 2);
+      ctx.arc(58, -45, 11, 0, Math.PI * 2);
+      ctx.fill();
+
+      // eyes
+      if (isSad) {
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(37, -45); ctx.lineTo(45, -45);
+        ctx.moveTo(54, -45); ctx.lineTo(62, -45);
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.arc(41, -45, 2, 0, Math.PI * 2);
+        ctx.arc(58, -45, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // nose
+      ctx.fillStyle = "#000";
+      ctx.beginPath();
+      ctx.arc(68, -37, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // mouth / tongue
+      if (isHappy) {
+        ctx.fillStyle = "#b01fa5";
+        roundRect(ctx, 60, -29, 10, 14, 5, true, true);
+
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(57, -30);
+        ctx.quadraticCurveTo(64, -22, 71, -30);
+        ctx.stroke();
+      } else if (isSad) {
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(59, -24);
+        ctx.quadraticCurveTo(64, -30, 69, -24);
+        ctx.stroke();
+      } else {
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(59, -28);
+        ctx.quadraticCurveTo(64, -23, 69, -28);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function roundRect(ctxRef, x, y, width, height, radius, fill, stroke) {
+      ctxRef.beginPath();
+      ctxRef.moveTo(x + radius, y);
+      ctxRef.lineTo(x + width - radius, y);
+      ctxRef.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctxRef.lineTo(x + width, y + height - radius);
+      ctxRef.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctxRef.lineTo(x + radius, y + height);
+      ctxRef.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctxRef.lineTo(x, y + radius);
+      ctxRef.quadraticCurveTo(x, y, x + radius, y);
+      ctxRef.closePath();
+
+      if (fill) ctxRef.fill();
+      if (stroke) ctxRef.stroke();
+    }
+
+    function easeInOutQuad(t) {
+      return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    }
+
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
+
+    function loop(ts) {
+      if (!state.lastTs) state.lastTs = ts;
+      const dt = Math.min(0.033, (ts - state.lastTs) / 1000);
+      state.lastTs = ts;
+
+      drawBackground();
+      drawTitleLine();
+      updateBoxes(ts);
+      updateEddie(dt);
+      updateParticles(dt);
+      drawBallMarker();
+      drawBoxes();
+      drawParticles();
+      drawEddie();
+
+      requestAnimationFrame(loop);
+    }
+
+    canvas.addEventListener("mousemove", (e) => {
+      if (state.phase !== "pick") {
+        state.hoverBoxId = null;
+        return;
+      }
+
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = (e.clientX - rect.left) * scaleX;
+      const y = (e.clientY - rect.top) * scaleY;
+
+      state.hoverBoxId = null;
+      for (const box of boxes) {
+        const bx = box.x;
+        const by = box.y - box.lift;
+        if (x >= bx && x <= bx + box.w && y >= by && y <= by + box.h) {
+          state.hoverBoxId = box.id;
+          break;
+        }
+      }
+    });
+
+    canvas.addEventListener("click", () => {
+      if (state.phase !== "pick" || state.hoverBoxId === null) return;
+      pickBox(state.hoverBoxId);
+    });
+
+    startBtn.addEventListener("click", startGame);
+    restartBtn.addEventListener("click", startGame);
+    restartTop.addEventListener("click", resetGame);
+
+    updateHud();
+    resetGame();
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
+
+```
+Rotation drin.
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Play with Eddie</title>
