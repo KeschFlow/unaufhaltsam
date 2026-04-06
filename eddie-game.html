@@ -1,14 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>Hier ist der vollständige Code mit der neuen **Rotations-Logik** in der drawBoxes-Funktion. Die Kisten neigen sich jetzt während des Shuffles leicht gegeneinander, was die Bewegung deutlich natürlicher und weniger statisch wirken lässt.
-```html
-<!DOCTYPE html>
-<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Where’s Eddie’s Ball?</title>
-  <meta name="description" content="Find Eddie’s ball under the right box. Higher score wins." />
+  <title>Eddie Game | Unaufhaltsam</title>
   <style>
     :root{
       --black:#000;
@@ -21,246 +16,76 @@
       --shadow:rgba(0,0,0,.08);
     }
 
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-      font-family:Arial, Helvetica, sans-serif;
-    }
+    *{ margin:0; padding:0; box-sizing:border-box; font-family:Arial, Helvetica, sans-serif; }
 
-    body{
-      background:var(--bg);
-      color:var(--black);
-      min-height:100vh;
-      padding:20px 14px 40px;
-    }
+    body{ background:var(--bg); color:var(--black); min-height:100vh; padding:20px 14px 40px; }
 
-    .wrap{
-      width:100%;
-      max-width:980px;
-      margin:0 auto;
-      display:flex;
-      flex-direction:column;
-      gap:18px;
-    }
+    .wrap{ width:100%; max-width:980px; margin:0 auto; display:flex; flex-direction:column; gap:18px; }
 
-    .topbar{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      flex-wrap:wrap;
-    }
+    .topbar{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
 
-    .title h1{
-      font-size:clamp(28px, 5vw, 52px);
-      line-height:1;
-      margin-bottom:8px;
-      font-weight:900;
-      letter-spacing:-0.8px;
-    }
+    .title h1{ font-size:clamp(28px, 5vw, 52px); line-height:1; margin-bottom:8px; font-weight:900; letter-spacing:-0.8px; }
 
-    .title p{
-      font-size:14px;
-      opacity:.75;
-    }
+    .title p{ font-size:14px; opacity:.75; }
 
-    .actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
+    .btn{ appearance:none; border:none; background:#000; color:#fff; padding:14px 18px; border-radius:14px; font-weight:900; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; min-width:180px; transition:transform .15s ease, opacity .15s ease; }
 
-    .btn{
-      appearance:none;
-      border:none;
-      background:#000;
-      color:#fff;
-      padding:14px 18px;
-      border-radius:14px;
-      font-weight:900;
-      cursor:pointer;
-      text-decoration:none;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-width:180px;
-      transition:transform .15s ease, opacity .15s ease;
-    }
+    .btn:hover{ transform:translateY(-1px); opacity:.94; }
 
-    .btn:hover{
-      transform:translateY(-1px);
-      opacity:.94;
-    }
+    .btn.alt{ background:#fff; color:#000; border:2px solid #000; }
 
-    .btn.alt{
-      background:#fff;
-      color:#000;
-      border:2px solid #000;
-    }
+    .hud{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px; }
 
-    .hud{
-      display:grid;
-      grid-template-columns:repeat(4, minmax(0,1fr));
-      gap:12px;
-    }
+    .stat{ border:2px solid #000; border-radius:18px; padding:14px 12px; background:#fff; text-align:center; }
 
-    .stat{
-      border:2px solid #000;
-      border-radius:18px;
-      padding:14px 12px;
-      background:#fff;
-      text-align:center;
-    }
+    .stat .label{ font-size:12px; opacity:.7; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
 
-    .stat .label{
-      font-size:12px;
-      opacity:.7;
-      text-transform:uppercase;
-      letter-spacing:1px;
-      margin-bottom:6px;
-    }
+    .stat .value{ font-size:clamp(22px, 4vw, 34px); font-weight:900; line-height:1; }
 
-    .stat .value{
-      font-size:clamp(22px, 4vw, 34px);
-      font-weight:900;
-      line-height:1;
-    }
+    .value.good{ color:var(--purpur); }
 
-    .value.good{ color:var(--green); }
-    .value.bad{ color:var(--red); }
-
-    .game-shell{
-      position:relative;
-      width:100%;
-      background:#fff;
-      border:2px solid #000;
-      border-radius:24px;
-      overflow:hidden;
-      box-shadow:0 10px 30px var(--shadow);
-    }
+    .game-shell{ position:relative; width:100%; background:#fff; border:2px solid #000; border-radius:24px; overflow:hidden; box-shadow:0 10px 30px var(--shadow); }
 
     canvas{
       display:block;
       width:100%;
       height:auto;
-      background:
-        linear-gradient(to bottom, #ffffff 0%, #ffffff 72%, var(--grass) 72%, var(--grass) 100%);
+      cursor:default;
+      background:linear-gradient(to bottom, #ffffff 0%, #ffffff 72%, var(--grass) 72%, var(--grass) 100%);
     }
 
-    .overlay{
-      position:absolute;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:20px;
-      background:rgba(255,255,255,.9);
-      text-align:center;
-    }
+    .overlay{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(255,255,255,.9); text-align:center; z-index: 100;}
 
-    .overlay.hidden{
-      display:none;
-    }
+    .overlay.hidden{ display:none; }
 
-    .card{
-      width:min(100%, 560px);
-      background:#fff;
-      border:2px solid #000;
-      border-radius:22px;
-      padding:24px 18px;
-      box-shadow:0 10px 30px rgba(0,0,0,.08);
-    }
+    .card{ width:min(100%, 560px); background:#fff; border:2px solid #000; border-radius:22px; padding:24px 18px; box-shadow:0 10px 30px rgba(0,0,0,.08); }
 
-    .card h2{
-      font-size:clamp(24px, 4vw, 36px);
-      margin-bottom:12px;
-      line-height:1.05;
-    }
+    .card h2{ font-size:clamp(24px, 4vw, 36px); margin-bottom:12px; line-height:1.05; }
 
-    .card p{
-      font-size:15px;
-      line-height:1.45;
-      opacity:.8;
-      margin-bottom:14px;
-    }
+    .card p{ font-size:15px; line-height:1.45; opacity:.8; margin-bottom:14px; }
 
-    .card .big{
-      font-size:38px;
-      font-weight:900;
-      margin:10px 0 14px;
-    }
+    .bottom-note{ text-align:center; font-size:13px; opacity:.65; line-height:1.4; }
 
-    .legend{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top:6px;
-      justify-content:center;
-    }
-
-    .pill{
-      border:2px solid #000;
-      border-radius:999px;
-      padding:8px 12px;
-      font-size:12px;
-      font-weight:700;
-      background:#fff;
-    }
-
-    .bottom-note{
-      text-align:center;
-      font-size:13px;
-      opacity:.65;
-      line-height:1.4;
-    }
-
-    @media (max-width:720px){
-      .hud{
-        grid-template-columns:repeat(2, minmax(0,1fr));
-      }
-
-      .btn{
-        width:100%;
-      }
-
-      .actions{
-        width:100%;
-      }
-    }
+    @media (max-width:720px){ .hud{ grid-template-columns:repeat(2, minmax(0,1fr)); } .btn{ width:100%; } }
   </style>
 </head>
 <body>
   <main class="wrap">
     <div class="topbar">
       <div class="title">
-        <h1>Where’s Eddie’s Ball?</h1>
-        <p>Watch carefully. Pick the right box. One mistake and the run is over.</p>
+        <h1>UNAUFHALTSAM</h1>
+        <p>Watch carefully. Find the focus.</p>
       </div>
-
       <div class="actions">
-        <a class="btn alt" href="index.html">← Back</a>
-        <button class="btn" id="restartTop">Restart Game</button>
+        <button class="btn" id="restartTop">Reset</button>
       </div>
     </div>
 
     <section class="hud">
-      <div class="stat">
-        <div class="label">Score</div>
-        <div class="value good" id="scoreValue">0</div>
-      </div>
-      <div class="stat">
-        <div class="label">Round</div>
-        <div class="value" id="roundValue">1</div>
-      </div>
-      <div class="stat">
-        <div class="label">Boxes</div>
-        <div class="value" id="boxValue">2</div>
-      </div>
-      <div class="stat">
-        <div class="label">Best</div>
-        <div class="value" id="bestValue">0</div>
-      </div>
+      <div class="stat"><div class="label">Score</div><div class="value good" id="scoreValue">0</div></div>
+      <div class="stat"><div class="label">Round</div><div class="value" id="roundValue">1</div></div>
+      <div class="stat"><div class="label">Boxes</div><div class="value" id="boxValue">2</div></div>
+      <div class="stat"><div class="label">Best</div><div class="value" id="bestValue">0</div></div>
     </section>
 
     <section class="game-shell">
@@ -268,49 +93,23 @@
 
       <div class="overlay" id="startOverlay">
         <div class="card">
-          <h2>Find Eddie’s Ball</h2>
-          <p>
-            Eddie shows you where the ball is.<br>
-            Then the boxes shuffle.
-          </p>
-          <p>
-            Click the correct box.<br>
-            Every correct choice gives you 1 point and adds more difficulty.
-          </p>
-          <p>
-            One wrong pick = game over.
-          </p>
-          <div class="legend">
-            <div class="pill">✅ Right box = +1</div>
-            <div class="pill">📦 More boxes over time</div>
-            <div class="pill">⚡ Faster shuffle later</div>
-          </div>
-          <div style="margin-top:18px;">
-            <button class="btn" id="startBtn">Start Game</button>
-          </div>
+          <h2>Find Eddie’s Focus</h2>
+          <p>Follow the "UNAUFHALTSAM" ring. Don't lose focus.</p>
+          <div style="margin-top:18px;"><button class="btn" id="startBtn">Start Game</button></div>
         </div>
       </div>
 
       <div class="overlay hidden" id="gameOverOverlay">
         <div class="card">
           <h2>Game Over</h2>
-          <p>You picked the wrong box.</p>
-          <div class="big" id="finalScore">Score: 0</div>
+          <div style="font-size:38px; font-weight:900; margin:10px 0; color:var(--purpur);" id="finalScore">Score: 0</div>
           <p id="bestLine">Best run: 0</p>
-          <div class="legend">
-            <div class="pill">Highest monthly score can win access</div>
-          </div>
-          <div style="margin-top:18px;">
-            <button class="btn" id="restartBtn">Play Again</button>
-          </div>
+          <button class="btn" id="restartBtn">Play Again</button>
         </div>
       </div>
     </section>
 
-    <div class="bottom-note">
-      Eddie watches the boxes. You follow Eddie.<br>
-      First nail the game feel. Leaderboard comes after that.
-    </div>
+    <div class="bottom-note">Eddie watches the boxes. You follow Eddie.</div>
   </main>
 
   <script>
@@ -333,1443 +132,370 @@
     const BEST_KEY = "eddieBoxBest_v1";
 
     const state = {
-      running: false,
-      score: 0,
-      round: 1,
+      running: false, 
+      score: 0, 
+      round: 1, 
       boxCount: 2,
       best: Number(localStorage.getItem(BEST_KEY) || 0),
-      phase: "idle", // idle, show, shuffle, pick, reveal, gameover
+      phase: "idle", 
       phaseStartedAt: 0,
-      selectedBoxId: null,
-      correctBoxId: null,
+      selectedBoxId: null, 
+      correctBoxId: null, 
       hoverBoxId: null,
-      result: null, // correct / wrong
-      showBallTime: 1400,
+      result: null, 
+      showBallTime: 1400, 
       shuffleDuration: 2200,
-      swapsRemaining: 0,
-      activeSwap: null,
+      swapsRemaining: 0, 
+      activeSwap: null, 
       lastTs: 0
     };
 
-    const eddie = {
-      x: 145,
-      y: 415,
-      lookTargetX: 0,
-      tongue: false,
-      happyFlash: 0,
-      sadFlash: 0
-    };
-
+    const eddie = { x: 145, y: 415, lookTargetX: 0, tongue: false, happyFlash: 0, sadFlash: 0 };
     const boxes = [];
     const particles = [];
 
+    // --- HELPER ---
+    function nowMs() { return performance.now(); }
+    function setPhase(next) { state.phase = next; state.phaseStartedAt = nowMs(); }
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function easeInOutQuad(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+    
+    function roundRect(c, x, y, w, h, r, f, s) {
+      c.beginPath(); 
+      c.moveTo(x+r, y); 
+      c.lineTo(x+w-r, y); 
+      c.quadraticCurveTo(x+w, y, x+w, y+r); 
+      c.lineTo(x+w, y+h-r); 
+      c.quadraticCurveTo(x+w, y+h, x+w-r, y+h); 
+      c.lineTo(x+r, y+h); 
+      c.quadraticCurveTo(x, y+h, x, y+h-r); 
+      c.lineTo(x, y+r); 
+      c.quadraticCurveTo(x, y, x+r, y); 
+      c.closePath();
+      if (f) c.fill(); if (s) c.stroke();
+    }
+
+    // --- TYPO-BALL ---
+    function drawTextCircle(text, cx, cy, radius) {
+      const chars = text.split("");
+      const angleStep = (Math.PI * 2) / chars.length;
+      const rotationSpeed = performance.now() / 6000;
+      ctx.save();
+      ctx.fillStyle = "#b01fa5";
+      ctx.font = "900 8px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      chars.forEach((char, i) => {
+        const angle = i * angleStep - Math.PI / 2 + rotationSpeed;
+        const x = cx + Math.cos(angle) * radius;
+        const y = cy + Math.sin(angle) * radius;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle + Math.PI / 2);
+        ctx.fillText(char, 0, 0);
+        ctx.restore();
+      });
+      ctx.restore();
+    }
+
+    // --- PARTICLES ---
     function spawnParticles(x, y) {
       for (let i = 0; i < 14; i++) {
-        particles.push({
-          x,
-          y,
-          vx: (Math.random() - 0.5) * 5,
-          vy: -Math.random() * 4 - 1,
-          life: 1,
-          size: Math.random() * 4 + 2
+        particles.push({ 
+          x, y, 
+          vx: (Math.random() - 0.5) * 5, 
+          vy: -Math.random() * 4 - 1, 
+          life: 1, 
+          size: Math.random() * 4 + 2 
         });
       }
     }
 
     function updateParticles(dt) {
       for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.x += p.vx * 60 * dt;
-        p.y += p.vy * 60 * dt;
-        p.vy += 0.12;
+        const p = particles[i]; 
+        p.x += p.vx * 60 * dt; 
+        p.y += p.vy * 60 * dt; 
+        p.vy += 0.12; 
         p.life -= 1.8 * dt;
-
-        if (p.life <= 0) {
-          particles.splice(i, 1);
-        }
+        if (p.life <= 0) particles.splice(i, 1);
       }
     }
 
     function drawParticles() {
       for (const p of particles) {
-        ctx.save();
-        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.save(); 
+        ctx.globalAlpha = Math.max(0, p.life); 
         ctx.fillStyle = "#b01fa5";
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.beginPath(); 
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); 
+        ctx.fill(); 
         ctx.restore();
       }
     }
 
-    function nowMs() {
-      return performance.now();
-    }
-
-    function setPhase(next) {
-      state.phase = next;
-      state.phaseStartedAt = nowMs();
-    }
-
-    function updateHud() {
-      scoreValue.textContent = state.score;
-      roundValue.textContent = state.round;
-      boxValue.textContent = state.boxCount;
-      bestValue.textContent = state.best;
-    }
-
-    function resetGame() {
-      state.running = false;
-      state.score = 0;
-      state.round = 1;
-      state.boxCount = 2;
-      state.selectedBoxId = null;
-      state.correctBoxId = null;
-      state.hoverBoxId = null;
-      state.result = null;
-      state.lastTs = 0;
-
-      eddie.tongue = false;
-      eddie.happyFlash = 0;
-      eddie.sadFlash = 0;
-
-      buildRound();
-      updateHud();
-
-      gameOverOverlay.classList.add("hidden");
-      startOverlay.classList.remove("hidden");
-    }
-
-    function startGame() {
-      state.running = true;
-      state.score = 0;
-      state.round = 1;
-      state.boxCount = 2;
-      state.selectedBoxId = null;
-      state.correctBoxId = null;
-      state.hoverBoxId = null;
-      state.result = null;
-      state.lastTs = 0;
-
-      eddie.tongue = false;
-      eddie.happyFlash = 0;
-      eddie.sadFlash = 0;
-
-      buildRound();
-      updateHud();
-
-      startOverlay.classList.add("hidden");
-      gameOverOverlay.classList.add("hidden");
-    }
-
-    function gameOver() {
-      state.running = false;
-      setPhase("gameover");
-
-      if (state.score > state.best) {
-        state.best = state.score;
-        localStorage.setItem(BEST_KEY, String(state.best));
-      }
-
-      updateHud();
-      finalScore.textContent = `Score: ${state.score}`;
-      bestLine.textContent = `Best run: ${state.best}`;
-      gameOverOverlay.classList.remove("hidden");
-    }
-
-    function nextRound() {
-      state.score += 1;
-      state.round += 1;
-      state.boxCount = Math.min(8, 2 + Math.floor(state.score / 1));
-      eddie.happyFlash = 0.55;
-      eddie.tongue = true;
-      buildRound();
-      updateHud();
-    }
-
+    // --- GAME LOGIC ---
     function buildRound() {
-      boxes.length = 0;
-      state.selectedBoxId = null;
-      state.result = null;
-      state.hoverBoxId = null;
+      boxes.length = 0; 
       state.activeSwap = null;
-
-      const count = state.boxCount;
+      const count = state.boxCount; 
+      const boxW = 92; 
       const spacing = 20;
-      const boxW = 92;
-      const boxH = 92;
       const totalW = count * boxW + (count - 1) * spacing;
-      const startX = (canvas.width - totalW) / 2;
+      const startX = (canvas.width - totalW) / 2; 
       const baseY = 315;
-
+      
       for (let i = 0; i < count; i++) {
-        boxes.push({
-          id: i,
-          x: startX + i * (boxW + spacing),
-          y: baseY,
-          w: boxW,
-          h: boxH,
-          targetX: startX + i * (boxW + spacing),
-          lift: 0
-        });
+        boxes.push({ id: i, x: startX + i * (boxW + spacing), y: baseY, w: boxW, h: 92, lift: 0 });
       }
-
       state.correctBoxId = Math.floor(Math.random() * count);
-      eddie.lookTargetX = boxes[state.correctBoxId].x + boxes[state.correctBoxId].w / 2;
-      state.showBallTime = Math.max(700, 1400 - state.score * 45);
-      state.shuffleDuration = Math.max(900, 2200 - state.score * 70);
+      eddie.lookTargetX = boxes[state.correctBoxId].x + 46;
+      
+      state.shuffleDuration = Math.max(1200, 2400 - state.score * 55);
       state.swapsRemaining = Math.max(4, 4 + Math.floor(count * 1.4));
       setPhase("show");
     }
 
     function startNextSwap() {
-      if (state.swapsRemaining <= 0) {
-        state.activeSwap = null;
-        setPhase("pick");
-        return;
-      }
-
+      if (state.swapsRemaining <= 0) { state.activeSwap = null; setPhase("pick"); return; }
       let a = Math.floor(Math.random() * boxes.length);
       let b = Math.floor(Math.random() * boxes.length);
-
-      while (b === a) {
-        b = Math.floor(Math.random() * boxes.length);
-      }
-
-      const boxA = boxes[a];
-      const boxB = boxes[b];
-
-      const MIN_SWAP_DURATION = 180;
-      const calculatedDuration = Math.max(
-        MIN_SWAP_DURATION,
-        state.shuffleDuration / Math.max(4, state.swapsRemaining)
-      );
-
-      const isFakeSwap = state.score >= 3 && Math.random() < 0.22;
-
-      state.activeSwap = {
-        aId: boxA.id,
-        bId: boxB.id,
-        aStartX: boxA.x,
-        bStartX: boxB.x,
-        aTargetX: boxB.x,
-        bTargetX: boxA.x,
-        start: nowMs(),
-        duration: calculatedDuration,
-        fake: isFakeSwap
+      while (b === a) b = Math.floor(Math.random() * boxes.length);
+      
+      const isFake = state.score >= 3 && Math.random() < 0.22;
+      state.activeSwap = { 
+        aId: boxes[a].id, bId: boxes[b].id, 
+        aStartX: boxes[a].x, bStartX: boxes[b].x, 
+        aTargetX: boxes[b].x, bTargetX: boxes[a].x, 
+        start: nowMs(), 
+        duration: Math.max(260, state.shuffleDuration / 5.2), 
+        fake: isFake 
       };
-
-      state.swapsRemaining -= 1;
+      state.swapsRemaining--;
     }
 
     function updateBoxes(ts) {
-      if (state.phase === "show") {
-        if (ts - state.phaseStartedAt > state.showBallTime) {
-          setPhase("shuffle");
-          startNextSwap();
-        }
-      } else if (state.phase === "shuffle") {
-        if (!state.activeSwap) {
-          startNextSwap();
-          return;
-        }
-
-        const swap = state.activeSwap;
+      if (state.phase === "show" && ts - state.phaseStartedAt > state.showBallTime) { 
+        setPhase("shuffle"); 
+        startNextSwap(); 
+      }
+      else if (state.phase === "shuffle") {
+        if (!state.activeSwap) { startNextSwap(); return; }
+        const swap = state.activeSwap; 
         const p = Math.min(1, (ts - swap.start) / swap.duration);
-        const eased = easeInOutQuad(p);
-
-        const boxA = boxes.find(b => b.id === swap.aId);
+        const boxA = boxes.find(b => b.id === swap.aId); 
         const boxB = boxes.find(b => b.id === swap.bId);
-
         const baseY = 315;
 
         if (swap.fake) {
-          const fakeProgress = Math.sin(p * Math.PI);
-          const midAX = (swap.aStartX + swap.aTargetX) / 2;
-          const midBX = (swap.bStartX + swap.bTargetX) / 2;
-
-          boxA.x = lerp(swap.aStartX, midAX, fakeProgress);
-          boxB.x = lerp(swap.bStartX, midBX, fakeProgress);
-
-          boxA.y = baseY - Math.sin(p * Math.PI) * 28;
-          boxB.y = baseY + Math.sin(p * Math.PI) * 8;
+          const fP = Math.sin(p * Math.PI);
+          boxA.x = lerp(swap.aStartX, (swap.aStartX + swap.aTargetX) / 2, fP);
+          boxB.x = lerp(swap.bStartX, (swap.bStartX + swap.bTargetX) / 2, fP);
+          boxA.y = baseY - fP * 28; 
+          boxB.y = baseY + fP * 8;
         } else {
+          const eased = easeInOutQuad(p);
           boxA.x = lerp(swap.aStartX, swap.aTargetX, eased);
           boxB.x = lerp(swap.bStartX, swap.bTargetX, eased);
-
-          boxA.y = baseY - Math.sin(p * Math.PI) * 40;
+          boxA.y = baseY - Math.sin(p * Math.PI) * 40; 
           boxB.y = baseY + Math.sin(p * Math.PI) * 10;
         }
 
         if (p >= 1) {
-          boxA.y = baseY;
-          boxB.y = baseY;
-
+          boxA.y = baseY; boxB.y = baseY;
           if (!swap.fake) {
-            if (state.correctBoxId === boxA.id) {
-              state.correctBoxId = boxB.id;
-            } else if (state.correctBoxId === boxB.id) {
-              state.correctBoxId = boxA.id;
-            }
+            if (state.correctBoxId === boxA.id) state.correctBoxId = boxB.id;
+            else if (state.correctBoxId === boxB.id) state.correctBoxId = boxA.id;
           }
-
           state.activeSwap = null;
         }
-      } else if (state.phase === "reveal") {
+      } 
+      else if (state.phase === "reveal") {
         const chosen = boxes.find(b => b.id === state.selectedBoxId);
         const correct = boxes.find(b => b.id === state.correctBoxId);
-
         if (chosen) chosen.lift = Math.min(72, chosen.lift + 5);
-        if (correct && correct.id !== state.selectedBoxId) {
-          correct.lift = Math.min(72, correct.lift + 5);
-        }
-
+        if (correct && correct.id !== state.selectedBoxId) correct.lift = Math.min(72, correct.lift + 5);
+        
         if (ts - state.phaseStartedAt > 1050) {
-          if (state.result === "correct") {
-            nextRound();
-          } else {
-            gameOver();
+          if (state.result === "correct") { 
+            state.score++; 
+            state.round++; 
+            state.boxCount = Math.min(8, 2 + Math.floor(state.score/1.5)); 
+            eddie.happyFlash = 0.55; 
+            buildRound(); 
+            updateHud(); 
           }
+          else gameOver();
         }
       }
-
-      for (const box of boxes) {
-        if (state.phase !== "reveal") {
-          box.lift = Math.max(0, box.lift - 6);
-        }
-      }
+      boxes.forEach(b => { if (state.phase !== "reveal") b.lift = Math.max(0, b.lift - 6); });
     }
 
-    function updateEddie(dt) {
-      if (eddie.happyFlash > 0) eddie.happyFlash -= dt;
-      if (eddie.sadFlash > 0) eddie.sadFlash -= dt;
-      if (eddie.happyFlash <= 0) eddie.tongue = false;
+    function updateEddie(dt) { 
+      if (eddie.happyFlash > 0) eddie.happyFlash -= dt; 
+      if (eddie.sadFlash > 0) eddie.sadFlash -= dt; 
+      eddie.tongue = eddie.happyFlash > 0; 
     }
 
     function pickBox(id) {
       if (!state.running || state.phase !== "pick") return;
-
       state.selectedBoxId = id;
-
       if (id === state.correctBoxId) {
-        state.result = "correct";
-        eddie.happyFlash = 0.55;
+        state.result = "correct"; 
+        eddie.happyFlash = 0.55; 
         eddie.tongue = true;
-
-        const correctBox = boxes.find(b => b.id === state.correctBoxId);
-        if (correctBox) {
-          spawnParticles(
-            correctBox.x + correctBox.w / 2,
-            correctBox.y + correctBox.h + 22
-          );
-        }
-      } else {
-        state.result = "wrong";
-        eddie.sadFlash = 0.55;
+        spawnParticles(boxes.find(b => b.id === id).x + 46, boxes.find(b => b.id === id).y + 114);
+      } else { 
+        state.result = "wrong"; 
+        eddie.sadFlash = 0.55; 
       }
-
       setPhase("reveal");
     }
 
-    function drawBackground() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.fillStyle = "#eef9ee";
-      ctx.fillRect(0, 400, canvas.width, 140);
-
-      ctx.strokeStyle = "#000";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(0, 400);
-      ctx.lineTo(canvas.width, 400);
-      ctx.stroke();
-    }
-
-    function drawTitleLine() {
-      ctx.save();
-      ctx.fillStyle = "rgba(0,0,0,.75)";
-      ctx.font = "700 18px Arial";
-      let text = "";
-
-      if (state.phase === "show") text = "Watch carefully.";
-      if (state.phase === "shuffle") text = "Follow the right box.";
-      if (state.phase === "pick") text = "Pick the box with Eddie’s ball.";
-      if (state.phase === "reveal" && state.result === "correct") text = "Correct.";
-      if (state.phase === "reveal" && state.result === "wrong") text = "Wrong box.";
-
-      ctx.fillText(text, 34, 42);
-      ctx.restore();
-    }
-
+    // --- DRAWING ---
     function drawBallMarker() {
       if (state.phase !== "show") return;
-
       const box = boxes.find(b => b.id === state.correctBoxId);
       if (!box) return;
+      const cx = box.x + box.w / 2; const cy = box.y + box.h + 22;
+      drawTextCircle("UNAUFHALTSAM • ", cx, cy, 16);
+    }
 
-      const cx = box.x + box.w / 2;
-      const cy = box.y + box.h + 22;
-
-      ctx.save();
-      ctx.fillStyle = "#b01fa5";
-      ctx.strokeStyle = "#000";
-      ctx.lineWidth = 2;
-
-      ctx.beginPath();
-      ctx.arc(cx, cy, 14, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(cx - 7, cy);
-      ctx.lineTo(cx + 7, cy);
-      ctx.moveTo(cx, cy - 7);
-      ctx.lineTo(cx, cy + 7);
-      ctx.stroke();
+    function drawEddie() {
+      ctx.save(); ctx.translate(eddie.x, eddie.y);
+      const isHappy = eddie.happyFlash > 0; const isSad = eddie.sadFlash > 0;
+      if (isSad) ctx.rotate(0.08);
+      
+      ctx.fillStyle = isHappy ? "#f0dcff" : isSad ? "#ffe6e3" : "#fff";
+      ctx.strokeStyle = "#000"; ctx.lineWidth = 4;
+      
+      // Tail
+      ctx.beginPath(); ctx.moveTo(-42,-4); ctx.quadraticCurveTo(-62,-16,-56,-38); ctx.stroke();
+      // Body
+      roundRect(ctx, -38, -34, 78, 40, 14, true, true);
+      // Patch
+      ctx.fillStyle = "#000"; ctx.beginPath(); ctx.arc(-8, -16, 12, 0, Math.PI * 2); ctx.fill();
+      // Legs
+      ctx.beginPath(); ctx.moveTo(-18, 6); ctx.lineTo(-18, 18); ctx.moveTo(-2, 6); ctx.lineTo(-2, 18); ctx.moveTo(14, 6); ctx.lineTo(14, 18); ctx.stroke();
+      // Head
+      ctx.beginPath(); ctx.moveTo(22,-16); ctx.lineTo(34,-30); ctx.stroke();
+      ctx.fillStyle = "#fff"; roundRect(ctx, 24, -62, 46, 38, 14, true, true);
+      // Ears
+      ctx.fillStyle = "#000";
+      if (isSad) { 
+        ctx.beginPath(); ctx.moveTo(31,-58); ctx.lineTo(27,-38); ctx.lineTo(40,-54); ctx.fill(); 
+        ctx.beginPath(); ctx.moveTo(58,-58); ctx.lineTo(62,-38); ctx.lineTo(49,-54); ctx.fill(); 
+      }
+      else { 
+        ctx.beginPath(); ctx.moveTo(32,-56); ctx.lineTo(24,-82); ctx.lineTo(40,-62); ctx.fill(); 
+        ctx.beginPath(); ctx.moveTo(58,-56); ctx.lineTo(66,-82); ctx.lineTo(50,-62); ctx.fill(); 
+      }
+      // Eyes
+      ctx.beginPath(); ctx.arc(41, -45, 11, 0, Math.PI * 2); ctx.arc(58, -45, 11, 0, Math.PI * 2); ctx.fill();
+      if (isSad) { ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(37,-45); ctx.lineTo(45,-45); ctx.moveTo(54,-45); ctx.lineTo(62,-45); ctx.stroke(); }
+      else { ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(41, -45, 2, 0, Math.PI * 2); ctx.arc(58, -45, 2, 0, Math.PI * 2); ctx.fill(); }
+      // Nose
+      ctx.fillStyle = "#000"; ctx.beginPath(); ctx.arc(68, -37, 4, 0, Math.PI * 2); ctx.fill();
+      // Tongue
+      if (isHappy) { ctx.fillStyle = "#b01fa5"; roundRect(ctx, 60, -29, 10, 14, 5, true, true); }
       ctx.restore();
     }
 
     function drawBoxes() {
-      for (const box of boxes) {
+      boxes.forEach(box => {
         const isHovered = state.phase === "pick" && state.hoverBoxId === box.id;
         const isSelected = state.selectedBoxId === box.id;
         const isCorrect = state.phase === "reveal" && state.correctBoxId === box.id;
-
-        const x = box.x;
-        const y = box.y - box.lift;
-
+        const x = box.x; const y = box.y - box.lift;
         ctx.save();
-
-        const cx = x + box.w / 2;
-        const cy = y + box.h / 2;
-
-        let tilt = 0;
+        const cx = x + box.w / 2; const cy = y + box.h / 2;
+        
+        let tilt = 0; 
         if (state.phase === "shuffle" && state.activeSwap) {
-          if (box.id === state.activeSwap.aId) {
-            tilt = -0.06;
-          } else if (box.id === state.activeSwap.bId) {
-            tilt = 0.06;
-          }
+          if (box.id === state.activeSwap.aId) tilt = -0.06; else if (box.id === state.activeSwap.bId) tilt = 0.06;
         }
-
-        ctx.translate(cx, cy);
-        ctx.rotate(tilt);
-        ctx.translate(-cx, -cy);
-
-        ctx.fillStyle = isHovered ? "#f8f8f8" : "#ffffff";
-        ctx.strokeStyle = "#000";
-        ctx.lineWidth = 3;
+        ctx.translate(cx, cy); ctx.rotate(tilt); ctx.translate(-cx, -cy);
+        
+        // Render Box
+        ctx.fillStyle = isHovered ? "#e9e9e9" : "#fff"; 
+        ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
         roundRect(ctx, x, y, box.w, box.h, 12, true, true);
 
-        ctx.beginPath();
-        ctx.moveTo(x + 14, y + 20);
-        ctx.lineTo(x + box.w - 14, y + 20);
-        ctx.stroke();
+        if (isHovered && state.phase === "pick") {
+          ctx.strokeStyle = "#000"; ctx.lineWidth = 5;
+          roundRect(ctx, x - 4, y - 4, box.w + 8, box.h + 8, 14, false, true);
+        }
 
-        ctx.beginPath();
-        ctx.moveTo(x + box.w / 2, y + 20);
-        ctx.lineTo(x + box.w / 2, y + box.h - 14);
-        ctx.stroke();
-
+        ctx.beginPath(); ctx.moveTo(x + 14, y + 20); ctx.lineTo(x + box.w - 14, y + 20); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x + box.w / 2, y + 20); ctx.lineTo(x + box.w / 2, y + box.h - 14); ctx.stroke();
+        
         if (isSelected && state.phase === "reveal") {
-          ctx.strokeStyle = state.result === "correct" ? "#0f9d58" : "#d92d20";
-          ctx.lineWidth = 4;
+          ctx.strokeStyle = state.result === "correct" ? "#0f9d58" : "#d92d20"; ctx.lineWidth = 4;
           roundRect(ctx, x - 4, y - 4, box.w + 8, box.h + 8, 14, false, true);
         }
 
         if (isCorrect) {
-          const ballX = x + box.w / 2;
-          const ballY = y + box.h + 22;
-
-          ctx.fillStyle = "#b01fa5";
-          ctx.strokeStyle = "#000";
-          ctx.lineWidth = 2;
-
-          ctx.beginPath();
-          ctx.arc(ballX, ballY, 14, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.stroke();
-
-          ctx.beginPath();
-          ctx.moveTo(ballX - 7, ballY);
-          ctx.lineTo(ballX + 7, ballY);
-          ctx.moveTo(ballX, ballY - 7);
-          ctx.lineTo(ballX, ballY + 7);
-          ctx.stroke();
+          drawTextCircle("UNAUFHALTSAM • ", x + box.w/2, y + box.h + 22, 16);
         }
-
         ctx.restore();
-      }
+      });
     }
 
-    function drawEddie() {
-      ctx.save();
-      ctx.translate(eddie.x, eddie.y);
-
-      const targetDir = eddie.lookTargetX >= eddie.x ? 1 : -1;
-      if (targetDir < 0) {
-        ctx.scale(-1, 1);
-      }
-
-      const isHappy = eddie.happyFlash > 0;
-      const isSad = eddie.sadFlash > 0;
-
-      if (isSad) {
-        ctx.rotate(0.08);
-      }
-
-      const fillColor = isHappy
-        ? "#f0dcff"
-        : isSad
-        ? "#ffe6e3"
-        : "#fff";
-
-      // tail
-      ctx.strokeStyle = "#000";
-      ctx.lineWidth = 5;
-      ctx.beginPath();
-      ctx.moveTo(-42, -4);
-      ctx.quadraticCurveTo(-62, -16, -56, -38);
-      ctx.stroke();
-
-      // body
-      ctx.fillStyle = fillColor;
-      ctx.strokeStyle = "#000";
-      ctx.lineWidth = 4;
-      roundRect(ctx, -38, -34, 78, 40, 14, true, true);
-
-      // black patch on back
-      ctx.fillStyle = "#000";
-      ctx.beginPath();
-      ctx.arc(-8, -16, 12, 0, Math.PI * 2);
-      ctx.fill();
-
-      // short legs
-      ctx.strokeStyle = "#000";
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.moveTo(-18, 6); ctx.lineTo(-18, 18);
-      ctx.moveTo(-2, 6); ctx.lineTo(-2, 18);
-      ctx.moveTo(14, 6); ctx.lineTo(14, 18);
-      ctx.stroke();
-
-      // neck
-      ctx.beginPath();
-      ctx.moveTo(22, -16);
-      ctx.lineTo(34, -30);
-      ctx.stroke();
-
-      // head
-      ctx.fillStyle = "#fff";
-      roundRect(ctx, 24, -62, 46, 38, 14, true, true);
-
-      // black ears
-      ctx.fillStyle = "#000";
-
-      if (isSad) {
-        ctx.beginPath();
-        ctx.moveTo(31, -58);
-        ctx.lineTo(27, -38);
-        ctx.lineTo(40, -54);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(58, -58);
-        ctx.lineTo(62, -38);
-        ctx.lineTo(49, -54);
-        ctx.fill();
-        ctx.stroke();
-      } else {
-        ctx.beginPath();
-        ctx.moveTo(32, -56);
-        ctx.lineTo(24, -82);
-        ctx.lineTo(40, -62);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(58, -56);
-        ctx.lineTo(66, -82);
-        ctx.lineTo(50, -62);
-        ctx.fill();
-        ctx.stroke();
-      }
-
-      // eye mask
-      ctx.beginPath();
-      ctx.arc(41, -45, 11, 0, Math.PI * 2);
-      ctx.arc(58, -45, 11, 0, Math.PI * 2);
-      ctx.fill();
-
-      // eyes
-      if (isSad) {
-        ctx.strokeStyle = "#fff";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(37, -45); ctx.lineTo(45, -45);
-        ctx.moveTo(54, -45); ctx.lineTo(62, -45);
-        ctx.stroke();
-      } else {
-        ctx.fillStyle = "#fff";
-        ctx.beginPath();
-        ctx.arc(41, -45, 2, 0, Math.PI * 2);
-        ctx.arc(58, -45, 2, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      // nose
-      ctx.fillStyle = "#000";
-      ctx.beginPath();
-      ctx.arc(68, -37, 4, 0, Math.PI * 2);
-      ctx.fill();
-
-      // mouth / tongue
-      if (isHappy) {
-        ctx.fillStyle = "#b01fa5";
-        roundRect(ctx, 60, -29, 10, 14, 5, true, true);
-
-        ctx.strokeStyle = "#000";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(57, -30);
-        ctx.quadraticCurveTo(64, -22, 71, -30);
-        ctx.stroke();
-      } else if (isSad) {
-        ctx.strokeStyle = "#000";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(59, -24);
-        ctx.quadraticCurveTo(64, -30, 69, -24);
-        ctx.stroke();
-      } else {
-        ctx.strokeStyle = "#000";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(59, -28);
-        ctx.quadraticCurveTo(64, -23, 69, -28);
-        ctx.stroke();
-      }
-
-      ctx.restore();
-    }
-
-    function roundRect(ctxRef, x, y, width, height, radius, fill, stroke) {
-      ctxRef.beginPath();
-      ctxRef.moveTo(x + radius, y);
-      ctxRef.lineTo(x + width - radius, y);
-      ctxRef.quadraticCurveTo(x + width, y, x + width, y + radius);
-      ctxRef.lineTo(x + width, y + height - radius);
-      ctxRef.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-      ctxRef.lineTo(x + radius, y + height);
-      ctxRef.quadraticCurveTo(x, y + height, x, y + height - radius);
-      ctxRef.lineTo(x, y + radius);
-      ctxRef.quadraticCurveTo(x, y, x + radius, y);
-      ctxRef.closePath();
-
-      if (fill) ctxRef.fill();
-      if (stroke) ctxRef.stroke();
-    }
-
-    function easeInOutQuad(t) {
-      return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-    }
-
-    function lerp(a, b, t) {
-      return a + (b - a) * t;
-    }
-
-    function loop(ts) {
-      if (!state.lastTs) state.lastTs = ts;
-      const dt = Math.min(0.033, (ts - state.lastTs) / 1000);
-      state.lastTs = ts;
-
-      drawBackground();
-      drawTitleLine();
-      updateBoxes(ts);
-      updateEddie(dt);
-      updateParticles(dt);
-      drawBallMarker();
-      drawBoxes();
-      drawParticles();
-      drawEddie();
-
-      requestAnimationFrame(loop);
-    }
-
-    canvas.addEventListener("mousemove", (e) => {
-      if (state.phase !== "pick") {
-        state.hoverBoxId = null;
-        return;
-      }
-
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      const x = (e.clientX - rect.left) * scaleX;
-      const y = (e.clientY - rect.top) * scaleY;
-
-      state.hoverBoxId = null;
-      for (const box of boxes) {
-        const bx = box.x;
-        const by = box.y - box.lift;
-        if (x >= bx && x <= bx + box.w && y >= by && y <= by + box.h) {
-          state.hoverBoxId = box.id;
-          break;
-        }
-      }
-    });
-
-    canvas.addEventListener("click", () => {
-      if (state.phase !== "pick" || state.hoverBoxId === null) return;
-      pickBox(state.hoverBoxId);
-    });
-
-    startBtn.addEventListener("click", startGame);
-    restartBtn.addEventListener("click", startGame);
-    restartTop.addEventListener("click", resetGame);
-
-    updateHud();
-    resetGame();
-    requestAnimationFrame(loop);
-  </script>
-</body>
-</html>
-
-```
-Rotation drin.
-
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Play with Eddie</title>
-  <meta name="description" content="Time the throw. Eddie catches the ball. 3 misses = game over." />
-  <style>
-    :root{
-      --black:#000;
-      --white:#fff;
-      --purpur:#b01fa5;
-      --bg:#f5f5f7;
-      --line:#111;
-      --grass:#e7f7e7;
-      --red:#d92d20;
-      --green:#0f9d58;
-    }
-
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-      font-family:Arial, Helvetica, sans-serif;
-    }
-
-    body{
-      background:var(--bg);
-      color:var(--black);
-      min-height:100vh;
-      padding:20px 14px 40px;
-    }
-
-    .wrap{
-      width:100%;
-      max-width:980px;
-      margin:0 auto;
-      display:flex;
-      flex-direction:column;
-      gap:18px;
-    }
-
-    .topbar{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      flex-wrap:wrap;
-    }
-
-    .title h1{
-      font-size:clamp(28px, 5vw, 52px);
-      line-height:1;
-      margin-bottom:8px;
-      font-weight:900;
-      letter-spacing:-0.8px;
-    }
-
-    .title p{
-      font-size:14px;
-      opacity:.75;
-    }
-
-    .actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .btn{
-      appearance:none;
-      border:none;
-      background:#000;
-      color:#fff;
-      padding:14px 18px;
-      border-radius:14px;
-      font-weight:900;
-      cursor:pointer;
-      text-decoration:none;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-width:180px;
-      transition:transform .15s ease, opacity .15s ease;
-    }
-
-    .btn:hover{
-      transform:translateY(-1px);
-      opacity:.94;
-    }
-
-    .btn.alt{
-      background:#fff;
-      color:#000;
-      border:2px solid #000;
-    }
-
-    .hud{
-      display:grid;
-      grid-template-columns:repeat(4, minmax(0,1fr));
-      gap:12px;
-    }
-
-    .stat{
-      border:2px solid #000;
-      border-radius:18px;
-      padding:14px 12px;
-      background:#fff;
-      text-align:center;
-    }
-
-    .stat .label{
-      font-size:12px;
-      opacity:.7;
-      text-transform:uppercase;
-      letter-spacing:1px;
-      margin-bottom:6px;
-    }
-
-    .stat .value{
-      font-size:clamp(22px, 4vw, 34px);
-      font-weight:900;
-      line-height:1;
-    }
-
-    .value.good{ color:var(--green); }
-    .value.bad{ color:var(--red); }
-
-    .game-shell{
-      position:relative;
-      width:100%;
-      background:#fff;
-      border:2px solid #000;
-      border-radius:24px;
-      overflow:hidden;
-    }
-
-    canvas{
-      display:block;
-      width:100%;
-      height:auto;
-      background:
-        linear-gradient(to bottom, #ffffff 0%, #ffffff 72%, var(--grass) 72%, var(--grass) 100%);
-      cursor:none;
-    }
-
-    .overlay{
-      position:absolute;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:20px;
-      background:rgba(255,255,255,.88);
-      text-align:center;
-    }
-
-    .overlay.hidden{
-      display:none;
-    }
-
-    .card{
-      width:min(100%, 520px);
-      background:#fff;
-      border:2px solid #000;
-      border-radius:22px;
-      padding:24px 18px;
-      box-shadow:0 10px 30px rgba(0,0,0,.08);
-    }
-
-    .card h2{
-      font-size:clamp(24px, 4vw, 36px);
-      margin-bottom:12px;
-      line-height:1.05;
-    }
-
-    .card p{
-      font-size:15px;
-      line-height:1.45;
-      opacity:.8;
-      margin-bottom:14px;
-    }
-
-    .card .big{
-      font-size:38px;
-      font-weight:900;
-      margin:10px 0 14px;
-    }
-
-    .legend{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top:6px;
-      justify-content:center;
-    }
-
-    .pill{
-      border:2px solid #000;
-      border-radius:999px;
-      padding:8px 12px;
-      font-size:12px;
-      font-weight:700;
-      background:#fff;
-    }
-
-    .bottom-note{
-      text-align:center;
-      font-size:13px;
-      opacity:.65;
-      line-height:1.4;
-    }
-
-    @media (max-width:720px){
-      .hud{
-        grid-template-columns:repeat(2, minmax(0,1fr));
-      }
-
-      .btn{
-        width:100%;
-      }
-
-      .actions{
-        width:100%;
-      }
-    }
-  </style>
-</head>
-<body>
-  <main class="wrap">
-    <div class="topbar">
-      <div class="title">
-        <h1>Play with Eddie</h1>
-        <p>Time the throw. Eddie catches the ball. 3 misses = game over.</p>
-      </div>
-
-      <div class="actions">
-        <a class="btn alt" href="index.html">← Back</a>
-        <button class="btn" id="restartTop">Restart Game</button>
-      </div>
-    </div>
-
-    <section class="hud">
-      <div class="stat">
-        <div class="label">Score</div>
-        <div class="value good" id="scoreValue">0</div>
-      </div>
-      <div class="stat">
-        <div class="label">Misses</div>
-        <div class="value bad" id="missValue">0 / 3</div>
-      </div>
-      <div class="stat">
-        <div class="label">Speed</div>
-        <div class="value" id="speedValue">1.00×</div>
-      </div>
-      <div class="stat">
-        <div class="label">Best</div>
-        <div class="value" id="bestValue">0</div>
-      </div>
-    </section>
-
-    <section class="game-shell">
-      <canvas id="gameCanvas" width="960" height="540"></canvas>
-
-      <div class="overlay" id="startOverlay">
-        <div class="card">
-          <h2>Eddie Catch Challenge</h2>
-          <p>
-            Eddie runs left and right.<br>
-            Aim with the crosshair and click to throw.
-          </p>
-          <p>
-            If the ball reaches Eddie at the perfect moment, he catches it.<br>
-            Each catch gives you 1 point and makes Eddie faster.
-          </p>
-          <p>
-            Miss 3 times and the run is over.
-          </p>
-          <div class="legend">
-            <div class="pill">✅ Catch = +1</div>
-            <div class="pill">❌ 3 misses = end</div>
-            <div class="pill">⚡ Eddie gets faster</div>
-          </div>
-          <div style="margin-top:18px;">
-            <button class="btn" id="startBtn">Start Game</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="overlay hidden" id="gameOverOverlay">
-        <div class="card">
-          <h2>Game Over</h2>
-          <p>Eddie missed the ball 3 times.</p>
-          <div class="big" id="finalScore">0</div>
-          <p id="bestLine">Best run: 0</p>
-          <div style="margin-top:18px;">
-            <button class="btn" id="restartBtn">Play Again</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <div class="bottom-note">
-      Version 1. Mechanic first. Leaderboard after game feel.
-    </div>
-  </main>
-
-  <script>
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-
-    const scoreValue = document.getElementById("scoreValue");
-    const missValue = document.getElementById("missValue");
-    const speedValue = document.getElementById("speedValue");
-    const bestValue = document.getElementById("bestValue");
-
-    const startOverlay = document.getElementById("startOverlay");
-    const gameOverOverlay = document.getElementById("gameOverOverlay");
-    const startBtn = document.getElementById("startBtn");
-    const restartBtn = document.getElementById("restartBtn");
-    const restartTop = document.getElementById("restartTop");
-    const finalScore = document.getElementById("finalScore");
-    const bestLine = document.getElementById("bestLine");
-
-    const BEST_KEY = "eddieCatchBest_v1";
-
-    const state = {
-      running: false,
-      score: 0,
-      misses: 0,
-      best: Number(localStorage.getItem(BEST_KEY) || 0),
-      baseSpeed: 190,
-      speedMultiplier: 1,
-      throwLocked: false,
-      lastTime: 0,
-      gameOverShown: false
-    };
-
-    const crosshair = {
-      x: canvas.width / 2,
-      y: 180,
-      visible: true
-    };
-
-    const eddie = {
-      x: canvas.width / 2,
-      y: 428,
-      dir: 1,
-      catchFlash: 0,
-      missFlash: 0
-    };
-
-    const ball = {
-      active: false,
-      x: 0,
-      y: 0,
-      startX: 0,
-      startY: 0,
-      targetX: 0,
-      targetY: 0,
-      peakHeight: 0,
-      startTime: 0,
-      duration: 0.62,
-      caught: false
-    };
-
+    // --- SYSTEM ---
     function updateHud() {
-      scoreValue.textContent = state.score;
-      missValue.textContent = `${state.misses} / 3`;
-      speedValue.textContent = `${state.speedMultiplier.toFixed(2)}×`;
-      bestValue.textContent = state.best;
-    }
-
-    function resetBall() {
-      ball.active = false;
-      ball.caught = false;
-    }
-
-    function resetGame() {
-      state.running = false;
-      state.score = 0;
-      state.misses = 0;
-      state.speedMultiplier = 1;
-      state.throwLocked = false;
-      state.lastTime = 0;
-      state.gameOverShown = false;
-
-      eddie.x = canvas.width / 2;
-      eddie.dir = 1;
-      eddie.catchFlash = 0;
-      eddie.missFlash = 0;
-
-      resetBall();
-      updateHud();
-
-      gameOverOverlay.classList.add("hidden");
-      startOverlay.classList.remove("hidden");
-    }
-
-    function startGame() {
-      state.running = true;
-      state.score = 0;
-      state.misses = 0;
-      state.speedMultiplier = 1;
-      state.throwLocked = false;
-      state.lastTime = 0;
-      state.gameOverShown = false;
-
-      eddie.x = canvas.width / 2;
-      eddie.dir = 1;
-      eddie.catchFlash = 0;
-      eddie.missFlash = 0;
-
-      resetBall();
-      updateHud();
-
-      startOverlay.classList.add("hidden");
-      gameOverOverlay.classList.add("hidden");
+      scoreValue.textContent = state.score; roundValue.textContent = state.round;
+      boxValue.textContent = state.boxCount; bestValue.textContent = state.best;
     }
 
     function gameOver() {
-      if (state.gameOverShown) return;
-      state.gameOverShown = true;
-      state.running = false;
-      state.throwLocked = true;
-
-      if (state.score > state.best) {
-        state.best = state.score;
-        localStorage.setItem(BEST_KEY, String(state.best));
-      }
-
-      updateHud();
-      finalScore.textContent = `Score: ${state.score}`;
-      bestLine.textContent = `Best run: ${state.best}`;
+      state.running = false; setPhase("gameover");
+      if (state.score > state.best) { state.best = state.score; localStorage.setItem(BEST_KEY, String(state.best)); }
+      updateHud(); finalScore.textContent = `Score: ${state.score}`; bestLine.textContent = `Best run: ${state.best}`;
       gameOverOverlay.classList.remove("hidden");
     }
 
-    function throwBall(x, y) {
-      if (!state.running || state.throwLocked || ball.active) return;
-
-      const clampedX = Math.max(60, Math.min(canvas.width - 60, x));
-      const clampedY = Math.max(110, Math.min(330, y));
-
-      ball.active = true;
-      ball.caught = false;
-      ball.startX = clampedX;
-      ball.startY = -40;
-      ball.targetX = clampedX;
-      ball.targetY = clampedY;
-      ball.peakHeight = 0;
-      ball.startTime = performance.now() / 1000;
-      ball.duration = 0.62;
-      ball.x = ball.startX;
-      ball.y = ball.startY;
-
-      state.throwLocked = true;
+    function resetGame() {
+      state.running = false; state.score = 0; state.round = 1; state.boxCount = 2;
+      eddie.tongue = false; eddie.happyFlash = 0; eddie.sadFlash = 0;
+      buildRound(); updateHud();
+      gameOverOverlay.classList.add("hidden"); startOverlay.classList.remove("hidden");
     }
 
-    function catchBall() {
-      state.score += 1;
-      state.speedMultiplier += 0.16;
-      eddie.catchFlash = 0.32;
-      ball.caught = true;
-      ball.active = false;
-      state.throwLocked = false;
-      updateHud();
+    function startGame() {
+      state.running = true; state.score = 0; state.round = 1; state.boxCount = 2;
+      buildRound(); updateHud();
+      startOverlay.classList.add("hidden"); gameOverOverlay.classList.add("hidden");
     }
 
-    function missBall() {
-      state.misses += 1;
-      eddie.missFlash = 0.32;
-      ball.active = false;
-      state.throwLocked = false;
-      updateHud();
-
-      if (state.misses >= 3) {
-        setTimeout(gameOver, 180);
-      }
-    }
-
-    function updateBall(now) {
-      if (!ball.active) return;
-
-      const t = (now - ball.startTime) / ball.duration;
-      const p = Math.max(0, Math.min(1, t));
-
-      ball.x = ball.startX + (ball.targetX - ball.startX) * p;
-      ball.y = ball.startY + (ball.targetY - ball.startY) * p;
-
-      const mouthX = eddie.x + (eddie.dir > 0 ? 26 : -26);
-      const mouthY = eddie.y - 32;
-
-      const dx = ball.x - mouthX;
-      const dy = ball.y - mouthY;
-      const dist = Math.hypot(dx, dy);
-
-      if (dist < 24 && p > 0.72) {
-        catchBall();
-        return;
-      }
-
-      if (p >= 1) {
-        missBall();
-      }
-    }
-
-    function updateEddie(dt) {
-      if (!state.running) return;
-
-      const speed = state.baseSpeed * state.speedMultiplier;
-      eddie.x += eddie.dir * speed * dt;
-
-      if (eddie.x < 90) {
-        eddie.x = 90;
-        eddie.dir = 1;
-      }
-      if (eddie.x > canvas.width - 90) {
-        eddie.x = canvas.width - 90;
-        eddie.dir = -1;
-      }
-
-      if (eddie.catchFlash > 0) eddie.catchFlash -= dt;
-      if (eddie.missFlash > 0) eddie.missFlash -= dt;
-    }
-
-    function drawBackground() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.fillStyle = "#eef9ee";
-      ctx.fillRect(0, 390, canvas.width, 150);
-
-      ctx.strokeStyle = "#000";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(0, 390);
-      ctx.lineTo(canvas.width, 390);
-      ctx.stroke();
-    }
-
-    function drawCrosshair() {
-      ctx.save();
-      ctx.strokeStyle = "rgba(0,0,0,0.75)";
-      ctx.lineWidth = 2;
-
-      ctx.beginPath();
-      ctx.arc(crosshair.x, crosshair.y, 16, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(crosshair.x - 24, crosshair.y);
-      ctx.lineTo(crosshair.x - 8, crosshair.y);
-      ctx.moveTo(crosshair.x + 8, crosshair.y);
-      ctx.lineTo(crosshair.x + 24, crosshair.y);
-      ctx.moveTo(crosshair.x, crosshair.y - 24);
-      ctx.lineTo(crosshair.x, crosshair.y - 8);
-      ctx.moveTo(crosshair.x, crosshair.y + 8);
-      ctx.lineTo(crosshair.x, crosshair.y + 24);
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    function drawBall() {
-      if (!ball.active) return;
-
-      ctx.save();
-      ctx.fillStyle = "#b01fa5";
-      ctx.strokeStyle = "#000";
-      ctx.lineWidth = 2;
-
-      ctx.beginPath();
-      ctx.arc(ball.x, ball.y, 12, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(ball.x - 7, ball.y);
-      ctx.lineTo(ball.x + 7, ball.y);
-      ctx.moveTo(ball.x, ball.y - 7);
-      ctx.lineTo(ball.x, ball.y + 7);
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    function drawEddie() {
-      ctx.save();
-      ctx.translate(eddie.x, eddie.y);
-
-      if (eddie.dir < 0) {
-        ctx.scale(-1, 1);
-      }
-
-      const fillColor = eddie.catchFlash > 0
-        ? "#f0dcff"
-        : eddie.missFlash > 0
-        ? "#ffe6e3"
-        : "#fff";
-
-      // tail
-      ctx.strokeStyle = "#000";
-      ctx.lineWidth = 5;
-      ctx.beginPath();
-      ctx.moveTo(-42, -6);
-      ctx.quadraticCurveTo(-65, -20, -58, -42);
-      ctx.stroke();
-
-      // body
-      ctx.fillStyle = fillColor;
-      ctx.strokeStyle = "#000";
-      ctx.lineWidth = 4;
-      roundRect(-38, -34, 74, 42, 14, true, true);
-
-      // legs
-      ctx.beginPath();
-      ctx.moveTo(-18, 7); ctx.lineTo(-18, 28);
-      ctx.moveTo(0, 7); ctx.lineTo(0, 28);
-      ctx.moveTo(16, 7); ctx.lineTo(16, 28);
-      ctx.stroke();
-
-      // neck
-      ctx.beginPath();
-      ctx.moveTo(20, -18);
-      ctx.lineTo(32, -30);
-      ctx.stroke();
-
-      // head
-      ctx.fillStyle = "#fff";
-      roundRect(22, -62, 44, 38, 14, true, true);
-
-      // ears
-      ctx.beginPath();
-      ctx.moveTo(30, -56);
-      ctx.lineTo(24, -78);
-      ctx.lineTo(38, -61);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(56, -56);
-      ctx.lineTo(62, -78);
-      ctx.lineTo(48, -61);
-      ctx.fill();
-      ctx.stroke();
-
-      // eyes
-      ctx.fillStyle = "#000";
-      ctx.beginPath();
-      ctx.arc(39, -46, 3, 0, Math.PI * 2);
-      ctx.arc(53, -46, 3, 0, Math.PI * 2);
-      ctx.fill();
-
-      // nose
-      ctx.beginPath();
-      ctx.arc(64, -38, 3.8, 0, Math.PI * 2);
-      ctx.fill();
-
-      // tongue / catch mouth
-      if (eddie.catchFlash > 0) {
-        ctx.fillStyle = "#b01fa5";
-        ctx.beginPath();
-        ctx.arc(60, -29, 7, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-      } else {
-        ctx.strokeStyle = "#000";
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.moveTo(56, -28);
-        ctx.quadraticCurveTo(61, -23, 66, -28);
-        ctx.stroke();
-      }
-
-      ctx.restore();
-    }
-
-    function roundRect(x, y, width, height, radius, fill, stroke) {
-      ctx.beginPath();
-      ctx.moveTo(x + radius, y);
-      ctx.lineTo(x + width - radius, y);
-      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-      ctx.lineTo(x + width, y + height - radius);
-      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-      ctx.lineTo(x + radius, y + height);
-      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-      ctx.lineTo(x, y + radius);
-      ctx.quadraticCurveTo(x, y, x + radius, y);
-      ctx.closePath();
-
-      if (fill) ctx.fill();
-      if (stroke) ctx.stroke();
-    }
-
-    function loop(timestamp) {
-      const now = timestamp / 1000;
-      if (!state.lastTime) state.lastTime = now;
-      const dt = Math.min(0.033, now - state.lastTime);
-      state.lastTime = now;
-
-      drawBackground();
-      updateEddie(dt);
-      updateBall(now);
-      drawBall();
-      drawEddie();
-      if (state.running && !ball.active) drawCrosshair();
-
+    function loop(ts) {
+      if (!state.lastTs) state.lastTs = ts; 
+      const dt = Math.min(0.033, (ts - state.lastTs) / 1000); 
+      state.lastTs = ts;
+      
+      ctx.clearRect(0,0,canvas.width,canvas.height); 
+      ctx.fillStyle = "#fff"; ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.fillStyle = "#eef9ee"; ctx.fillRect(0, 400, canvas.width, 140);
+      
+      updateBoxes(ts); updateEddie(dt); updateParticles(dt);
+      drawParticles(); drawBallMarker(); drawBoxes(); drawEddie();
       requestAnimationFrame(loop);
     }
 
     canvas.addEventListener("mousemove", (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
+      if (state.phase !== "pick") { state.hoverBoxId = null; return; }
+      const rect = canvas.getBoundingClientRect(); 
+      const scaleX = canvas.width / rect.width; 
       const scaleY = canvas.height / rect.height;
-      crosshair.x = (e.clientX - rect.left) * scaleX;
-      crosshair.y = (e.clientY - rect.top) * scaleY;
-      crosshair.y = Math.max(110, Math.min(330, crosshair.y));
-      crosshair.x = Math.max(60, Math.min(canvas.width - 60, crosshair.x));
+      const x = (e.clientX - rect.left) * scaleX; 
+      const y = (e.clientY - rect.top) * scaleY;
+      state.hoverBoxId = null;
+      for (const box of boxes) { if (x >= box.x && x <= box.x + box.w && y >= box.y && y <= box.y + box.h) { state.hoverBoxId = box.id; break; } }
     });
 
-    canvas.addEventListener("click", () => {
-      throwBall(crosshair.x, crosshair.y);
-    });
+    canvas.addEventListener("click", () => { if (state.phase === "pick" && state.hoverBoxId !== null) pickBox(state.hoverBoxId); });
+    startBtn.addEventListener("click", startGame); restartBtn.addEventListener("click", startGame); restartTop.addEventListener("click", resetGame);
 
-    startBtn.addEventListener("click", startGame);
-    restartBtn.addEventListener("click", startGame);
-    restartTop.addEventListener("click", resetGame);
-
-    bestValue.textContent = state.best;
-    resetGame();
-    requestAnimationFrame(loop);
+    updateHud(); resetGame(); requestAnimationFrame(loop);
   </script>
 </body>
 </html>
