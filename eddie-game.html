@@ -79,7 +79,7 @@
     selectedBoxId: null, correctBoxId: null, hoverBoxId: null, result: null,
     showBallTime: 1400, shuffleDuration: 2200, swapsRemaining: 0,
     activeSwap: null, lastTs: 0, glowPulse: 0,
-    startBoxId: null, startSlotX: null, startSlotY: null, breatherMs: 220
+    startBoxId: null, startSlotX: null, startSlotY: null, breatherMs: 400 // Erhöht für spürbaren Stopp
   };
 
   const eddie = { x: canvas.width / 2, y: 80, lookTargetX: canvas.width / 2, lookTargetY: 300, happyFlash: 0, sadFlash: 0, blinkTimer: 0, idleBob: 0 };
@@ -96,7 +96,6 @@
   }
 
   function getLeaderboard() { return JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || "[]"); }
-
   function updateLeaderboardUI() {
     const scores = getLeaderboard();
     leaderboardList.innerHTML = scores.length ? scores.map((s, i) => `<li class="leaderboard-entry"><span>#${i + 1}</span><span>${s.name}</span><span>${s.score}</span></li>`).join("") : '<li class="leaderboard-entry">No entries yet</li>';
@@ -117,9 +116,8 @@
     const played = localStorage.getItem(TRACK_PLAYED) === "true" ? "Yes" : "No";
     const retries = Number(localStorage.getItem(TRACK_RETRIES) || 0);
     const runs = JSON.parse(localStorage.getItem(TRACK_RUNS) || "[]");
-    const last10 = runs.slice(-10).reverse();
     const avg = runs.length ? (runs.reduce((sum, r) => sum + Number(r.s || 0), 0) / runs.length).toFixed(1) : "0.0";
-    statsContent.innerHTML = `<div>Played once: ${played}</div><div>Retries: ${retries}</div><div>Runs: ${runs.length}</div><div>Avg Score: ${avg}</div><div style="margin-top:10px;">Last Scores: ${last10.map(r => r.s).join(", ") || "None"}</div>`;
+    statsContent.innerHTML = `<div>Played: ${played}</div><div>Retries: ${retries}</div><div>Runs: ${runs.length}</div><div>Avg: ${avg}</div>`;
     statsOverlay.classList.remove("hidden");
   }
 
@@ -136,118 +134,138 @@
       const r = Math.floor(i / cols), c = i % cols;
       boxes.push({ id: i, x: startX + c * (boxW + spacing), y: startY + r * (boxH + spacing), w: boxW, h: boxH, lift: 0 });
     }
-    state.correctBoxId = Math.floor(Math.random() * count); state.startBoxId = state.correctBoxId;
+    state.correctBoxId = Math.floor(Math.random() * count);
     const startBox = boxes.find(b => b.id === state.correctBoxId);
     state.startSlotX = startBox.x; state.startSlotY = startBox.y;
-    eddie.x = canvas.width / 2; eddie.y = Math.max(65, startY - 95);
     eddie.lookTargetX = startBox.x + boxW / 2; eddie.lookTargetY = startBox.y + boxH / 2;
-    state.shuffleDuration = Math.max(1200, 2400 - state.score * 55); state.swapsRemaining = Math.max(4, 4 + Math.floor(count * 1.6));
-    state.glowPulse = 1; setPhase("show");
+    state.shuffleDuration = Math.max(1200, 2400 - state.score * 55);
+    state.swapsRemaining = Math.max(4, 4 + Math.floor(count * 1.6));
+    setPhase("show");
   }
 
   function startNextSwap() {
-    const cur = boxes.find(b => b.id === state.correctBoxId);
     if (state.swapsRemaining <= 0) {
+      // Prüfen ob Ball am Startplatz liegt (Forced Departure)
+      const cur = boxes.find(b => b.id === state.correctBoxId);
       if (cur && Math.abs(cur.x - state.startSlotX) < 1 && Math.abs(cur.y - state.startSlotY) < 1) {
         let t; do { t = boxes[Math.floor(Math.random() * boxes.length)]; } while (t.id === state.correctBoxId);
-        state.activeSwap = { aId: cur.id, bId: t.id, aStartX: cur.x, bStartX: t.x, aStartY: cur.y, bStartY: t.y, aTargetX: t.x, bTargetX: cur.x, aTargetY: t.y, bTargetY: cur.y, start: nowMs(), duration: Math.max(320, state.shuffleDuration / 4), fake: false };
+        state.activeSwap = { aId: cur.id, bId: t.id, aStartX: cur.x, bStartX: t.x, aStartY: cur.y, bStartY: t.y, aTargetX: t.x, bTargetX: cur.x, aTargetY: t.y, bTargetY: cur.y, start: nowMs(), duration: 350, fake: false };
         return;
       }
-      state.activeSwap = null; setPhase("wait"); return;
+      state.activeSwap = null;
+      setPhase("wait"); // Wechsel in Ruhephase
+      return;
     }
     let a = Math.floor(Math.random() * boxes.length), b = Math.floor(Math.random() * boxes.length);
     while (b === a) b = Math.floor(Math.random() * boxes.length);
     const isF = state.score >= 4 && Math.random() < 0.18;
-    const boxA = boxes[a], boxB = boxes[b];
-    state.activeSwap = { aId: boxA.id, bId: boxB.id, aStartX: boxA.x, bStartX: boxB.x, aStartY: boxA.y, bStartY: boxB.y, aTargetX: boxB.x, bTargetX: boxA.x, aTargetY: boxB.y, bTargetY: boxA.y, start: nowMs(), duration: Math.max(260, state.shuffleDuration / 5.2), fake: isF };
+    state.activeSwap = { aId: boxes[a].id, bId: boxes[b].id, aStartX: boxes[a].x, bStartX: boxes[b].x, aStartY: boxes[a].y, bStartY: boxes[b].y, aTargetX: boxes[b].x, bTargetX: boxes[a].x, aTargetY: boxes[b].y, bTargetY: boxes[a].y, start: nowMs(), duration: Math.max(260, state.shuffleDuration / 5.2), fake: isF };
     state.swapsRemaining--;
   }
 
   function updateBoxes(ts) {
-    if (state.phase === "show" && ts - state.phaseStartedAt > state.showBallTime) {
-      setPhase("shuffle"); startNextSwap();
-    } else if (state.phase === "shuffle") {
+    if (state.phase === "show") {
+      if (ts - state.phaseStartedAt > state.showBallTime) { setPhase("shuffle"); startNextSwap(); }
+    } 
+    else if (state.phase === "shuffle") {
       if (!state.activeSwap) { startNextSwap(); return; }
       const s = state.activeSwap, p = Math.min(1, (ts - s.start) / s.duration), bA = boxes.find(b => b.id === s.aId), bB = boxes.find(b => b.id === s.bId);
-      if (s.fake) { const fP = Math.sin(p * Math.PI); bA.x = lerp(s.aStartX, (s.aStartX + s.aTargetX) / 2, fP); bB.x = lerp(s.bStartX, (s.bStartX + s.bTargetX) / 2, fP); bA.y = lerp(s.aStartY, (s.aStartY + s.aTargetY) / 2, fP); bB.y = lerp(s.bStartY, (s.bStartY + s.bTargetY) / 2, fP); } 
-      else { const e = easeInOutQuad(p); bA.x = lerp(s.aStartX, s.aTargetX, e); bB.x = lerp(s.bStartX, s.bTargetX, e); bA.y = lerp(s.aStartY, s.aTargetY, e); bB.y = lerp(s.bStartY, s.bTargetY, e); }
-      if (p >= 1) { bA.x = s.fake ? s.aStartX : s.aTargetX; bA.y = s.fake ? s.aStartY : s.aTargetY; bB.x = s.fake ? s.bStartX : s.bTargetX; bB.y = s.fake ? s.bStartY : s.bTargetY;
+      const eased = easeInOutQuad(p);
+      bA.x = lerp(s.aStartX, s.aTargetX, eased); bB.x = lerp(s.bStartX, s.bTargetX, eased);
+      bA.y = lerp(s.aStartY, s.aTargetY, eased); bB.y = lerp(s.bStartY, s.bTargetY, eased);
+      if (p >= 1) {
+        bA.x = s.aTargetX; bA.y = s.aTargetY; bB.x = s.bTargetX; bB.y = s.bTargetY;
         if (!s.fake) { if (state.correctBoxId === bA.id) state.correctBoxId = bB.id; else if (state.correctBoxId === bB.id) state.correctBoxId = bA.id; }
         state.activeSwap = null;
       }
-    } else if (state.phase === "wait") { if (ts - state.phaseStartedAt > state.breatherMs) setPhase("pick"); } 
+    } 
+    else if (state.phase === "wait") {
+      if (ts - state.phaseStartedAt > state.breatherMs) setPhase("pick");
+    } 
     else if (state.phase === "reveal") {
       const sel = boxes.find(b => b.id === state.selectedBoxId), cor = boxes.find(b => b.id === state.correctBoxId);
-      if (sel) sel.lift = Math.min(sel.h * 0.8, sel.lift + 5); if (cor && cor.id !== state.selectedBoxId) cor.lift = Math.min(cor.h * 0.8, cor.lift + 5);
-      if (ts - state.phaseStartedAt > 1100) {
-        if (state.selectedBoxId === state.correctBoxId) { state.score++; state.round++; state.boxCount = Math.min(18, 2 + Math.floor(state.score / 1.5)); eddie.happyFlash = 0.55; buildRound(); updateHud(); } 
-        else gameOver();
+      if (sel) sel.lift = Math.min(sel.h * 0.8, sel.lift + 5);
+      if (cor) cor.lift = Math.min(cor.h * 0.8, cor.lift + 5);
+      if (ts - state.phaseStartedAt > 1200) {
+        if (state.selectedBoxId === state.correctBoxId) {
+          state.score++; state.round++; state.boxCount = Math.min(18, 2 + Math.floor(state.score / 1.5));
+          eddie.happyFlash = 0.55; buildRound(); updateHud();
+        } else gameOver();
       }
     }
-    boxes.forEach(b => { if (state.phase !== "reveal") b.lift = Math.max(0, b.lift - 6); });
+    if (state.phase !== "reveal") boxes.forEach(b => b.lift = Math.max(0, b.lift - 6));
     const target = boxes.find(b => b.id === state.correctBoxId);
     if (target) { eddie.lookTargetX = target.x + target.w / 2; eddie.lookTargetY = target.y + target.h / 2; }
   }
 
   function updateEddie(dt) {
-    if (eddie.happyFlash > 0) eddie.happyFlash -= dt; if (eddie.sadFlash > 0) eddie.sadFlash -= dt; if (state.glowPulse > 0) state.glowPulse -= dt * 1.5;
+    eddie.happyFlash = Math.max(0, eddie.happyFlash - dt); eddie.sadFlash = Math.max(0, eddie.sadFlash - dt);
     eddie.blinkTimer -= dt; if (eddie.blinkTimer < 0) eddie.blinkTimer = Math.random() * 4 + 2;
     eddie.idleBob = Math.sin(nowMs() / 400) * 2;
   }
 
   function drawBallMarker() {
     if (state.phase !== "show") return;
-    const b = boxes.find(bx => bx.id === state.correctBoxId); if (!b) return;
-    const cx = b.x + b.w / 2, cy = b.y + b.h + (b.h * 0.25), markR = b.w * 0.22;
-    ctx.save(); ctx.fillStyle = "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(cx, cy, markR + 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-    if (state.glowPulse > 0) { ctx.shadowColor = "#b01fa5"; ctx.shadowBlur = 25 * state.glowPulse; ctx.strokeStyle = `rgba(176,31,165,${0.3 + state.glowPulse * 0.7})`; } 
-    else ctx.strokeStyle = "#b01fa5";
-    ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, cy, markR, 0, Math.PI * 2); ctx.stroke();
-    const brW = imgBrand.width * 0.15, brH = imgBrand.height * 0.15; ctx.drawImage(imgBrand, cx - brW / 2, cy - brH / 2, brW, brH); ctx.restore();
+    const b = boxes.find(bx => bx.id === state.correctBoxId);
+    if (b) {
+      const cx = b.x + b.w / 2, cy = b.y + b.h + 25, r = b.w * 0.25;
+      ctx.save();
+      ctx.shadowColor = "#b01fa5"; ctx.shadowBlur = 15;
+      ctx.drawImage(imgBrand, cx - r, cy - r, r * 2, r * 2);
+      ctx.restore();
+    }
   }
 
   function drawEddie() {
     ctx.save(); ctx.translate(eddie.x, eddie.y + eddie.idleBob); ctx.scale(0.85, 0.85);
-    const isH = eddie.happyFlash > 0, isS = eddie.sadFlash > 0; if (isS) ctx.rotate(0.12);
-    const tDir = eddie.lookTargetX >= eddie.x ? 1 : -1; if (tDir < 0) ctx.scale(-1, 1);
-    ctx.drawImage(imgEddieHead, -imgEddieHead.width / 8, -imgEddieHead.height / 4, imgEddieHead.width / 4, imgEddieHead.height / 4);
-    const dx = (eddie.lookTargetX - eddie.x) / 500, dy = (eddie.lookTargetY - eddie.y) / 500, lim = 4, px = Math.max(-lim, Math.min(lim, dx * 15 * tDir)), py = Math.max(-lim, Math.min(lim, dy * 15));
-    ctx.fillStyle = "#fff";
-    if (isS) { ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-10, -45); ctx.lineTo(0, -45); ctx.stroke(); } 
-    else if (eddie.blinkTimer > 0.15) { ctx.beginPath(); ctx.arc(-15 + px, -45 + py, isH ? 4 : 2.5, 0, Math.PI * 2); ctx.arc(15 + px, -45 + py, isH ? 4 : 2.5, 0, Math.PI * 2); ctx.fill(); }
+    if (eddie.sadFlash > 0) ctx.rotate(0.1);
+    ctx.drawImage(imgEddieHead, -50, -50, 100, 100);
+    // Augen-Logik (vereinfacht für Performance)
+    ctx.fillStyle = "white";
+    if (eddie.blinkTimer > 0.1) {
+      ctx.beginPath(); ctx.arc(-15, -10, 5, 0, Math.PI * 2); ctx.arc(15, -10, 5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "black";
+      const dx = (eddie.lookTargetX - eddie.x) * 0.01, dy = (eddie.lookTargetY - eddie.y) * 0.01;
+      ctx.beginPath(); ctx.arc(-15 + dx, -10 + dy, 2, 0, Math.PI * 2); ctx.arc(15 + dx, -10 + dy, 2, 0, Math.PI * 2); ctx.fill();
+    }
     ctx.restore();
   }
 
   function drawBoxes() {
     boxes.forEach(b => {
-      const isH = state.phase === "pick" && state.hoverBoxId === b.id, isS = state.selectedBoxId === b.id, isC = state.phase === "reveal" && state.correctBoxId === b.id;
-      const x = b.x, y = b.y - b.lift, cx = x + b.w / 2, cy = y + b.h / 2;
+      const isH = state.phase === "pick" && state.hoverBoxId === b.id;
+      const y = b.y - b.lift;
       ctx.save();
-      let tilt = 0; if (state.phase === "shuffle" && state.activeSwap) { if (b.id === state.activeSwap.aId) tilt = -0.06; else if (b.id === state.activeSwap.bId) tilt = 0.06; }
-      ctx.translate(cx, cy); ctx.rotate(tilt); ctx.translate(-cx, -cy);
-      ctx.fillStyle = isH ? "#e9e9e9" : "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 3; roundRect(ctx, x, y, b.w, b.h, 12, true, true);
-      const tW = b.w * 0.5, tH = b.h * 0.5; ctx.drawImage(imgEddieTongue, cx - tW / 2, cy - tH / 2, tW, tH);
-      if (isH && state.phase === "pick") { ctx.strokeStyle = "#000"; ctx.lineWidth = 5; roundRect(ctx, x - 4, y - 4, b.w + 8, b.h + 8, 14, false, true); }
-      if (isS && state.phase === "reveal") { ctx.strokeStyle = state.result === "correct" ? "#0f9d58" : "#d92d20"; ctx.lineWidth = 4; roundRect(ctx, x - 4, y - 4, b.w + 8, b.h + 8, 14, false, true); }
-      if (isC) { const brW = b.w * 0.7, brH = brW * (imgBrand.height / imgBrand.width); ctx.drawImage(imgBrand, cx - brW / 2, y + b.h + 5, brW, brH); }
+      ctx.fillStyle = isH ? "#eee" : "white"; ctx.strokeStyle = "black"; ctx.lineWidth = 3;
+      roundRect(ctx, b.x, y, b.w, b.h, 12, true, true);
+      ctx.drawImage(imgEddieTongue, b.x + b.w * 0.25, y + b.h * 0.25, b.w * 0.5, b.h * 0.5);
+      if (isH) { ctx.strokeStyle = "#b01fa5"; ctx.lineWidth = 4; roundRect(ctx, b.x - 2, y - 2, b.w + 4, b.h + 4, 14, false, true); }
+      if (state.phase === "reveal" && b.id === state.correctBoxId) {
+        ctx.drawImage(imgBrand, b.x + b.w * 0.1, y + b.h + 5, b.w * 0.8, 20);
+      }
       ctx.restore();
     });
   }
 
   function gameOver() {
-    state.running = false; setPhase("gameover"); if (state.score > state.best) { state.best = state.score; localStorage.setItem(BEST_KEY, String(state.best)); }
+    state.running = false; setPhase("gameover");
+    if (state.score > state.best) { state.best = state.score; localStorage.setItem(BEST_KEY, String(state.best)); }
     finalScoreDisplay.textContent = state.score; bestLineDisplay.textContent = `Best: ${state.best}`; updateHud();
-    let history = JSON.parse(localStorage.getItem(TRACK_RUNS) || "[]"); history.push({ s: state.score, t: Date.now() }); localStorage.setItem(TRACK_RUNS, JSON.stringify(history.slice(-50)));
-    if (state.score > 0 && (getLeaderboard().length < 10 || state.score > getLeaderboard()[9].score)) nameOverlay.classList.remove("hidden"); else gameOverOverlay.classList.remove("hidden");
+    let history = JSON.parse(localStorage.getItem(TRACK_RUNS) || "[]");
+    history.push({ s: state.score, t: Date.now() });
+    localStorage.setItem(TRACK_RUNS, JSON.stringify(history.slice(-20)));
+    if (state.score > 0 && (getLeaderboard().length < 10 || state.score > getLeaderboard()[9].score)) nameOverlay.classList.remove("hidden");
+    else gameOverOverlay.classList.remove("hidden");
   }
 
   function updateHud() { scoreValue.textContent = state.score; roundValue.textContent = state.round; boxValue.textContent = state.boxCount; bestValue.textContent = state.best; }
   function resetGame() { state.running = false; state.score = 0; state.round = 1; state.boxCount = 2; buildRound(); updateHud(); gameOverOverlay.classList.add("hidden"); nameOverlay.classList.add("hidden"); startOverlay.classList.remove("hidden"); }
-  function startGame() { state.running = true; state.score = 0; state.round = 1; state.boxCount = 2; buildRound(); updateHud(); startOverlay.classList.add("hidden"); gameOverOverlay.classList.add("hidden"); nameOverlay.classList.add("hidden"); if (!localStorage.getItem(TRACK_PLAYED)) localStorage.setItem(TRACK_PLAYED, "true"); }
+  function startGame() { state.running = true; state.score = 0; state.round = 1; buildRound(); updateHud(); startOverlay.classList.add("hidden"); gameOverOverlay.classList.add("hidden"); if (!localStorage.getItem(TRACK_PLAYED)) localStorage.setItem(TRACK_PLAYED, "true"); }
 
   function loop(ts) {
-    const dt = Math.min(0.033, (ts - state.lastTs) / 1000 || 0); state.lastTs = ts;
-    ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = "#eef9ee"; ctx.fillRect(0, 400, canvas.width, 140);
+    const dt = (ts - state.lastTs) / 1000 || 0; state.lastTs = ts;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#eef9ee"; ctx.fillRect(0, 400, canvas.width, 140);
     updateBoxes(ts); updateEddie(dt); drawBallMarker(); drawBoxes(); drawEddie();
     requestAnimationFrame(loop);
   }
@@ -255,30 +273,29 @@
   canvas.addEventListener("mousemove", (e) => {
     if (state.phase !== "pick") { state.hoverBoxId = null; return; }
     const rect = canvas.getBoundingClientRect(), x = (e.clientX - rect.left) * (canvas.width / rect.width), y = (e.clientY - rect.top) * (canvas.height / rect.height);
-    state.hoverBoxId = null; boxes.forEach(b => { if (x >= b.x && x <= b.x + b.w && y >= (b.y - b.lift) && y <= (b.y - b.lift) + b.h) state.hoverBoxId = b.id; });
+    state.hoverBoxId = null;
+    boxes.forEach(b => { if (x >= b.x && x <= b.x + b.w && y >= b.y - b.lift && y <= b.y - b.lift + b.h) state.hoverBoxId = b.id; });
   });
 
   canvas.addEventListener("click", (e) => {
     const rect = canvas.getBoundingClientRect(), x = (e.clientX - rect.left) * (canvas.width / rect.width), y = (e.clientY - rect.top) * (canvas.height / rect.height);
-    const ex = eddie.x, ey = eddie.y + eddie.idleBob, ew = 120, eh = 110;
-    if (x >= ex - ew / 2 && x <= ex + ew / 2 && y >= ey - eh / 2 && y <= ey + eh / 2) {
-      const now = Date.now(); eddieTapTimes = eddieTapTimes.filter(t => now - t < 1200); eddieTapTimes.push(now);
-      if (eddieTapTimes.length >= 5) { eddieTapTimes = []; renderStatsOverlay(); return; }
+    if (x > 430 && x < 530 && y > 30 && y < 130) { // Eddie Tap
+      eddieTapTimes.push(Date.now());
+      if (eddieTapTimes.length > 5) { renderStatsOverlay(); eddieTapTimes = []; }
     }
     if (state.phase === "pick" && state.hoverBoxId !== null) {
-      const id = state.hoverBoxId; state.selectedBoxId = id;
-      if (id === state.correctBoxId) { state.result = "correct"; eddie.happyFlash = 0.55; } else { state.result = "wrong"; eddie.sadFlash = 0.55; }
-      setPhase("reveal");
+      state.selectedBoxId = state.hoverBoxId; setPhase("reveal");
     }
   });
 
-  let imagesLoaded = 0;
-  const preloader = () => { imagesLoaded++; if (imagesLoaded === 3) { updateLeaderboardUI(); resetGame(); requestAnimationFrame(loop); } };
-  imgEddieHead.onload = preloader; imgEddieHead.onerror = preloader; imgEddieTongue.onload = preloader; imgEddieTongue.onerror = preloader; imgBrand.onload = preloader; imgBrand.onerror = preloader;
+  let loaded = 0;
+  const check = () => { loaded++; if (loaded >= 3) { updateLeaderboardUI(); resetGame(); requestAnimationFrame(loop); } };
+  imgEddieHead.onload = check; imgEddieHead.onerror = check;
+  imgEddieTongue.onload = check; imgEddieTongue.onerror = check;
+  imgBrand.onload = check; imgBrand.onerror = check;
 
   startBtn.onclick = startGame; restartTop.onclick = resetGame; saveScoreBtn.onclick = saveScore; closeStatsBtn.onclick = () => statsOverlay.classList.add("hidden");
   restartBtn.onclick = () => { let r = Number(localStorage.getItem(TRACK_RETRIES) || 0); localStorage.setItem(TRACK_RETRIES, r + 1); startGame(); };
-  nameInput.onkeydown = (e) => { if (e.key === "Enter") saveScore(); };
 </script>
 </body>
 </html>
