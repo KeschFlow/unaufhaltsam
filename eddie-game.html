@@ -150,35 +150,29 @@
       if (f) c.fill(); if (s) c.stroke();
     }
 
-    // --- 1) FIX: LOOPING TEXTCIRCLE MIT OUTLINE ---
+    // --- FIX: TEXTCIRCLE NUR KONTUR, LANGSAMER, RADIUS 20 ---
     function drawTextCircle(text, cx, cy, r){
-      const fullText = (text + " ").repeat(3); 
-      const chars = fullText.split("");
+      const chars = text.split("");
       const step = (Math.PI * 2) / chars.length;
-      const rot = performance.now() / 5000;
+      const rot = performance.now() / 12000;
 
       ctx.save();
-      ctx.textAlign="center";
-      ctx.textBaseline="middle";
-      ctx.font="900 10px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = "900 11px Arial";
 
-      chars.forEach((c,i)=>{
-        const a = i * step + rot;
+      chars.forEach((c, i) => {
+        const a = i * step - Math.PI / 2 + rot;
         const x = cx + Math.cos(a) * r;
         const y = cy + Math.sin(a) * r;
 
         ctx.save();
-        ctx.translate(x,y);
-        ctx.rotate(a + Math.PI/2);
+        ctx.translate(x, y);
+        ctx.rotate(a + Math.PI / 2);
 
-        // Outline
-        ctx.strokeStyle = "#000";
-        ctx.lineWidth = 2.5;
-        ctx.strokeText(c,0,0);
-
-        // Fill
-        ctx.fillStyle = "#b01fa5";
-        ctx.fillText(c,0,0);
+        ctx.strokeStyle = "#b01fa5";
+        ctx.lineWidth = 1.5;
+        ctx.strokeText(c, 0, 0);
 
         ctx.restore();
       });
@@ -276,7 +270,8 @@
       if (state.phase !== "show") return;
       const box = boxes.find(b => b.id === state.correctBoxId);
       if (!box) return;
-      drawTextCircle("UNAUFHALTSAM •", box.x + box.w / 2, box.y + box.h + 22, 16);
+      // RADIUS 20
+      drawTextCircle("UNAUFHALTSAM", box.x + box.w / 2, box.y + box.h + 22, 20);
     }
 
     function drawEddie() {
@@ -318,7 +313,6 @@
         ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
         roundRect(ctx, x, y, box.w, box.h, 12, true, true);
 
-        // --- 2) FIX: ECHTE WACKELNDE ZUNGE ---
         if (isHovered && state.phase === "pick") {
           const tongueX = x + box.w/2;
           const tongueBaseY = y - 10;
@@ -340,7 +334,6 @@
           ctx.beginPath(); ctx.moveTo(0, 4); ctx.lineTo(0, 22 + wobble); ctx.stroke();
           ctx.restore();
 
-          // Kastenrahmen
           ctx.strokeStyle = "#000";
           ctx.lineWidth = 5;
           roundRect(ctx, x - 4, y - 4, box.w + 8, box.h + 8, 14, false, true);
@@ -355,7 +348,8 @@
         }
 
         if (isCorrect) {
-          drawTextCircle("UNAUFHALTSAM •", x + box.w / 2, y + box.h + 22, 16);
+          // RADIUS 20
+          drawTextCircle("UNAUFHALTSAM", x + box.w / 2, y + box.h + 22, 20);
         }
         ctx.restore();
       });
