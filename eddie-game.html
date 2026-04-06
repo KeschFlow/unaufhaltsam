@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>UNAUFHALTSAM | V5.2 Dev Tracking</title>
+  <title>UNAUFHALTSAM | V5.2 Final</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
@@ -26,12 +26,10 @@
     .overlay{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(255,255,255,.9); text-align:center; z-index:50; }
     .overlay.hidden{ display:none; }
     .card{ width:min(100%, 480px); background:#fff; border:2px solid #000; border-radius:22px; padding:30px 20px; box-shadow:0 10px 30px rgba(0,0,0,.08); }
-    .card h2{ font-size:32px; font-weight:900; margin-bottom:12px; }
+    #nameInput { border:2px solid #000; padding:14px; border-radius:12px; width:100%; font-size:18px; font-weight:900; text-align:center; margin-bottom:15px; outline:none; text-transform: uppercase; }
     .leaderboard-container { background:#fff; border:2px solid #000; border-radius:22px; padding:20px; margin-top:10px; }
     .leaderboard-title { font-weight:900; text-transform:uppercase; margin-bottom:12px; font-size:16px; border-bottom: 2px solid #000; padding-bottom: 8px; }
     .leaderboard-entry { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee; font-weight:700; font-size: 14px; }
-    #nameInput { border:2px solid #000; padding:14px; border-radius:12px; width:100%; font-size:18px; font-weight:900; text-align:center; margin-bottom:15px; outline:none; text-transform: uppercase; }
-    .bottom-note{ text-align:center; font-size:12px; opacity:.5; font-weight: 700; margin-top: 10px; }
     @media (max-width:720px){ .hud{ grid-template-columns:repeat(2, minmax(0,1fr)); } .btn{ width:100%; } }
   </style>
 </head>
@@ -41,32 +39,20 @@
       <div class="title"><h1>UNAUFHALTSAM</h1><p>FIND THE FOCUS RING</p></div>
       <div class="actions"><button class="btn" id="restartTop">RESTART GAME</button></div>
     </div>
-
     <section class="hud">
       <div class="stat"><div class="label">Score</div><div class="value good" id="scoreValue">0</div></div>
       <div class="stat"><div class="label">Round</div><div class="value" id="roundValue">1</div></div>
       <div class="stat"><div class="label">Boxes</div><div class="value" id="boxValue">2</div></div>
       <div class="stat"><div class="label">Best</div><div class="value" id="bestValue">0</div></div>
     </section>
-
     <section class="game-shell">
       <canvas id="gameCanvas" width="960" height="540"></canvas>
-      
       <div class="overlay" id="startOverlay"><div class="card"><h2>START</h2><p>Eddie shows you the focus ring. Then the boxes shuffle.</p><button class="btn" id="startBtn" style="margin-top:20px;">START GAME</button></div></div>
       <div class="overlay hidden" id="nameOverlay"><div class="card"><h2>NEW HIGHSCORE!</h2><input type="text" id="nameInput" placeholder="YOUR NAME" maxlength="12"><button class="btn" id="saveScoreBtn">SAVE SCORE</button></div></div>
       <div class="overlay hidden" id="gameOverOverlay"><div class="card"><h2>FOCUS LOST</h2><div style="font-size:48px; font-weight:900; color:var(--purpur); margin:10px 0;" id="finalScore">0</div><p id="bestLine" style="font-weight:700; margin-bottom:20px;">Best: 0</p><button class="btn" id="restartBtn">PLAY AGAIN</button></div></div>
-      
-      <div class="overlay hidden" id="statsOverlay">
-        <div class="card">
-          <h2 style="font-weight:900;">TEST STATS</h2>
-          <div id="statsContent" style="text-align:left; margin:16px 0; font-weight:700; line-height:1.6; font-size:15px;"></div>
-          <button class="btn" id="closeStatsBtn">CLOSE</button>
-        </div>
-      </div>
+      <div class="overlay hidden" id="statsOverlay"><div class="card"><h2 style="font-weight:900;">TEST STATS</h2><div id="statsContent" style="text-align:left; margin:16px 0; font-weight:700; line-height:1.6; font-size:15px;"></div><button class="btn" id="closeStatsBtn">CLOSE</button></div></div>
     </section>
-
     <section class="leaderboard-container"><div class="leaderboard-title">Eddie's Top 10</div><ul class="leaderboard-list" id="leaderboardList"></ul></section>
-    <div class="bottom-note">Fokus is everything. Don't blink.</div>
   </main>
 
   <script>
@@ -76,12 +62,15 @@
     const startBtn = document.getElementById("startBtn"), restartBtn = document.getElementById("restartBtn"), restartTop = document.getElementById("restartTop"), saveScoreBtn = document.getElementById("saveScoreBtn"), closeStatsBtn = document.getElementById("closeStatsBtn");
     const nameInput = document.getElementById("nameInput"), leaderboardList = document.getElementById("leaderboardList"), finalScoreDisplay = document.getElementById("finalScore"), bestLineDisplay = document.getElementById("bestLine");
 
-    const BEST_KEY = "eddieBoxBest_v1", LEADERBOARD_KEY = "eddieLeaderboard_v1";
-    const TRACK_PLAYED = "eddie_played_once", TRACK_RETRIES = "eddie_retry_count", TRACK_RUNS = "eddie_runs_history";
+    const imgEddieHead = new Image(); imgEddieHead.src = 'eddie_head.png';
+    const imgEddieTongue = new Image(); imgEddieTongue.src = 'eddie_tongue.png';
+    const imgBrand = new Image(); imgBrand.src = 'unaufhaltsam_brand.png';
+
+    const BEST_KEY = "eddieBoxBest_v1", LEADERBOARD_KEY = "eddieLeaderboard_v1", TRACK_PLAYED = "eddie_played_once", TRACK_RETRIES = "eddie_retry_count", TRACK_RUNS = "eddie_runs_history";
 
     let eddieTapTimes = [];
     const state = { running: false, score: 0, round: 1, boxCount: 2, best: Number(localStorage.getItem(BEST_KEY) || 0), phase: "idle", phaseStartedAt: 0, selectedBoxId: null, correctBoxId: null, hoverBoxId: null, result: null, showBallTime: 1400, shuffleDuration: 2200, swapsRemaining: 0, activeSwap: null, lastTs: 0, glowPulse: 0, startBoxId: null, startSlotX: null, startSlotY: null };
-    const eddie = { x: canvas.width / 2, y: 80, lookTargetX: canvas.width / 2, lookTargetY: 300, tongue: false, happyFlash: 0, sadFlash: 0, blinkTimer: 0, idleBob: 0 };
+    const eddie = { x: canvas.width / 2, y: 80, lookTargetX: canvas.width / 2, lookTargetY: 300, happyFlash: 0, sadFlash: 0, blinkTimer: 0, idleBob: 0 };
     const boxes = [], particles = [];
 
     function nowMs() { return performance.now(); }
@@ -89,20 +78,8 @@
     function lerp(a, b, t) { return a + (b - a) * t; }
     function easeInOutQuad(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
     function roundRect(c, x, y, w, h, r, f, s) { c.beginPath(); c.moveTo(x+r, y); c.lineTo(x+w-r, y); c.quadraticCurveTo(x+w, y, x+w, y+r); c.lineTo(x+w, y+h-r); c.quadraticCurveTo(x+w, y+h, x+w-r, y+h); c.lineTo(x+r, y+h); c.quadraticCurveTo(x, y+h, x, y+h-r); c.lineTo(x, y+r); c.quadraticCurveTo(x, y, x+r, y); c.closePath(); if (f) c.fill(); if (s) c.stroke(); }
-    function drawTextCircle(text, cx, cy, r){ const chars = text.split(""); const step = (Math.PI * 2) / chars.length; const rot = performance.now() / 12000; ctx.save(); ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.font = `900 ${Math.max(7, r * 0.55)}px Arial`; chars.forEach((c, i) => { const a = i * step + rot; const x = cx + Math.cos(a) * r; const y = cy + Math.sin(a) * r; ctx.save(); ctx.translate(x, y); ctx.rotate(a + Math.PI / 2); ctx.strokeStyle = "#b01fa5"; ctx.lineWidth = 1.5; ctx.strokeText(c, 0, 0); ctx.restore(); }); ctx.restore(); }
-
-    function updateLeaderboardUI() { const scores = JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || "[]"); leaderboardList.innerHTML = scores.length ? scores.map((s, i) => `<li class="leaderboard-entry"><span class="leaderboard-rank">#${i+1}</span><span class="leaderboard-name">${s.name}</span><span class="leaderboard-score">${s.score}</span></li>`).join('') : '<li class="leaderboard-entry">No entries yet</li>'; }
-    function saveScore() { const name = nameInput.value.trim().toUpperCase() || "ANONYMOUS"; let scores = JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || "[]"); scores.push({ name, score: state.score, date: Date.now() }); scores.sort((a, b) => b.score - a.score); localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(scores.slice(0, 10))); updateLeaderboardUI(); nameOverlay.classList.add("hidden"); gameOverOverlay.classList.remove("hidden"); }
-
-    function renderStatsOverlay() {
-      const played = localStorage.getItem(TRACK_PLAYED) === "true" ? "Yes" : "No";
-      const retries = Number(localStorage.getItem(TRACK_RETRIES) || 0);
-      const runs = JSON.parse(localStorage.getItem(TRACK_RUNS) || "[]");
-      const last10 = runs.slice(-10).reverse();
-      const avg = runs.length ? (runs.reduce((sum, r) => sum + Number(r.s || 0), 0) / runs.length).toFixed(1) : "0.0";
-      statsContent.innerHTML = `<div>Played once: ${played}</div><div>Total Retries: ${retries}</div><div>Runs saved: ${runs.length}</div><div>Avg Score: ${avg}</div><div style="margin-top:10px;">Last Scores: ${last10.map(r=>r.s).join(', ') || 'None'}</div>`;
-      statsOverlay.classList.remove("hidden");
-    }
+    function getLeaderboard() { return JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || "[]"); }
+    function updateLeaderboardUI() { const scores = getLeaderboard(); leaderboardList.innerHTML = scores.length ? scores.map((s, i) => `<li class="leaderboard-entry"><span class="leaderboard-rank">#${i+1}</span><span class="leaderboard-name">${s.name}</span><span class="leaderboard-score">${s.score}</span></li>`).join('') : '<li class="leaderboard-entry">No entries yet</li>'; }
 
     function buildRound() {
       boxes.length = 0; state.activeSwap = null; state.selectedBoxId = null; state.hoverBoxId = null;
@@ -150,22 +127,29 @@
       const target = boxes.find(b => b.id === state.correctBoxId); if (target) { eddie.lookTargetX = target.x + target.w/2; eddie.lookTargetY = target.y + target.h/2; }
     }
 
-    function updateEddie(dt) { if (eddie.happyFlash > 0) eddie.happyFlash -= dt; if (eddie.sadFlash > 0) eddie.sadFlash -= dt; if (state.glowPulse > 0) state.glowPulse -= dt * 1.5; eddie.tongue = eddie.happyFlash > 0; eddie.blinkTimer -= dt; if (eddie.blinkTimer < 0) eddie.blinkTimer = Math.random() * 4 + 2; eddie.idleBob = Math.sin(nowMs() / 400) * 2; }
-    function drawBallMarker() { if (state.phase !== "show") return; const b = boxes.find(bx => bx.id === state.correctBoxId); if (!b) return; const cx = b.x + b.w / 2, cy = b.y + b.h + (b.h * 0.25), r = b.w * 0.22; if (state.glowPulse > 0) { ctx.save(); ctx.globalAlpha = state.glowPulse * 0.6; ctx.shadowColor = "#b01fa5"; ctx.shadowBlur = 25 * state.glowPulse; drawTextCircle("UNAUFHALTSAM", cx, cy, r); ctx.restore(); } drawTextCircle("UNAUFHALTSAM", cx, cy, r); }
+    function updateEddie(dt) { if (eddie.happyFlash > 0) eddie.happyFlash -= dt; if (eddie.sadFlash > 0) eddie.sadFlash -= dt; if (state.glowPulse > 0) state.glowPulse -= dt * 1.5; eddie.blinkTimer -= dt; if (eddie.blinkTimer < 0) eddie.blinkTimer = Math.random() * 4 + 2; eddie.idleBob = Math.sin(nowMs() / 400) * 2; }
 
     function drawEddie() {
-      ctx.save(); ctx.translate(eddie.x, eddie.y + eddie.idleBob); ctx.scale(0.82, 0.82);
-      const isH = eddie.happyFlash > 0, isS = eddie.sadFlash > 0; if (isS) ctx.rotate(0.12);
-      const tDir = eddie.lookTargetX >= eddie.x ? 1 : -1; if (tDir < 0) ctx.scale(-1, 1);
-      ctx.fillStyle = isH ? "#f0dcff" : isS ? "#ffe6e3" : "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 4;
-      ctx.beginPath(); ctx.moveTo(-42,-4); ctx.quadraticCurveTo(-62,-16,-56,-38); ctx.stroke(); roundRect(ctx, -38, -34, 78, 40, 14, true, true);
-      ctx.fillStyle = "#000"; ctx.beginPath(); ctx.arc(-8, -16, 12, 0, Math.PI * 2); ctx.fill();
-      const eY = isH ? -85 : (isS ? -45 : -82); ctx.beginPath(); ctx.moveTo(32,-56); ctx.lineTo(24, eY); ctx.lineTo(40,-62); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(58,-56); ctx.lineTo(66, eY); ctx.lineTo(50,-62); ctx.fill(); ctx.stroke();
-      ctx.beginPath(); [ -18, -2, 14 ].forEach(lx => { ctx.moveTo(lx, 6); ctx.lineTo(lx, 18); }); ctx.stroke(); ctx.beginPath(); ctx.moveTo(22,-16); ctx.lineTo(34,-30); ctx.stroke();
-      ctx.fillStyle = "#fff"; roundRect(ctx, 24, -62, 46, 38, 14, true, true);
-      ctx.fillStyle = "#000"; ctx.beginPath(); ctx.arc(41, -45, 11, 0, Math.PI * 2); ctx.arc(58, -45, 11, 0, Math.PI * 2); ctx.fill();
-      if (eddie.blinkTimer > 0.15) { const dx = (eddie.lookTargetX - eddie.x) / 500, dy = (eddie.lookTargetY - eddie.y) / 500, lim = 4, px = Math.max(-lim, Math.min(lim, dx * 15 * tDir)), py = Math.max(-lim, Math.min(lim, dy * 15)); ctx.fillStyle = "#fff"; if (isS) { ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(37,-45); ctx.lineTo(45,-45); ctx.moveTo(54,-45); ctx.lineTo(62,-45); ctx.stroke(); } else { ctx.beginPath(); ctx.arc(41 + px, -45 + py, isH ? 4 : 2.5, 0, Math.PI * 2); ctx.arc(58 + px, -45 + py, isH ? 4 : 2.5, 0, Math.PI * 2); ctx.fill(); } }
-      ctx.fillStyle = "#000"; ctx.beginPath(); ctx.arc(68, -37, 4, 0, Math.PI * 2); ctx.fill(); if (isH) { ctx.fillStyle = "#b01fa5"; roundRect(ctx, 60, -29, 10, 14, 5, true, true); }
+      ctx.save(); ctx.translate(eddie.x, eddie.y + eddie.idleBob); ctx.scale(0.85, 0.85);
+      const isHappy = eddie.happyFlash > 0, isSad = eddie.sadFlash > 0;
+      if (isSad) ctx.rotate(0.12);
+      const targetDir = eddie.lookTargetX >= eddie.x ? 1 : -1;
+      if (targetDir < 0) ctx.scale(-1, 1);
+
+      // Draw the Head Image Logo
+      ctx.drawImage(imgEddieHead, -imgEddieHead.width/8, -imgEddieHead.height/4, imgEddieHead.width/4, imgEddieHead.height/4);
+
+      // Mask and Pupils (Tracking)
+      const dx = (eddie.lookTargetX - eddie.x) / 500, dy = (eddie.lookTargetY - eddie.y) / 500;
+      const lim = 4, px = Math.max(-lim, Math.min(lim, dx * 15 * targetDir)), py = Math.max(-lim, Math.min(lim, dy * 15));
+      ctx.fillStyle = "#fff";
+      if (isSad) {
+          ctx.strokeStyle = "#fff"; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(-10, -45); ctx.lineTo(0, -45); ctx.stroke();
+      } else if (eddie.blinkTimer > 0.15) {
+          ctx.beginPath(); ctx.arc(-15 + px, -45 + py, isHappy ? 4 : 2.5, 0, Math.PI * 2); 
+          ctx.arc(15 + px, -45 + py, isHappy ? 4 : 2.5, 0, Math.PI * 2); ctx.fill();
+      }
       ctx.restore();
     }
 
@@ -174,47 +158,50 @@
         const isH = state.phase === "pick" && state.hoverBoxId === b.id, isS = state.selectedBoxId === b.id, isC = state.phase === "reveal" && state.correctBoxId === b.id;
         const x = b.x, y = b.y - b.lift; ctx.save(); const cx = x + b.w / 2, cy = y + b.h / 2;
         let tilt = 0; if (state.phase === "shuffle" && state.activeSwap) { if (b.id === state.activeSwap.aId) tilt = -0.06; else if (b.id === state.activeSwap.bId) tilt = 0.06; }
-        ctx.translate(cx, cy); ctx.rotate(tilt); ctx.translate(-cx, -cy); ctx.fillStyle = isH ? "#e9e9e9" : "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 3; roundRect(ctx, x, y, b.w, b.h, 12, true, true);
-        const tW = b.w * 0.25, tH = b.h * 0.35, wob = Math.sin(performance.now()/120) * (b.h * 0.04); ctx.save(); ctx.translate(cx, y + b.h/2 + 2); ctx.rotate(Math.sin(performance.now()/200) * 0.15); ctx.fillStyle = "#b01fa5"; ctx.beginPath(); ctx.moveTo(0, -tH * 0.6); ctx.quadraticCurveTo(-tW * 1.2, 0, -tW * 0.8, tH * 0.5 + wob); ctx.quadraticCurveTo(0, tH + wob, tW * 0.8, tH * 0.5 + wob); ctx.quadraticCurveTo(tW * 1.2, 0, 0, -tH * 0.6); ctx.fill(); ctx.strokeStyle = "#000"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(0, -tH * 0.3); ctx.lineTo(0, tH * 0.6 + wob); ctx.stroke(); ctx.restore();
+        ctx.translate(cx, cy); ctx.rotate(tilt); ctx.translate(-cx, -cy);
+        ctx.fillStyle = isH ? "#e9e9e9" : "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 3; roundRect(ctx, x, y, b.w, b.h, 12, true, true);
+        
+        // --- FIXED IMAGE TONGUE ---
+        const tongueW = b.w * 0.5; const tongueH = b.h * 0.5;
+        ctx.drawImage(imgEddieTongue, cx - tongueW/2, cy - tongueH/2, tongueW, tongueH);
+        
         if (isH && state.phase === "pick") { ctx.strokeStyle = "#000"; ctx.lineWidth = 5; roundRect(ctx, x-4, y-4, b.w+8, b.h+8, 14, false, true); }
         if (isS && state.phase === "reveal") { ctx.strokeStyle = state.result === "correct" ? "#0f9d58" : "#d92d20"; ctx.lineWidth = 4; roundRect(ctx, x-4, y-4, b.w+8, b.h+8, 14, false, true); }
-        if (isC) drawTextCircle("UNAUFHALTSAM", cx, y + b.h + (b.h * 0.25), b.w * 0.22); ctx.restore();
+        
+        // Reveal with Branding Image
+        if (isC) {
+          const brandW = b.w * 0.7; const brandH = brandW * (imgBrand.height / imgBrand.width);
+          ctx.drawImage(imgBrand, cx - brandW/2, y + b.h + 5, brandW, brandH);
+        }
+        ctx.restore();
       });
     }
 
-    function spawnParticles(x, y) { for (let i = 0; i < 14; i++) particles.push({ x, y, vx: (Math.random() - 0.5) * 5, vy: -Math.random() * 4 - 1, life: 1, size: Math.random() * 4 + 2 }); }
-    function updateParticles(dt) { for (let i = particles.length - 1; i >= 0; i--) { const p = particles[i]; p.x += p.vx * 60 * dt; p.y += p.vy * 60 * dt; p.vy += 0.12; p.life -= 1.8 * dt; if (p.life <= 0) particles.splice(i, 1); } }
-    function drawParticles() { for (const p of particles) { ctx.save(); ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = "#b01fa5"; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill(); ctx.restore(); } }
-    
     function gameOver() { 
-      state.running = false; setPhase("gameover"); if (state.score > state.best) { state.best = state.score; localStorage.setItem(BEST_KEY, String(state.best)); } finalScoreDisplay.textContent = state.score; bestLineDisplay.textContent = `Best: ${state.best}`; updateHud(); eddie.sadFlash = 1;
+      state.running = false; setPhase("gameover"); if (state.score > state.best) { state.best = state.score; localStorage.setItem(BEST_KEY, String(state.best)); } finalScoreDisplay.textContent = state.score; bestLineDisplay.textContent = `Best: ${state.best}`; updateHud();
       let history = JSON.parse(localStorage.getItem(TRACK_RUNS) || "[]"); history.push({ s: state.score, t: Date.now() }); localStorage.setItem(TRACK_RUNS, JSON.stringify(history.slice(-50)));
-      if (state.score > 0 && (JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || "[]").length < 10 || state.score > JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || "[]")[9].score)) nameOverlay.classList.remove("hidden"); else gameOverOverlay.classList.remove("hidden"); 
+      if (state.score > 0 && (getLeaderboard().length < 10 || state.score > getLeaderboard()[9].score)) nameOverlay.classList.remove("hidden"); else gameOverOverlay.classList.remove("hidden"); 
     }
 
     function updateHud() { scoreValue.textContent = state.score; roundValue.textContent = state.round; boxValue.textContent = state.boxCount; bestValue.textContent = state.best; }
     function resetGame() { state.running = false; state.score = 0; state.round = 1; state.boxCount = 2; buildRound(); updateHud(); gameOverOverlay.classList.add("hidden"); nameOverlay.classList.add("hidden"); startOverlay.classList.remove("hidden"); }
     function startGame() { state.running = true; state.score = 0; state.round = 1; buildRound(); updateHud(); startOverlay.classList.add("hidden"); gameOverOverlay.classList.add("hidden"); nameOverlay.classList.add("hidden"); if (!localStorage.getItem(TRACK_PLAYED)) localStorage.setItem(TRACK_PLAYED, "true"); }
-    function loop(ts) { const dt = Math.min(0.033, (ts - state.lastTs) / 1000); state.lastTs = ts; ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#fff"; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#eef9ee"; ctx.fillRect(0, 400, canvas.width, 140); updateBoxes(ts); updateEddie(dt); updateParticles(dt); drawParticles(); drawBallMarker(); drawBoxes(); drawEddie(); requestAnimationFrame(loop); }
+    function loop(ts) { const dt = Math.min(0.033, (ts - state.lastTs) / 1000); state.lastTs = ts; ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#fff"; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#eef9ee"; ctx.fillRect(0, 400, canvas.width, 140); updateBoxes(ts); updateEddie(dt); drawBoxes(); drawEddie(); requestAnimationFrame(loop); }
     
     canvas.addEventListener("mousemove", (e) => { const rect = canvas.getBoundingClientRect(), x = (e.clientX - rect.left) * (canvas.width/rect.width), y = (e.clientY - rect.top) * (canvas.height/rect.height); state.hoverBoxId = null; boxes.forEach(b => { if (x >= b.x && x <= b.x+b.w && y >= (b.y - b.lift) && y <= (b.y - b.lift)+b.h) state.hoverBoxId = b.id; }); });
 
     canvas.addEventListener("click", (e) => {
       const rect = canvas.getBoundingClientRect(), x = (e.clientX - rect.left) * (canvas.width/rect.width), y = (e.clientY - rect.top) * (canvas.height/rect.height);
-      const ex = eddie.x, ey = eddie.y + eddie.idleBob, ew = 120, eh = 110;
-      if (x >= ex - ew/2 && x <= ex + ew/2 && y >= ey - eh/2 && y <= ey + eh/2) {
-        const now = Date.now(); eddieTapTimes = eddieTapTimes.filter(t => now - t < 1200); eddieTapTimes.push(now);
-        if (eddieTapTimes.length >= 5) { eddieTapTimes = []; renderStatsOverlay(); return; }
-      }
       if (state.phase === "pick" && state.hoverBoxId !== null) {
-        const id = state.hoverBoxId; state.selectedBoxId = id; if (id === state.correctBoxId) { state.result = "correct"; eddie.happyFlash = 0.55; state.glowPulse = 1; spawnParticles(boxes.find(b => b.id === id).x + boxes.find(b => b.id === id).w/2, boxes.find(b => b.id === id).y + boxes.find(b => b.id === id).h + 20); } else { state.result = "wrong"; eddie.sadFlash = 0.55; } setPhase("reveal");
+        const id = state.hoverBoxId; state.selectedBoxId = id; if (id === state.correctBoxId) { state.result = "correct"; eddie.happyFlash = 0.55; state.glowPulse = 1; } else { state.result = "wrong"; eddie.sadFlash = 0.55; } setPhase("reveal");
       }
     });
-    
-    startBtn.onclick = startGame; restartTop.onclick = resetGame; saveScoreBtn.onclick = saveScore; closeStatsBtn.onclick = () => statsOverlay.classList.add("hidden");
+
+    let imagesLoaded = 0; const totalImages = 3;
+    const preloader = () => { imagesLoaded++; if(imagesLoaded === totalImages) { updateLeaderboardUI(); resetGame(); requestAnimationFrame(loop); } };
+    imgEddieHead.onload = preloader; imgEddieTongue.onload = preloader; imgBrand.onload = preloader;
+    startBtn.onclick = startGame; restartTop.onclick = resetGame; saveScoreBtn.onclick = saveScore;
     restartBtn.onclick = () => { let r = Number(localStorage.getItem(TRACK_RETRIES) || 0); localStorage.setItem(TRACK_RETRIES, r + 1); startGame(); };
-    nameInput.onkeydown = (e) => { if(e.key === 'Enter') saveScore(); };
-    updateLeaderboardUI(); resetGame(); requestAnimationFrame(loop);
   </script>
 </body>
 </html>
