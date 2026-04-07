@@ -1,174 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Eddie’s World</title>
-  <meta name="description" content="Eddie’s World. Real life. Unfiltered. Members only access." />
-  <link rel="preload" as="image" href="logo.png" />
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eddie’s World | Unaufhaltsam</title>
   <style>
-    :root{
-      --black:#000;
-      --white:#fff;
-      --purpur:#b01fa5;
+    :root {
+      --black: #000;
+      --white: #fff;
+      --purpur: #b01fa5;
+      --bg: #f5f5f7;
     }
 
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-      font-family:Arial, Helvetica, sans-serif;
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+
+    body {
+      background: var(--bg);
+      color: var(--black);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
     }
 
-    body{
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      padding:28px 16px;
-      background:#fff;
-      color:#000;
+    .container {
+      text-align: center;
+      max-width: 900px;
+      width: 100%;
     }
 
-    .wrap{
-      width:100%;
-      max-width:900px;
+    h1 {
+      font-size: clamp(32px, 8vw, 64px);
+      font-weight: 900;
+      margin-bottom: 10px;
+      letter-spacing: -1px;
     }
 
-    .hero{
-      max-width:420px;
-      margin:0 auto 26px;
+    .subtitle {
+      font-size: 18px;
+      opacity: 0.7;
+      margin-bottom: 40px;
+      font-weight: 700;
     }
 
-    h1{
-      font-size:clamp(36px, 6vw, 64px);
-      font-weight:900;
-      margin-bottom:10px;
+    /* --- NEW ACTION LAYOUT --- */
+    .hero-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      margin-top: 32px;
     }
 
-    .tagline{
-      letter-spacing:4px;
-      font-size:14px;
-      margin-bottom:24px;
-      opacity:.8;
+    .hero-actions-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      width: 100%;
     }
 
-    .subline{
-      margin-bottom:40px;
-      font-size:14px;
-      opacity:.7;
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 24px;
+      border-radius: 16px;
+      font-weight: 900;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: transform 0.1s ease, background 0.2s ease;
+      cursor: pointer;
+      border: none;
     }
 
-    .actions{
-      display:flex;
-      justify-content:center;
-      gap:16px;
-      flex-wrap:wrap;
-    }
+    .btn:active { transform: scale(0.97); }
 
-    .button{
-      padding:18px 26px;
-      border-radius:14px;
-      font-weight:900;
-      text-decoration:none;
-      min-width:260px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      border:2px solid transparent;
+    .btn-game {
+      min-width: 320px;
+      padding: 20px 28px;
+      background: var(--white);
+      color: var(--black);
+      border: 3px solid var(--black);
+      font-size: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     }
+    
+    .btn-game:hover { background: #fafafa; }
 
-    .button.purpur{
-      background:var(--purpur);
-      color:#fff;
-    }
+    .btn-primary { background: var(--purpur); color: var(--white); }
+    .btn-secondary { background: var(--black); color: var(--white); }
+    .btn-dark { background: #333; color: var(--white); }
 
-    .button.white{
-      background:#fff;
-      border-color:#000;
-      color:#000;
-    }
-
-    .button.dark{
-      background:#000;
-      color:#fff;
-    }
-
-    .note{
-      margin-top:14px;
-      font-size:12px;
-      opacity:.6;
-    }
-
-    .links{
-      margin-top:50px;
-      font-size:13px;
-      opacity:.6;
-      display:flex;
-      gap:18px;
-      justify-content:center;
-      flex-wrap:wrap;
-    }
-
-    footer{
-      margin-top:60px;
-      font-size:11px;
-      opacity:.3;
+    @media (max-width: 720px) {
+      .hero-actions-row {
+        flex-direction: column;
+      }
+      .btn {
+        width: 100%;
+        max-width: 420px;
+      }
+      .btn-game {
+        min-width: 0;
+      }
     }
   </style>
 </head>
-
 <body>
-  <main class="wrap">
 
-    <img src="logo.png" class="hero" />
+  <div class="container">
+    <h1>EDDIE’S WORLD</h1>
+    <p class="subtitle">UNAUFHALTSAM & UNSTOPPABLE</p>
 
-    <h1>Eddie’s World</h1>
+    <div class="hero-actions">
 
-    <div class="tagline">REAL LIFE · UNFILTERED · NO STAGING</div>
-
-    <div class="subline">
-      Private archive. Real moments. Members only.
-    </div>
-
-    <nav class="actions">
-
-      <!-- PRIMARY -->
-      <a class="button purpur" href="https://ko-fi.com/eddiesworld" target="_blank">
-        🔐 JOIN EDDIE’S WORLD
+      <a class="btn btn-game" href="https://keschflow.github.io/unaufhaltsam/eddie-game.html?v=5.7">
+        🎯 CAN YOU STAY FOCUSED?
       </a>
 
-      <!-- SECONDARY -->
-      <a class="button white" href="https://ko-fi.com/eddiesworld" target="_blank">
-        🎥 WATCH EDDIE
-      </a>
+      <div class="hero-actions-row">
+        <a class="btn btn-primary" href="YOUR_MEMBERSHIP_LINK">
+          🔐 JOIN EDDIE’S WORLD
+        </a>
 
-      <!-- TOOL -->
-      <a class="button dark" href="https://keschflow.github.io/eddies-print-engine-public/" target="_blank">
-        🚀 CREATE YOUR BOOK
-      </a>
+        <a class="btn btn-secondary" href="YOUR_WATCH_LINK">
+          🎥 WATCH EDDIE
+        </a>
 
-    </nav>
+        <a class="btn btn-dark" href="https://keschflow.github.io/eddies-print-engine-public/?v=1">
+          🚀 CREATE YOUR BOOK
+        </a>
+      </div>
 
-    <div class="note">
-      Membership required for full access
     </div>
+  </div>
 
-    <div class="links">
-      <a href="https://www.youtube.com/@Eddie-Unaufhaltsam">YouTube</a>
-      <a href="https://www.tiktok.com/@keschflow">TikTok</a>
-      <a href="https://www.reddit.com/u/KeSchFlow">Reddit</a>
-      <a href="impressum.html">Impressum</a>
-      <a href="datenschutz.html">Datenschutz</a>
-    </div>
-
-    <footer>
-      © 2026 Eddie’s World
-    </footer>
-
-  </main>
 </body>
 </html>
