@@ -1,141 +1,120 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Eddie’s World | Unaufhaltsam</title>
-  <style>
-    :root {
-      --black: #000;
-      --white: #fff;
-      --purpur: #b01fa5;
-      --bg: #f5f5f7;
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+<title>Eddie’s Print Engine</title>
+<meta name="description" content="Members only tool inside Eddie’s World." />
 
-    body {
-      background: var(--bg);
-      color: var(--black);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
+<style>
+:root{
+  --purple:#7c3aed;
+  --dark:#4c1d95;
+}
 
-    .container {
-      text-align: center;
-      max-width: 900px;
-      width: 100%;
-    }
+*{margin:0;padding:0;box-sizing:border-box;}
 
-    h1 {
-      font-size: clamp(32px, 8vw, 64px);
-      font-weight: 900;
-      margin-bottom: 10px;
-      letter-spacing: -1px;
-    }
+body{
+  font-family:system-ui, -apple-system, sans-serif;
+  background:linear-gradient(135deg,var(--purple),var(--dark));
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+}
 
-    .subtitle {
-      font-size: 18px;
-      opacity: 0.7;
-      margin-bottom: 40px;
-      font-weight: 700;
-    }
+.card{
+  text-align:center;
+  padding:40px 24px;
+  border-radius:24px;
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(12px);
+  max-width:500px;
+  width: 90%;
+}
 
-    /* --- NEW ACTION LAYOUT --- */
-    .hero-actions {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 18px;
-      margin-top: 32px;
-    }
+h1{
+  font-size:32px;
+  margin-bottom:12px;
+}
 
-    .hero-actions-row {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
-      width: 100%;
-    }
+p{
+  margin-bottom:24px;
+  opacity:.9;
+}
 
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px 24px;
-      border-radius: 16px;
-      font-weight: 900;
-      text-decoration: none;
-      text-transform: uppercase;
-      transition: transform 0.1s ease, background 0.2s ease;
-      cursor: pointer;
-      border: none;
-    }
+.btn{
+  display:block;
+  margin:10px auto;
+  padding:14px 22px;
+  border-radius:999px;
+  font-weight:800;
+  text-decoration:none;
+  transition: transform 0.1s ease, opacity 0.1s ease;
+}
 
-    .btn:active { transform: scale(0.97); }
+.btn:active {
+  transform: scale(0.98);
+}
 
-    .btn-game {
-      min-width: 320px;
-      padding: 20px 28px;
-      background: var(--white);
-      color: var(--black);
-      border: 3px solid var(--black);
-      font-size: 20px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    }
-    
-    .btn-game:hover { background: #fafafa; }
+.btn:hover {
+  transform: scale(1.03);
+}
 
-    .btn-primary { background: var(--purpur); color: var(--white); }
-    .btn-secondary { background: var(--black); color: var(--white); }
-    .btn-dark { background: #333; color: var(--white); }
+.primary{
+  background:#fff;
+  color:#4c1d95;
+}
 
-    @media (max-width: 720px) {
-      .hero-actions-row {
-        flex-direction: column;
-      }
-      .btn {
-        width: 100%;
-        max-width: 420px;
-      }
-      .btn-game {
-        min-width: 0;
-      }
-    }
-  </style>
+.secondary{
+  border:1px solid #fff;
+  color:#fff;
+}
+
+.meta{
+  margin-top:14px;
+  font-size:13px;
+  opacity:.8;
+}
+</style>
 </head>
+
 <body>
 
-  <div class="container">
-    <h1>EDDIE’S WORLD</h1>
-    <p class="subtitle">UNAUFHALTSAM & UNSTOPPABLE</p>
+<div class="card">
 
-    <div class="hero-actions">
+  <h1>Eddie’s Print Engine</h1>
 
-      <a class="btn btn-game" href="https://keschflow.github.io/unaufhaltsam/eddie-game.html?v=5.7">
-        🎯 CAN YOU STAY FOCUSED?
-      </a>
+  <p>
+    Create real books from your photos.<br>
+    Available only inside Eddie’s World.
+  </p>
 
-      <div class="hero-actions-row">
-        <a class="btn btn-primary" href="YOUR_MEMBERSHIP_LINK">
-          🔐 JOIN EDDIE’S WORLD
-        </a>
+  <div style="margin:22px 0 10px; padding:18px; background:rgba(255,255,255,0.08); border:1px dashed rgba(255,255,255,0.35); border-radius:18px;">
+    <p style="margin:0 0 12px; opacity:1; font-size:13px; font-weight:800; letter-spacing:.08em; text-transform:uppercase;">
+      Prove your focus first
+    </p>
 
-        <a class="btn btn-secondary" href="YOUR_WATCH_LINK">
-          🎥 WATCH EDDIE
-        </a>
-
-        <a class="btn btn-dark" href="https://keschflow.github.io/eddies-print-engine-public/?v=1">
-          🚀 CREATE YOUR BOOK
-        </a>
-      </div>
-
-    </div>
+    <a class="btn primary" href="https://keschflow.github.io/unaufhaltsam/eddie-game.html?v=5.7" target="_blank">
+      🎯 PROVE YOUR FOCUS
+    </a>
   </div>
+
+  <a class="btn primary" href="https://ko-fi.com/eddiesworld" target="_blank">
+    🔐 UNLOCK ACCESS
+  </a>
+
+  <a class="btn secondary" href="https://keschflow.github.io/unaufhaltsam/?v=1" target="_blank">
+    ← Back to Eddie’s World
+  </a>
+
+  <div class="meta">
+    Includes archive + new uploads + book generator
+  </div>
+
+</div>
 
 </body>
 </html>
