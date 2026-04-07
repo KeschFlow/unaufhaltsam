@@ -1,117 +1,140 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Eddie’s Print Engine</title>
-<meta name="description" content="Members only tool inside Eddie’s World." />
+<title>Eddie’s World</title>
 
 <style>
-:root{
-  --purple:#7c3aed;
-  --dark:#4c1d95;
+:root {
+  --black:#000;
+  --white:#fff;
+  --purpur:#b01fa5;
+  --bg:#f5f5f7;
 }
 
-*{margin:0;padding:0;box-sizing:border-box;}
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial, sans-serif;
+}
 
 body{
-  font-family:system-ui, -apple-system, sans-serif;
-  background:linear-gradient(135deg,var(--purple),var(--dark));
-  color:#fff;
+  background:var(--bg);
+  color:var(--black);
   display:flex;
   align-items:center;
   justify-content:center;
   min-height:100vh;
+  padding:20px;
 }
 
-.card{
+.container{
   text-align:center;
-  padding:40px 24px;
-  border-radius:24px;
-  background:rgba(255,255,255,0.08);
-  backdrop-filter:blur(12px);
-  max-width:500px;
-  width: 90%;
+  max-width:900px;
+  width:100%;
 }
 
 h1{
-  font-size:32px;
-  margin-bottom:12px;
+  font-size:clamp(32px,8vw,64px);
+  font-weight:900;
+  margin-bottom:10px;
 }
 
-p{
-  margin-bottom:24px;
-  opacity:.9;
+.subtitle{
+  font-size:16px;
+  opacity:.7;
+  margin-bottom:40px;
+  font-weight:700;
+}
+
+.hero-actions{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:18px;
+}
+
+.hero-row{
+  display:flex;
+  gap:16px;
+  flex-wrap:wrap;
+  justify-content:center;
 }
 
 .btn{
-  display:block;
-  margin:10px auto;
-  padding:14px 22px;
-  border-radius:999px;
-  font-weight:800;
+  padding:16px 24px;
+  border-radius:16px;
+  font-weight:900;
   text-decoration:none;
-  transition: transform 0.1s ease, opacity 0.1s ease;
+  display:inline-flex;
+  justify-content:center;
+  align-items:center;
+  transition:0.1s;
 }
 
-.btn:active {
-  transform: scale(0.98);
+.btn:active{
+  transform:scale(0.97);
 }
 
-.btn:hover {
-  transform: scale(1.03);
-}
-
-.primary{
+.btn-game{
   background:#fff;
-  color:#4c1d95;
+  color:#000;
+  border:2px solid #000;
+  min-width:280px;
 }
 
-.secondary{
-  border:1px solid #fff;
+.btn-primary{
+  background:var(--purpur);
   color:#fff;
 }
 
-.meta{
-  margin-top:14px;
-  font-size:13px;
-  opacity:.8;
+.btn-dark{
+  background:#000;
+  color:#fff;
+}
+
+@media(max-width:720px){
+  .hero-row{
+    flex-direction:column;
+    width:100%;
+  }
+
+  .btn{
+    width:100%;
+    max-width:420px;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<div class="card">
+<div class="container">
 
-  <h1>Eddie’s Print Engine</h1>
+  <h1>EDDIE’S WORLD</h1>
+  <p class="subtitle">UNAUFHALTSAM & UNSTOPPABLE</p>
 
-  <p>
-    Create real books from your photos.<br>
-    Available only inside Eddie’s World.
-  </p>
+  <div class="hero-actions">
 
-  <div style="margin:22px 0 10px; padding:18px; background:rgba(255,255,255,0.08); border:1px dashed rgba(255,255,255,0.35); border-radius:18px;">
-    <p style="margin:0 0 12px; opacity:1; font-size:13px; font-weight:800; letter-spacing:.08em; text-transform:uppercase;">
-      Prove your focus first
-    </p>
-
-    <a class="btn primary" href="https://keschflow.github.io/unaufhaltsam/eddie-game.html?v=5.7" target="_blank">
+    <a class="btn btn-game" href="https://keschflow.github.io/unaufhaltsam/eddie-game.html?v=5.7">
       🎯 PROVE YOUR FOCUS
     </a>
-  </div>
 
-  <a class="btn primary" href="https://ko-fi.com/eddiesworld" target="_blank">
-    🔐 UNLOCK ACCESS
-  </a>
+    <div class="hero-row">
 
-  <a class="btn secondary" href="https://keschflow.github.io/unaufhaltsam/?v=1" target="_blank">
-    ← Back to Eddie’s World
-  </a>
+      <a class="btn btn-primary" href="https://ko-fi.com/eddiesworld">
+        🔐 JOIN EDDIE’S WORLD
+      </a>
 
-  <div class="meta">
-    Includes archive + new uploads + book generator
+      <a class="btn btn-dark" href="https://keschflow.github.io/eddies-print-engine-public/?v=1">
+        🚀 CREATE YOUR BOOK
+      </a>
+
+    </div>
+
   </div>
 
 </div>
