@@ -1,261 +1,34 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EDDIE'S WORLD | Official</title>
-  <style>
-    :root{
-      --black:#000;
-      --white:#fff;
-      --purpur:#b01fa5;
-      --bg:#f5f5f7;
-      --muted:rgba(0,0,0,.56);
-      --line:rgba(0,0,0,.08);
-    }
-
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    }
-
-    html,body{
-      min-height:100%;
-    }
-
-    body{
-      background:var(--bg);
-      color:var(--black);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      min-height:100vh;
-      padding:40px 20px;
-    }
-
-    .container{
-      width:100%;
-      max-width:620px;
-      text-align:center;
-    }
-
-    .eddie-avatar{
-      width:120px;
-      height:120px;
-      margin:0 auto 24px;
-      background:var(--white);
-      border:3px solid var(--black);
-      border-radius:50%;
-      overflow:hidden;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      box-shadow:0 10px 25px rgba(0,0,0,.05);
-    }
-
-    .eddie-avatar img{
-      width:100%;
-      height:auto;
-      display:block;
-    }
-
-    h1{
-      font-size:clamp(32px,8vw,48px);
-      font-weight:900;
-      margin-bottom:8px;
-      letter-spacing:-1.5px;
-    }
-
-    .subtitle{
-      font-size:16px;
-      opacity:.62;
-      margin-bottom:32px;
-      font-weight:700;
-      text-transform:uppercase;
-      letter-spacing:1px;
-    }
-
-    .exp-container{
-      background:var(--white);
-      border:2px solid var(--black);
-      border-radius:24px;
-      padding:26px 24px 22px;
-      margin-bottom:24px;
-      box-shadow:0 15px 35px rgba(0,0,0,.05);
-    }
-
-    .exp-title{
-      display:block;
-      margin-bottom:14px;
-      font-size:18px;
-      font-weight:900;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-    }
-
-    .btn{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      width:100%;
-      padding:18px 24px;
-      border-radius:16px;
-      font-weight:900;
-      font-size:16px;
-      line-height:1;
-      text-decoration:none;
-      text-transform:uppercase;
-      border:none;
-      cursor:pointer;
-      margin-bottom:12px;
-      transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
-      -webkit-tap-highlight-color:transparent;
-    }
-
-    .btn:active{
-      transform:scale(.985);
-    }
-
-    .btn-game{
-      background:var(--black);
-      color:var(--white);
-      font-size:18px;
-      border:3px solid var(--black);
-      box-shadow:0 8px 0 var(--black);
-      animation:subtlePulse 2.2s ease-in-out infinite;
-    }
-
-    .btn-game:hover{
-      transform:translateY(-2px);
-      box-shadow:0 10px 0 var(--black);
-    }
-
-    .btn-game:active{
-      transform:translateY(2px);
-      box-shadow:0 4px 0 var(--black);
-    }
-
-    .btn-subtext{
-      display:block;
-      margin-top:10px;
-      font-size:12px;
-      opacity:.56;
-      font-weight:700;
-    }
-
-    .btn-primary{
-      background:var(--purpur);
-      color:var(--white);
-    }
-
-    .btn-primary:hover,
-    .btn-secondary:hover{
-      transform:translateY(-1px);
-    }
-
-    .btn-secondary{
-      background:var(--white);
-      color:var(--black);
-      border:2px solid var(--black);
-    }
-
-    .member-note{
-      margin:24px 0;
-      font-size:13px;
-      color:var(--muted);
-      font-weight:700;
-    }
-
-    .footer-links{
-      margin-top:40px;
-      display:flex;
-      justify-content:center;
-      gap:20px;
-      flex-wrap:wrap;
-      padding-top:24px;
-      border-top:1px solid var(--line);
-    }
-
-    .footer-links a{
-      color:#888;
-      font-size:13px;
-      text-decoration:none;
-      font-weight:700;
-    }
-
-    .footer-links a:hover{
-      color:var(--black);
-    }
-
-    @keyframes subtlePulse{
-      0%{transform:scale(1);}
-      50%{transform:scale(1.015);}
-      100%{transform:scale(1);}
-    }
-
-    @media (max-width:480px){
-      body{
-        padding:28px 16px 32px;
-      }
-
-      h1{
-        font-size:38px;
-      }
-
-      .exp-container{
-        padding:22px 18px 18px;
-      }
-
-      .btn{
-        padding:17px 18px;
-      }
-    }
-
-    @media (prefers-reduced-motion:reduce){
-      .btn,
-      .btn-game{
-        transition:none;
-        animation:none;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="eddie-avatar">
-      <img src="eddie_head.png" alt="Eddie" />
-    </div>
-
-    <h1>EDDIE'S WORLD</h1>
-    <p class="subtitle">Unstoppable Focus</p>
-
-    <div class="exp-container">
-      <span class="exp-title">YOU WON'T LAST LONG.</span>
-      <a class="btn btn-game" href="eddie-game.html">
+<div class="hero-actions">
+  
+  <div style="width: 100%; max-width: 420px; margin-bottom: 28px;">
+      <p style="margin-bottom: 12px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; font-size: 16px; color: var(--black);">
+        YOU WON'T LAST LONG.
+      </p>
+      
+      <a class="btn btn-game" href="https://keschflow.github.io/unaufhaltsam/eddie-game.html?v=5.7">
         START THE GAME
       </a>
-      <span class="btn-subtext">Eddie is faster than you think.</span>
+      
+      <p style="font-size: 12px; opacity: 0.6; font-weight: 700; margin-top: 14px;">
+        Eddie is faster than you think.
+      </p>
+  </div>
+
+  <div class="hero-actions-row">
+    
+    <div style="width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;">
+        <a class="btn btn-secondary" href="https://jutn.creator-spring.com/listing/eddies-world-unaufhaltsam" target="_blank" style="background: var(--black); color: #fff; width: 100%; border: 2px solid var(--black);">
+          🛒 GET EDDIE MERCH
+        </a>
+        <p style="font-size: 11px; opacity: 0.5; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+          Wear Eddie. Stay Unstoppable.
+        </p>
     </div>
 
-    <a class="btn btn-primary" href="https://ko-fi.com/eddiesworld" target="_blank" rel="noopener noreferrer">
-      🔐 JOIN MEMBERSHIP
-    </a>
-
-    <a class="btn btn-secondary" href="https://keschflow.github.io/eddies-print-engine-public/" target="_blank" rel="noopener noreferrer">
-      🚀 CREATE YOUR BOOK
-    </a>
-
-    <p class="member-note">Membership unlocks the full Eddie's World experience.</p>
-
-    <div class="footer-links">
-      <a href="https://www.youtube.com/@eddiesworld" target="_blank" rel="noopener noreferrer">YOUTUBE</a>
-      <a href="https://www.tiktok.com/@eddiesworld" target="_blank" rel="noopener noreferrer">TIKTOK</a>
-      <a href="https://www.reddit.com/r/eddiesworld" target="_blank" rel="noopener noreferrer">REDDIT</a>
-      <a href="impressum.html">IMPRESSUM</a>
-      <a href="datenschutz.html">DATENSCHUTZ</a>
+    <div class="hero-actions-row" style="margin-top: 0;">
+        <a class="btn btn-primary" href="https://ko-fi.com/eddiesworld" style="flex: 1; min-width: 140px; font-size: 14px;">🔐 JOIN</a>
+        <a class="btn btn-dark" href="https://keschflow.github.io/eddies-print-engine-public/?v=2" style="flex: 1; min-width: 140px; font-size: 14px;">🚀 CREATE</a>
     </div>
   </div>
-</body>
-</html>
+
+</div>
