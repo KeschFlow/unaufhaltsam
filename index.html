@@ -1,34 +1,76 @@
-<div class="hero-actions">
-  
-  <div style="width: 100%; max-width: 420px; margin-bottom: 28px;">
-      <p style="margin-bottom: 12px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; font-size: 16px; color: var(--black);">
-        YOU WON'T LAST LONG.
-      </p>
-      
-      <a class="btn btn-game" href="https://keschflow.github.io/unaufhaltsam/eddie-game.html?v=5.7">
-        START THE GAME
-      </a>
-      
-      <p style="font-size: 12px; opacity: 0.6; font-weight: 700; margin-top: 14px;">
-        Eddie is faster than you think.
-      </p>
-  </div>
-
-  <div class="hero-actions-row">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eddie’s World | V6.1</title>
+  <style>
+    :root { --black: #000; --white: #fff; --purpur: #b01fa5; --bg: #f5f5f7; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { background: var(--bg); color: var(--black); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+    .container { text-align: center; max-width: 900px; width: 100%; }
+    h1 { font-size: clamp(32px, 8vw, 64px); font-weight: 900; margin-bottom: 10px; letter-spacing: -1px; }
+    .subtitle { font-size: 18px; opacity: 0.7; margin-bottom: 40px; font-weight: 700; }
     
-    <div style="width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;">
-        <a class="btn btn-secondary" href="https://jutn.creator-spring.com/listing/eddies-world-unaufhaltsam" target="_blank" style="background: var(--black); color: #fff; width: 100%; border: 2px solid var(--black);">
-          🛒 GET EDDIE MERCH
-        </a>
-        <p style="font-size: 11px; opacity: 0.5; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
-          Wear Eddie. Stay Unstoppable.
-        </p>
-    </div>
+    .hero-actions { display: flex; flex-direction: column; align-items: center; gap: 18px; margin-top: 32px; }
+    .hero-actions-row { display: flex; justify-content: center; align-items: center; gap: 16px; flex-wrap: wrap; width: 100%; margin-top: 10px; }
+    
+    .btn { display: inline-flex; align-items: center; justify-content: center; padding: 16px 24px; border-radius: 16px; font-weight: 900; text-decoration: none; text-transform: uppercase; transition: all 0.2s ease; cursor: pointer; border: none; }
+    .btn:active { transform: scale(0.97); }
+    
+    .btn-game { min-width: 320px; padding: 22px 28px; background: var(--white); color: var(--black); border: 3px solid var(--black); font-size: 20px; box-shadow: 0 6px 0 var(--black); position: relative; }
+    .btn-game:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    
+    .btn-primary { background: var(--purpur); color: var(--white); }
+    .btn-secondary { background: var(--black); color: var(--white); }
+    .btn-dark { background: #333; color: var(--white); }
 
-    <div class="hero-actions-row" style="margin-top: 0;">
-        <a class="btn btn-primary" href="https://ko-fi.com/eddiesworld" style="flex: 1; min-width: 140px; font-size: 14px;">🔐 JOIN</a>
-        <a class="btn btn-dark" href="https://keschflow.github.io/eddies-print-engine-public/?v=2" style="flex: 1; min-width: 140px; font-size: 14px;">🚀 CREATE</a>
+    @media (max-width: 720px) {
+      .hero-actions-row { flex-direction: column; }
+      .btn { width: 100%; max-width: 420px; }
+      .btn-game { min-width: 0; box-shadow: 0 4px 0 var(--black); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>EDDIE’S WORLD</h1>
+    <p class="subtitle">UNAUFHALTSAM & UNSTOPPABLE</p>
+
+    <div class="hero-actions">
+      
+      <div style="width: 100%; max-width: 420px; margin-bottom: 28px;">
+          <p style="margin-bottom: 12px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; font-size: 16px; color: var(--black);">
+            YOU WON'T LAST LONG.
+          </p>
+          <a class="btn btn-game" href="https://keschflow.github.io/unaufhaltsam/eddie-game.html?v=6.1">
+            START THE GAME
+          </a>
+          <p style="font-size: 12px; opacity: 0.6; font-weight: 700; margin-top: 14px;">
+            Eddie is faster than you think.
+          </p>
+      </div>
+
+      <div class="hero-actions-row">
+        
+        <div style="width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;">
+            <a class="btn btn-secondary" href="https://jutn.creator-spring.com/listing/eddies-world-unaufhaltsam" target="_blank" style="background: var(--black); color: #fff; width: 100%; border: 2px solid var(--black);">
+              🛒 GET EDDIE MERCH
+            </a>
+            <p style="font-size: 11px; opacity: 0.5; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+              Wear Eddie. Stay Unstoppable.
+            </p>
+        </div>
+
+        <div class="hero-actions-row" style="margin-top: 0;">
+            <a class="btn btn-primary" href="https://ko-fi.com/eddiesworld" style="flex: 1; min-width: 140px; font-size: 14px;">🔐 JOIN</a>
+            <a class="btn btn-dark" href="https://keschflow.github.io/eddies-print-engine-public/?v=6.1" style="flex: 1; min-width: 140px; font-size: 14px;">🚀 CREATE</a>
+        </div>
+      </div>
+
     </div>
   </div>
 
-</div>
+</body>
+</html>
