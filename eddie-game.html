@@ -110,9 +110,16 @@
           <div id="finalScore" style="font-size:64px; font-weight:900; color:var(--purpur); margin:10px 0;">0</div>
           <p id="bestLine" style="font-weight:800; opacity:0.6; margin-bottom:20px;">BEST: 0</p>
           <button class="btn btn-pulse" id="restartBtn" style="width:100%; margin-bottom:12px;">NEUER VERSUCH</button>
+          
           <div style="margin-top:15px; padding:15px; background:rgba(0,0,0,0.03); border-radius:16px;">
             <p style="font-size:13px; font-weight:800; margin-bottom:10px;">NUTZE DEINEN FOKUS FÜR ETWAS REALES.</p>
             <a href="https://keschflow.github.io/eddies-print-engine-public/" class="btn" style="background:var(--purpur); width:100%;">PROJECT: PRINT ENGINE</a>
+          </div>
+
+          <!-- NEU: Das Elite Easter-Egg (versteckt bis Score 29) -->
+          <div id="eliteReward" style="display:none; margin-top:15px; padding:15px; background:var(--purpur); color:#fff; border-radius:16px;">
+            <p style="font-size:12px; font-weight:800; margin-bottom:5px;">ELITE STATUS ERREICHT</p>
+            <p style="font-size:18px; font-weight:900;">DEIN KO-FI CODE: <span style="color:#000;">EDDIE30</span></p>
           </div>
         </div>
       </div>
@@ -176,66 +183,58 @@
     const eddie = { x: canvas.width / 2, y: 80, happyFlash: 0 };
     const boxes = [];
 
-    // --- FUNCTIONS ---
-
+    // --- NEUE SPEICHER-LOGIK (Anti-Spam & 1 User = 1 Eintrag) ---
     async function saveScore() {
-  const name = nameInput.value.trim().toUpperCase() || "ANONYM";
-  if(!auth.currentUser) await auth.signInAnonymously();
-  
-  // Die einzigartige ID des Geräts/Browsers
-  const uid = auth.currentUser.uid;
-
-  try {
-    // 1. Check: Gibt es den Namen schon bei jemand ANDEREM?
-    const nameCheck = await db.collection("leaderboard").where("name", "==", name).get();
-    let nameIsTaken = false;
-    
-    nameCheck.forEach(doc => {
-      if (doc.id !== uid) nameIsTaken = true; // Ein anderer User (andere UID) nutzt den Namen
-    });
-
-    if (nameIsTaken && name !== "ANONYM") {
-      alert("Dieser Name ist bereits vergeben! Bitte wähle einen anderen.");
-      return; // Bricht das Speichern ab
-    }
-
-    // 2. Den bestehenden Eintrag des Users suchen
-    const userRef = db.collection("leaderboard").doc(uid);
-    const userDoc = await userRef.get();
-
-    if (userDoc.exists) {
-      // Der User hat schon mal gespielt
-      const oldScore = userDoc.data().score;
+      const name = nameInput.value.trim().toUpperCase() || "ANONYM";
+      if(!auth.currentUser) await auth.signInAnonymously();
       
-      if (state.score > oldScore) {
-        // Neuer Highscore! Name, Score und Zeit updaten
-        await userRef.update({
-          name: name,
-          score: state.score,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      } else {
-        // Score ist nicht besser. Wir updaten nur den Namen (falls er ihn geändert hat)
-        await userRef.update({ name: name });
-      }
-    } else {
-      // Der User spielt zum allerersten Mal
-      await userRef.set({
-        name: name,
-        score: state.score,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    }
+      const uid = auth.currentUser.uid;
 
-    // Wenn alles geklappt hat, Fenster wechseln
-    nameOverlay.classList.add("hidden");
-    gameOverOverlay.classList.remove("hidden");
-    
-  } catch (e) { 
-    console.error("Fehler beim Speichern:", e); 
-    alert("Fehler beim Speichern. Prüfe deine Verbindung.");
-  }
-}
+      try {
+        // 1. Prüfen, ob der Name schon von wem anders vergeben ist
+        const nameCheck = await db.collection("leaderboard").where("name", "==", name).get();
+        let nameIsTaken = false;
+        
+        nameCheck.forEach(doc => {
+          if (doc.id !== uid) nameIsTaken = true; 
+        });
+
+        if (nameIsTaken && name !== "ANONYM") {
+          alert("Dieser Name ist bereits vergeben! Bitte wähle einen anderen.");
+          return; 
+        }
+
+        // 2. Den eigenen Eintrag aktualisieren oder neu erstellen
+        const userRef = db.collection("leaderboard").doc(uid);
+        const userDoc = await userRef.get();
+
+        if (userDoc.exists) {
+          const oldScore = userDoc.data().score;
+          if (state.score > oldScore) {
+            await userRef.update({
+              name: name,
+              score: state.score,
+              timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          } else {
+            await userRef.update({ name: name }); // Nur Namen aktualisieren
+          }
+        } else {
+          await userRef.set({
+            name: name,
+            score: state.score,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        }
+
+        nameOverlay.classList.add("hidden");
+        gameOverOverlay.classList.remove("hidden");
+        
+      } catch (e) { 
+        console.error("Fehler beim Speichern:", e); 
+        alert("Fehler beim Speichern. Prüfe deine Verbindung.");
+      }
+    }
 
     function renderLeaderboard() {
       db.collection("leaderboard").orderBy("score", "desc").limit(10).onSnapshot(snap => {
@@ -285,7 +284,6 @@
           ctx.restore();
         }
 
-        // --- SCHWARZER FOKUS-TEXT VOR DEM START ---
         if (state.phase === "show" && box.id === state.correctBoxId) {
           ctx.save();
           const pulse = Math.sin(performance.now() / 150) * 0.2 + 0.8;
@@ -293,7 +291,6 @@
           ctx.strokeStyle = "#b01fa5"; ctx.lineWidth = 6;
           roundRect(ctx, box.x - 4, y - 4, box.w + 8, box.h + 8, 14, false, true);
           
-          // Schwarz mit weißem Schatten für Kontrast
           ctx.fillStyle = "#000000"; 
           ctx.font = `900 ${Math.floor(box.w * 0.18)}px Arial`;
           ctx.textAlign = "center";
@@ -374,10 +371,22 @@
       if (eddie.happyFlash > 0) eddie.happyFlash = Math.max(0, eddie.happyFlash - 0.03);
     }
 
+    // --- ANGEPASSTE GAMEOVER FUNKTION FÜR DAS EASTER-EGG ---
     function gameOver() {
       state.running = false; setPhase("gameover");
       if (state.score > state.best) { state.best = state.score; localStorage.setItem(BEST_KEY, String(state.best)); }
       finalScoreDisplay.textContent = state.score; bestLineDisplay.textContent = `BEST: ${state.best}`; updateHud();
+      
+      // Elite Reward einblenden, wenn Score hoch genug ist
+      const eliteReward = document.getElementById("eliteReward");
+      if (eliteReward) {
+        if (state.score >= 29) {
+          eliteReward.style.display = "block";
+        } else {
+          eliteReward.style.display = "none";
+        }
+      }
+
       if (state.score > 0) { nameOverlay.classList.remove("hidden"); nameInput.value = ""; } else gameOverOverlay.classList.remove("hidden");
     }
 
@@ -390,6 +399,7 @@
       state.running = true; state.score = 0; state.round = 1; state.boxCount = 2;
       buildRound(); updateHud();
       startOverlay.classList.add("hidden"); gameOverOverlay.classList.add("hidden"); nameOverlay.classList.add("hidden");
+      document.getElementById("eliteReward").style.display = "none";
     }
 
     function getCanvasPos(e) {
