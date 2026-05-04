@@ -212,50 +212,85 @@
     }
 
     function drawBoxes() {
-      boxes.forEach(box => {
-        const isHovered = state.phase === "pick" && state.hoverBoxId === box.id;
-        const y = box.y - box.lift;
-        const cx = box.x + box.w / 2;
-        const cy = y + box.h / 2;
-        ctx.save();
-        let tilt = 0;
-        if (state.phase === "shuffle" && state.activeSwap) {
-          if (box.id === state.activeSwap.aId) tilt = -0.06;
-          if (box.id === state.activeSwap.bId) tilt = 0.06;
-        }
-        ctx.translate(cx, cy); ctx.rotate(tilt); ctx.translate(-cx, -cy);
-        ctx.fillStyle = isHovered ? "#eee" : "#fff";
-        ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
-        roundRect(ctx, box.x, y, box.w, box.h, 12, true, true);
-        if (imgEddieTongue.complete) {
-          ctx.save(); ctx.globalAlpha = 0.95;
-          ctx.drawImage(imgEddieTongue, box.x + box.w*0.04, y + box.w*0.04, box.w*0.92, box.h*0.92);
-          ctx.restore();
-        }
-        if (state.phase === "show" && box.id === state.correctBoxId) {
-          ctx.save();
-          const pulse = Math.sin(performance.now() / 150) * 0.2 + 0.8;
-          ctx.globalAlpha = pulse;
-          ctx.strokeStyle = "#b01fa5"; ctx.lineWidth = 6;
-          roundRect(ctx, box.x - 4, y - 4, box.w + 8, box.h + 8, 14, false, true);
-          ctx.fillStyle = "#b01fa5"; ctx.font = `900 ${Math.floor(box.w * 0.18)}px Arial`;
-          ctx.textAlign = "center"; ctx.fillText("FOCUS", cx, cy + (box.w * 0.06));
-          ctx.restore();
-        }
-        if (isHovered || (state.phase === "reveal" && state.selectedBoxId === box.id)) {
-          ctx.strokeStyle = (state.phase === "reveal") ? (state.selectedBoxId === state.correctBoxId ? "#0f9d58" : "#d92d20") : "#b01fa5";
-          ctx.lineWidth = 5; roundRect(ctx, box.x - 4, y - 4, box.w + 8, box.h + 8, 14, false, true);
-        }
-        if (state.phase === "reveal" && box.id === state.correctBoxId && imgBrand.complete) {
-          const bW = Math.max(box.w * 1.15, 110); 
-          const bH = bW * (imgBrand.height / imgBrand.width);
-          ctx.save(); ctx.fillStyle = "white"; ctx.strokeStyle = "black"; ctx.lineWidth = 2;
-          roundRect(ctx, box.x + box.w/2 - bW/2 - 8, y + box.h + 6, bW + 16, bH + 8, 10, true, true);
-          ctx.drawImage(imgBrand, box.x + box.w/2 - bW/2, y + box.h + 10, bW, bH); ctx.restore();
-        }
-        ctx.restore();
-      });
+  boxes.forEach(box => {
+    const isHovered = state.phase === "pick" && state.hoverBoxId === box.id;
+    const y = box.y - box.lift;
+    const cx = box.x + box.w / 2;
+    const cy = y + box.h / 2;
+    
+    ctx.save();
+    
+    // Tilt-Effekt beim Shuffeln
+    let tilt = 0;
+    if (state.phase === "shuffle" && state.activeSwap) {
+      if (box.id === state.activeSwap.aId) tilt = -0.06;
+      if (box.id === state.activeSwap.bId) tilt = 0.06;
     }
+    
+    ctx.translate(cx, cy); 
+    ctx.rotate(tilt); 
+    ctx.translate(-cx, -cy);
+
+    // Kisten-Body
+    ctx.fillStyle = isHovered ? "#eee" : "#fff";
+    ctx.strokeStyle = "#000"; 
+    ctx.lineWidth = 3;
+    roundRect(ctx, box.x, y, box.w, box.h, 12, true, true);
+
+    // Bild auf der Kiste
+    const pad = box.w * 0.04;
+    if (imgEddieTongue.complete) {
+      ctx.save(); 
+      ctx.globalAlpha = 0.95;
+      ctx.drawImage(imgEddieTongue, box.x + pad, y + pad, box.w - pad * 2, box.h - pad * 2);
+      ctx.restore();
+    }
+
+    // --- OPTIMIERTER FOKUS-TEXT IN SCHWARZ ---
+    if (state.phase === "show" && box.id === state.correctBoxId) {
+      ctx.save();
+      const pulse = Math.sin(performance.now() / 150) * 0.2 + 0.8;
+      ctx.globalAlpha = pulse;
+
+      // Der Rahmen bleibt Purpur für den Wiedererkennungswert
+      ctx.strokeStyle = "#b01fa5"; 
+      ctx.lineWidth = 6;
+      roundRect(ctx, box.x - 4, y - 4, box.w + 8, box.h + 8, 14, false, true);
+
+      // Text-Einstellungen: Schwarz mit weißem Glow für maximale Schärfe
+      ctx.fillStyle = "#000000"; 
+      ctx.font = `900 ${Math.floor(box.w * 0.18)}px Arial`;
+      ctx.textAlign = "center";
+      ctx.shadowColor = "#ffffff";
+      ctx.shadowBlur = 4;
+      
+      ctx.fillText("FOCUS", cx, cy + (box.w * 0.06));
+      ctx.restore();
+    }
+
+    // Hover- und Reveal-Effekte
+    if (isHovered || (state.phase === "reveal" && state.selectedBoxId === box.id)) {
+      ctx.strokeStyle = (state.phase === "reveal") ? (state.selectedBoxId === state.correctBoxId ? "#0f9d58" : "#d92d20") : "#b01fa5";
+      ctx.lineWidth = 5; 
+      roundRect(ctx, box.x - 4, y - 4, box.w + 8, box.h + 8, 14, false, true);
+    }
+
+    // Brand-Logo bei Erfolg
+    if (state.phase === "reveal" && box.id === state.correctBoxId && imgBrand.complete) {
+      const bW = Math.max(box.w * 1.15, 110); 
+      const bH = bW * (imgBrand.height / imgBrand.width);
+      ctx.save(); 
+      ctx.fillStyle = "white"; 
+      ctx.strokeStyle = "black"; 
+      ctx.lineWidth = 2;
+      roundRect(ctx, box.x + box.w/2 - bW/2 - 8, y + box.h + 6, bW + 16, bH + 8, 10, true, true);
+      ctx.drawImage(imgBrand, box.x + box.w/2 - bW/2, y + box.h + 10, bW, bH); 
+      ctx.restore();
+    }
+    
+    ctx.restore();
+  });
+}
 
     function buildRound() {
       boxes.length = 0; const count = state.boxCount;
