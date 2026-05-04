@@ -223,161 +223,241 @@
     }
 
     // --- GAME ENGINE ---
-    function setPhase(n) { state.phase = n; state.phaseStartedAt = performance.now(); }
-    function lerp(a, b, t) { return a + (b - a) * t; }
-    function easeInOutQuad(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+function setPhase(n) { 
+    state.phase = n; 
+    state.phaseStartedAt = performance.now(); 
+}
 
-    function roundRect(c, x, y, w, h, r, fill, stroke) {
-      c.beginPath(); c.moveTo(x + r, y); c.lineTo(x + w - r, y);
-      c.quadraticCurveTo(x + w, y, x + w, y + r); c.lineTo(x + w, y + h - r);
-      c.quadraticCurveTo(x + w, y + h, x + w - r, y + h); c.lineTo(x + r, y + h);
-      c.quadraticCurveTo(x, y + h, x, y + h - r); c.lineTo(x, y + r);
-      c.quadraticCurveTo(x, y, x + r, y); c.closePath();
-      if (fill) c.fill(); if (stroke) c.stroke();
-    }
+function lerp(a, b, t) { 
+    return a + (b - a) * t; 
+}
 
-    function drawTextCircle(text, cx, cy, r) {
-      const chars = text.split("");
-      const step = (Math.PI * 2) / chars.length;
-      const rot = performance.now() / 12000;
-      ctx.save(); ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      ctx.font = `900 ${Math.max(7, r * 0.55)}px Arial`;
-      chars.forEach((char, i) => {
-        const angle = i * step + rot;
-        const x = cx + Math.cos(angle) * r;
-        const y = cy + Math.sin(angle) * r;
-        ctx.save(); ctx.translate(x, y); ctx.rotate(angle + Math.PI / 2);
-        ctx.strokeStyle = "#b01fa5"; ctx.lineWidth = 1.5; ctx.strokeText(char, 0, 0); ctx.restore();
-      });
-      ctx.restore();
-    }
+function easeInOutQuad(t) { 
+    return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; 
+}
 
-    function drawBoxes() {
-      boxes.forEach(box => {
+function roundRect(c, x, y, w, h, r, fill, stroke) {
+    c.beginPath(); 
+    c.moveTo(x + r, y); 
+    c.lineTo(x + w - r, y);
+    c.quadraticCurveTo(x + w, y, x + w, y + r); 
+    c.lineTo(x + w, y + h - r);
+    c.quadraticCurveTo(x + w, y + h, x + w - r, y + h); 
+    c.lineTo(x + r, y + h);
+    c.quadraticCurveTo(x, y + h, x, y + h - r); 
+    c.lineTo(x, y + r);
+    c.quadraticCurveTo(x, y, x + r, y); 
+    c.closePath();
+    if (fill) c.fill(); 
+    if (stroke) c.stroke();
+}
+
+function drawBoxes() {
+    boxes.forEach(box => {
         const isHovered = state.phase === "pick" && state.hoverBoxId === box.id;
         const y = box.y - box.lift;
         const cx = box.x + box.w / 2;
         const cy = y + box.h / 2;
+        
         ctx.save();
+        
+        // Tilt-Effekt beim Shuffeln
         let tilt = 0;
         if (state.phase === "shuffle" && state.activeSwap) {
-          if (box.id === state.activeSwap.aId) tilt = -0.06;
-          if (box.id === state.activeSwap.bId) tilt = 0.06;
+            if (box.id === state.activeSwap.aId) tilt = -0.06;
+            if (box.id === state.activeSwap.bId) tilt = 0.06;
         }
-        ctx.translate(cx, cy); ctx.rotate(tilt); ctx.translate(-cx, -cy);
+        
+        ctx.translate(cx, cy); 
+        ctx.rotate(tilt); 
+        ctx.translate(-cx, -cy);
+
+        // Kisten-Body
         ctx.fillStyle = isHovered ? "#eee" : "#fff";
-        ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
+        ctx.strokeStyle = "#000"; 
+        ctx.lineWidth = 3;
         roundRect(ctx, box.x, y, box.w, box.h, 12, true, true);
+
+        // Eddie-Bild auf der Kiste
         const pad = box.w * 0.04;
-        if (imgEddieTongue.complete) { ctx.save(); ctx.globalAlpha = 0.95; ctx.drawImage(imgEddieTongue, box.x + pad, y + pad, box.w - pad * 2, box.h - pad * 2); ctx.restore(); }
-        if (isHovered) { ctx.strokeStyle = "#b01fa5"; ctx.lineWidth = 5; roundRect(ctx, box.x - 4, y - 4, box.w + 8, box.h + 8, 14, false, true); }
-        if (state.phase === "reveal" && state.selectedBoxId === box.id) {
-          ctx.strokeStyle = state.selectedBoxId === state.correctBoxId ? "#0f9d58" : "#d92d20";
-          ctx.lineWidth = 5; roundRect(ctx, box.x - 4, y - 4, box.w + 8, box.h + 8, 14, false, true);
+        if (imgEddieTongue.complete) { 
+            ctx.save(); 
+            ctx.globalAlpha = 0.95; 
+            ctx.drawImage(imgEddieTongue, box.x + pad, y + pad, box.w - pad * 2, box.h - pad * 2); 
+            ctx.restore(); 
         }
+
+        // --- VERBESSERUNG: MARKIERUNG VOR DEM START ---
+        if (state.phase === "show" && box.id === state.correctBoxId) {
+            ctx.save();
+            // Pulsieren für bessere Sichtbarkeit
+            const pulse = Math.sin(performance.now() / 150) * 0.2 + 0.8;
+            ctx.globalAlpha = pulse;
+
+            // Markierungs-Rahmen
+            ctx.strokeStyle = "#b01fa5";
+            ctx.lineWidth = 6;
+            roundRect(ctx, box.x - 4, y - 4, box.w + 8, box.h + 8, 14, false, true);
+
+            // Fokus-Text auf der Kiste
+            ctx.fillStyle = "#b01fa5";
+            ctx.font = `900 ${Math.floor(box.w * 0.18)}px Arial`;
+            ctx.textAlign = "center";
+            ctx.fillText("FOCUS", cx, cy + (box.w * 0.06)); 
+            ctx.restore();
+        }
+
+        // Hover-Effekt (Pick-Phase)
+        if (isHovered) { 
+            ctx.strokeStyle = "#b01fa5"; 
+            ctx.lineWidth = 5; 
+            roundRect(ctx, box.x - 4, y - 4, box.w + 8, box.h + 8, 14, false, true); 
+        }
+
+        // Reveal-Effekt (Richtig/Falsch)
+        if (state.phase === "reveal" && state.selectedBoxId === box.id) {
+            ctx.strokeStyle = state.selectedBoxId === state.correctBoxId ? "#0f9d58" : "#d92d20";
+            ctx.lineWidth = 5; 
+            roundRect(ctx, box.x - 4, y - 4, box.w + 8, box.h + 8, 14, false, true);
+        }
+
+        // Brand-Logo bei Korrektem Reveal
         if (state.phase === "reveal" && box.id === state.correctBoxId && imgBrand.complete) {
-          const bW = Math.max(box.w * 1.15, 110); const bH = bW * (imgBrand.height / imgBrand.width || 0.2);
-          const bX = box.x + box.w / 2 - bW / 2; const bY = y + box.h + 10;
-          ctx.save(); ctx.fillStyle = "white"; ctx.strokeStyle = "black"; ctx.lineWidth = 2;
-          roundRect(ctx, bX - 8, bY - 4, bW + 16, bH + 8, 10, true, true);
-          ctx.drawImage(imgBrand, bX, bY, bW, bH); ctx.restore();
+            const bW = Math.max(box.w * 1.15, 110); 
+            const bH = bW * (imgBrand.height / imgBrand.width || 0.2);
+            const bX = box.x + box.w / 2 - bW / 2; 
+            const bY = y + box.h + 10;
+            ctx.save(); 
+            ctx.fillStyle = "white"; 
+            ctx.strokeStyle = "black"; 
+            ctx.lineWidth = 2;
+            roundRect(ctx, bX - 8, bY - 4, bW + 16, bH + 8, 10, true, true);
+            ctx.drawImage(imgBrand, bX, bY, bW, bH); 
+            ctx.restore();
         }
         ctx.restore();
-      });
-    }
+    });
+}
 
-    function buildRound() {
-      boxes.length = 0; const count = state.boxCount;
-      let cols = Math.ceil(Math.sqrt(count));
-      const availableW = canvas.width - 160; const availableH = canvas.height - 200;
-      const boxW = Math.min(92, availableW / cols - 24);
-      const gridW = cols * boxW + (cols - 1) * 24; const gridH = Math.ceil(count / cols) * boxW + (Math.ceil(count / cols) - 1) * 24;
-      const startX = (canvas.width - gridW) / 2; const startY = 160 + (availableH - gridH) / 2;
-      for (let i = 0; i < count; i++) {
-        const r = Math.floor(i / cols); const c = i % cols;
+function buildRound() {
+    boxes.length = 0; 
+    const count = state.boxCount;
+    let cols = Math.ceil(Math.sqrt(count));
+    const availableW = canvas.width - 160; 
+    const availableH = canvas.height - 200;
+    const boxW = Math.min(92, availableW / cols - 24);
+    const gridW = cols * boxW + (cols - 1) * 24; 
+    const gridH = Math.ceil(count / cols) * boxW + (Math.ceil(count / cols) - 1) * 24;
+    const startX = (canvas.width - gridW) / 2; 
+    const startY = 160 + (availableH - gridH) / 2;
+
+    for (let i = 0; i < count; i++) {
+        const r = Math.floor(i / cols); 
+        const c = i % cols;
         boxes.push({ id: i, x: startX + c * (boxW + 24), y: startY + r * (boxW + 24), w: boxW, h: boxW, lift: 0 });
-      }
-      state.correctBoxId = Math.floor(Math.random() * count);
-      eddie.y = Math.max(65, startY - 95);
-      state.swapsRemaining = Math.max(4, 4 + Math.floor(count * 1.6));
-      setPhase("show");
     }
+    state.correctBoxId = Math.floor(Math.random() * count);
+    eddie.y = Math.max(65, startY - 95);
+    state.swapsRemaining = Math.max(4, 4 + Math.floor(count * 1.6));
+    setPhase("show");
+}
 
-    function startNextSwap() {
-      if (state.swapsRemaining <= 0) { state.activeSwap = null; setPhase("wait"); return; }
-      let a = Math.floor(Math.random() * boxes.length); let b = Math.floor(Math.random() * boxes.length);
-      while (b === a) b = Math.floor(Math.random() * boxes.length);
-      const boxA = boxes[a]; const boxB = boxes[b];
-      state.activeSwap = {
-        aId: boxA.id, bId: boxB.id, aStartX: boxA.x, bStartX: boxB.x, aStartY: boxA.y, bStartY: boxB.y,
-        aTargetX: boxB.x, bTargetX: boxA.x, aTargetY: boxB.y, bTargetY: boxA.y,
-        start: performance.now(), duration: Math.max(260, (2400 - state.score * 50) / 6)
-      };
-      state.swapsRemaining--;
+function startNextSwap() {
+    if (state.swapsRemaining <= 0) { 
+        state.activeSwap = null; 
+        setPhase("wait"); 
+        return; 
     }
+    let a = Math.floor(Math.random() * boxes.length); 
+    let b = Math.floor(Math.random() * boxes.length);
+    while (b === a) b = Math.floor(Math.random() * boxes.length);
+    const boxA = boxes[a]; 
+    const boxB = boxes[b];
+    state.activeSwap = {
+        aId: boxA.id, bId: boxB.id, 
+        aStartX: boxA.x, bStartX: boxB.x, 
+        aStartY: boxA.y, bStartY: boxB.y,
+        aTargetX: boxB.x, bTargetX: boxA.x, 
+        aTargetY: boxB.y, bTargetY: boxA.y,
+        start: performance.now(), 
+        duration: Math.max(260, (2400 - state.score * 50) / 6)
+    };
+    state.swapsRemaining--;
+}
 
-    function updateBoxes(ts) {
-      if (state.phase === "show" && ts - state.phaseStartedAt > state.showBallTime) { setPhase("shuffle"); startNextSwap(); }
-      else if (state.phase === "shuffle") {
-        if (!state.activeSwap) { startNextSwap(); return; }
-        const swap = state.activeSwap; const p = Math.min(1, (ts - swap.start) / swap.duration); const e = easeInOutQuad(p);
-        const bA = boxes.find(b => b.id === swap.aId); const bB = boxes.find(b => b.id === swap.bId);
-        if(bA && bB) {
-            bA.x = lerp(swap.aStartX, swap.aTargetX, e); bB.x = lerp(swap.bStartX, swap.bTargetX, e);
-            bA.y = lerp(swap.aStartY, swap.aTargetY, e); bB.y = lerp(swap.bStartY, swap.bTargetY, e);
-            if (p >= 1) { bA.x = swap.aTargetX; bA.y = swap.aTargetY; bB.x = swap.bTargetX; bB.y = swap.bTargetY; state.activeSwap = null; }
+function updateBoxes(ts) {
+    if (state.phase === "show" && ts - state.phaseStartedAt > state.showBallTime) { 
+        setPhase("shuffle"); 
+        startNextSwap(); 
+    }
+    else if (state.phase === "shuffle") {
+        if (!state.activeSwap) { 
+            startNextSwap(); 
+            return; 
         }
-      }
-      else if (state.phase === "wait" && ts - state.phaseStartedAt > state.breatherMs) setPhase("pick");
-      else if (state.phase === "reveal") {
-        const s = boxes.find(b => b.id === state.selectedBoxId); const c = boxes.find(b => b.id === state.correctBoxId);
+        const swap = state.activeSwap; 
+        const p = Math.min(1, (ts - swap.start) / swap.duration); 
+        const e = easeInOutQuad(p);
+        const bA = boxes.find(b => b.id === swap.aId); 
+        const bB = boxes.find(b => b.id === swap.bId);
+        if(bA && bB) {
+            bA.x = lerp(swap.aStartX, swap.aTargetX, e); 
+            bB.x = lerp(swap.bStartX, swap.bTargetX, e);
+            bA.y = lerp(swap.aStartY, swap.aTargetY, e); 
+            bB.y = lerp(swap.bStartY, swap.bTargetY, e);
+            if (p >= 1) { 
+                bA.x = swap.aTargetX; bA.y = swap.aTargetY; 
+                bB.x = swap.bTargetX; bB.y = swap.bTargetY; 
+                state.activeSwap = null; 
+            }
+        }
+    }
+    else if (state.phase === "wait" && ts - state.phaseStartedAt > state.breatherMs) {
+        setPhase("pick");
+    }
+    else if (state.phase === "reveal") {
+        const s = boxes.find(b => b.id === state.selectedBoxId); 
+        const c = boxes.find(b => b.id === state.correctBoxId);
         if (s) s.lift = Math.min(s.h * 0.8, s.lift + 5);
         if (c && c.id !== state.selectedBoxId) c.lift = Math.min(c.h * 0.8, c.lift + 5);
         if (ts - state.phaseStartedAt > 1200) {
-          if (state.selectedBoxId === state.correctBoxId) {
-            state.score++; state.round++; state.boxCount = Math.min(18, 2 + Math.floor(state.score / 1.5));
-            eddie.happyFlash = 0.5; buildRound(); updateHud();
-          } else gameOver();
+            if (state.selectedBoxId === state.correctBoxId) {
+                state.score++; 
+                state.round++; 
+                state.boxCount = Math.min(18, 2 + Math.floor(state.score / 1.5));
+                eddie.happyFlash = 0.5; 
+                buildRound(); 
+                updateHud();
+            } else {
+                gameOver();
+            }
         }
-      }
-      if (state.phase !== "reveal") boxes.forEach(b => b.lift = Math.max(0, b.lift - 6));
-      if (eddie.happyFlash > 0) eddie.happyFlash = Math.max(0, eddie.happyFlash - 0.03);
     }
+    if (state.phase !== "reveal") boxes.forEach(b => b.lift = Math.max(0, b.lift - 6));
+    if (eddie.happyFlash > 0) eddie.happyFlash = Math.max(0, eddie.happyFlash - 0.03);
+}
 
-    function gameOver() {
-      state.running = false; setPhase("gameover");
-      if (state.score > state.best) { state.best = state.score; localStorage.setItem(BEST_KEY, String(state.best)); }
-      finalScoreDisplay.textContent = state.score; bestLineDisplay.textContent = `BEST: ${state.best}`;
-      updateHud();
-      if (state.score > 0) { nameOverlay.classList.remove("hidden"); nameInput.value = ""; setTimeout(() => nameInput.focus(), 50); }
-      else gameOverOverlay.classList.remove("hidden");
+function loop(ts) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#eef9ee"; 
+    ctx.fillRect(0, 400, canvas.width, 140);
+    
+    if (state.running) updateBoxes(ts);
+    
+    // Die Markierung findet jetzt direkt in drawBoxes() statt
+    drawBoxes();
+    
+    ctx.save(); 
+    ctx.translate(eddie.x, eddie.y + Math.sin(ts / 400) * 2); 
+    ctx.scale(0.85, 0.85);
+    if (imgEddieHead.complete) ctx.drawImage(imgEddieHead, -50, -50, 100, 100);
+    if (eddie.happyFlash > 0 && imgEddieTongue.complete) { 
+        ctx.globalAlpha = Math.min(1, eddie.happyFlash + 0.3); 
+        ctx.drawImage(imgEddieTongue, -14, 4, 28, 34); 
     }
-
-    function updateHud() {
-      scoreValue.textContent = state.score; roundValue.textContent = state.round;
-      boxValue.textContent = state.boxCount; bestValue.textContent = state.best;
-    }
-
-    function startGame() {
-      state.running = true; state.score = 0; state.round = 1; state.boxCount = 2;
-      buildRound(); updateHud();
-      startOverlay.classList.add("hidden"); gameOverOverlay.classList.add("hidden"); nameOverlay.classList.add("hidden");
-    }
-
-    function getCanvasPos(e) {
-      const r = canvas.getBoundingClientRect();
-      const cX = e.touches ? e.touches[0].clientX : e.clientX;
-      const cY = e.touches ? e.touches[0].clientY : e.clientY;
-      return { x: (cX - r.left) * (canvas.width / r.width), y: (cY - r.top) * (canvas.height / r.height) };
-    }
-
-    canvas.addEventListener("mousedown", e => {
-      const { x, y } = getCanvasPos(e);
-      if (state.phase === "pick") {
-        boxes.forEach(b => { if (x >= b.x && x <= b.x + b.w && y >= b.y - b.lift && y <= b.y - b.lift + b.h) { state.selectedBoxId = b.id; setPhase("reveal"); } });
-      }
-    });
-
+    ctx.restore();
+    requestAnimationFrame(loop);
+}
     // Touch Support
     canvas.addEventListener("touchstart", e => {
         e.preventDefault();
