@@ -179,17 +179,63 @@
     // --- FUNCTIONS ---
 
     async function saveScore() {
-      const name = nameInput.value.trim().toUpperCase() || "ANONYM";
-      if(!auth.currentUser) await auth.signInAnonymously();
-      try {
-        await db.collection("leaderboard").add({
-          name: name, score: state.score,
+  const name = nameInput.value.trim().toUpperCase() || "ANONYM";
+  if(!auth.currentUser) await auth.signInAnonymously();
+  
+  // Die einzigartige ID des Geräts/Browsers
+  const uid = auth.currentUser.uid;
+
+  try {
+    // 1. Check: Gibt es den Namen schon bei jemand ANDEREM?
+    const nameCheck = await db.collection("leaderboard").where("name", "==", name).get();
+    let nameIsTaken = false;
+    
+    nameCheck.forEach(doc => {
+      if (doc.id !== uid) nameIsTaken = true; // Ein anderer User (andere UID) nutzt den Namen
+    });
+
+    if (nameIsTaken && name !== "ANONYM") {
+      alert("Dieser Name ist bereits vergeben! Bitte wähle einen anderen.");
+      return; // Bricht das Speichern ab
+    }
+
+    // 2. Den bestehenden Eintrag des Users suchen
+    const userRef = db.collection("leaderboard").doc(uid);
+    const userDoc = await userRef.get();
+
+    if (userDoc.exists) {
+      // Der User hat schon mal gespielt
+      const oldScore = userDoc.data().score;
+      
+      if (state.score > oldScore) {
+        // Neuer Highscore! Name, Score und Zeit updaten
+        await userRef.update({
+          name: name,
+          score: state.score,
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
-        nameOverlay.classList.add("hidden");
-        gameOverOverlay.classList.remove("hidden");
-      } catch (e) { console.error(e); }
+      } else {
+        // Score ist nicht besser. Wir updaten nur den Namen (falls er ihn geändert hat)
+        await userRef.update({ name: name });
+      }
+    } else {
+      // Der User spielt zum allerersten Mal
+      await userRef.set({
+        name: name,
+        score: state.score,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
     }
+
+    // Wenn alles geklappt hat, Fenster wechseln
+    nameOverlay.classList.add("hidden");
+    gameOverOverlay.classList.remove("hidden");
+    
+  } catch (e) { 
+    console.error("Fehler beim Speichern:", e); 
+    alert("Fehler beim Speichern. Prüfe deine Verbindung.");
+  }
+}
 
     function renderLeaderboard() {
       db.collection("leaderboard").orderBy("score", "desc").limit(10).onSnapshot(snap => {
