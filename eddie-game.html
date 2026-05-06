@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>UNAUFHALTSAM | Focus System</title>
 
-  <!-- FIREBASE CORE SDKS -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -116,7 +115,6 @@
             <a href="https://ko-fi.com/s/f84c7bff38" target="_blank" class="btn" style="background:var(--purpur); width:100%;">ZUM SHOP & CODE EINLÖSEN</a>
           </div>
 
-          <!-- NEU: Das Elite Easter-Egg (versteckt bis Score 29) -->
           <div id="eliteReward" style="display:none; margin-top:15px; padding:15px; background:var(--purpur); color:#fff; border-radius:16px;">
             <p style="font-size:12px; font-weight:800; margin-bottom:5px;">ELITE STATUS ERREICHT</p>
             <p style="font-size:18px; font-weight:900;">DEIN KO-FI CODE: <span style="color:#000;">EDDIE30</span></p>
@@ -146,6 +144,7 @@
     const db = firebase.firestore();
     const auth = firebase.auth();
 
+    const eddieDbRef = db.collection('leaderboard');
     auth.signInAnonymously().catch(e => console.error("Firebase Auth Error:", e));
 
     const canvas = document.getElementById("gameCanvas");
@@ -183,61 +182,43 @@
     const eddie = { x: canvas.width / 2, y: 80, happyFlash: 0 };
     const boxes = [];
 
-    // --- NEUE SPEICHER-LOGIK (Anti-Spam & 1 User = 1 Eintrag) ---
     async function saveScore() {
       const name = nameInput.value.trim().toUpperCase() || "ANONYM";
       if(!auth.currentUser) await auth.signInAnonymously();
-      
       const uid = auth.currentUser.uid;
 
       try {
-        // 1. Prüfen, ob der Name schon von wem anders vergeben ist
-        const nameCheck = await db.collection("leaderboard").where("name", "==", name).get();
+        const nameCheck = await eddieDbRef.where("name", "==", name).get();
         let nameIsTaken = false;
-        
-        nameCheck.forEach(doc => {
-          if (doc.id !== uid) nameIsTaken = true; 
-        });
+        nameCheck.forEach(doc => { if (doc.id !== uid) nameIsTaken = true; });
 
         if (nameIsTaken && name !== "ANONYM") {
-          alert("Dieser Name ist bereits vergeben! Bitte wähle einen anderen.");
+          alert("Dieser Name ist bereits vergeben!");
           return; 
         }
 
-        // 2. Den eigenen Eintrag aktualisieren oder neu erstellen
-        const userRef = db.collection("leaderboard").doc(uid);
+        const userRef = eddieDbRef.doc(uid);
         const userDoc = await userRef.get();
 
         if (userDoc.exists) {
-          const oldScore = userDoc.data().score;
-          if (state.score > oldScore) {
-            await userRef.update({
-              name: name,
-              score: state.score,
-              timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            });
+          if (state.score > userDoc.data().score) {
+            await userRef.update({ name, score: state.score, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
           } else {
-            await userRef.update({ name: name }); // Nur Namen aktualisieren
+            await userRef.update({ name });
           }
         } else {
-          await userRef.set({
-            name: name,
-            score: state.score,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-          });
+          await userRef.set({ name, score: state.score, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
         }
-
         nameOverlay.classList.add("hidden");
         gameOverOverlay.classList.remove("hidden");
-        
       } catch (e) { 
-        console.error("Fehler beim Speichern:", e); 
-        alert("Fehler beim Speichern. Prüfe deine Verbindung.");
+        console.error("Save Error:", e); 
+        alert("Fehler beim Speichern.");
       }
     }
 
     function renderLeaderboard() {
-      db.collection("leaderboard").orderBy("score", "desc").limit(10).onSnapshot(snap => {
+      eddieDbRef.orderBy("score", "desc").limit(10).onSnapshot(snap => {
         leaderboardList.innerHTML = "";
         snap.forEach(doc => {
           const d = doc.data();
@@ -266,45 +247,34 @@
         const cx = box.x + box.w / 2;
         const cy = y + box.h / 2;
         ctx.save();
-        
         let tilt = 0;
         if (state.phase === "shuffle" && state.activeSwap) {
           if (box.id === state.activeSwap.aId) tilt = -0.06;
           if (box.id === state.activeSwap.bId) tilt = 0.06;
         }
-        
         ctx.translate(cx, cy); ctx.rotate(tilt); ctx.translate(-cx, -cy);
         ctx.fillStyle = isHovered ? "#eee" : "#fff";
         ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
         roundRect(ctx, box.x, y, box.w, box.h, 12, true, true);
-        
         if (imgEddieTongue.complete) {
           ctx.save(); ctx.globalAlpha = 0.95;
           ctx.drawImage(imgEddieTongue, box.x + box.w*0.04, y + box.w*0.04, box.w*0.92, box.h*0.92);
           ctx.restore();
         }
-
         if (state.phase === "show" && box.id === state.correctBoxId) {
           ctx.save();
           const pulse = Math.sin(performance.now() / 150) * 0.2 + 0.8;
           ctx.globalAlpha = pulse;
           ctx.strokeStyle = "#b01fa5"; ctx.lineWidth = 6;
           roundRect(ctx, box.x - 4, y - 4, box.w + 8, box.h + 8, 14, false, true);
-          
-          ctx.fillStyle = "#000000"; 
-          ctx.font = `900 ${Math.floor(box.w * 0.18)}px Arial`;
-          ctx.textAlign = "center";
-          ctx.shadowColor = "#ffffff";
-          ctx.shadowBlur = 4;
-          ctx.fillText("FOCUS", cx, cy + (box.w * 0.06));
+          ctx.fillStyle = "#000"; ctx.font = `900 ${Math.floor(box.w * 0.18)}px Arial`;
+          ctx.textAlign = "center"; ctx.fillText("FOCUS", cx, cy + (box.w * 0.06));
           ctx.restore();
         }
-
         if (isHovered || (state.phase === "reveal" && state.selectedBoxId === box.id)) {
           ctx.strokeStyle = (state.phase === "reveal") ? (state.selectedBoxId === state.correctBoxId ? "#0f9d58" : "#d92d20") : "#b01fa5";
           ctx.lineWidth = 5; roundRect(ctx, box.x - 4, y - 4, box.w + 8, box.h + 8, 14, false, true);
         }
-
         if (state.phase === "reveal" && box.id === state.correctBoxId && imgBrand.complete) {
           const bW = Math.max(box.w * 1.15, 110); const bH = bW * (imgBrand.height / imgBrand.width);
           ctx.save(); ctx.fillStyle = "white"; ctx.strokeStyle = "black"; ctx.lineWidth = 2;
@@ -316,7 +286,10 @@
     }
 
     function buildRound() {
-      boxes.length = 0; const count = state.boxCount;
+      boxes.length = 0; 
+      // LOGIK: Start bei 2, +1 pro Punkt, max 30
+      state.boxCount = Math.min(30, 2 + state.score); 
+      const count = state.boxCount;
       let cols = Math.ceil(Math.sqrt(count));
       const boxW = Math.min(92, (canvas.width - 160) / cols - 24);
       const gridW = cols * boxW + (cols - 1) * 24;
@@ -328,8 +301,9 @@
       }
       state.correctBoxId = Math.floor(Math.random() * count);
       eddie.y = Math.max(65, startY - 95);
-      state.swapsRemaining = Math.max(4, 4 + Math.floor(count * 1.6));
+      state.swapsRemaining = Math.max(4, 3 + Math.floor(count * 1.3));
       setPhase("show");
+      updateHud();
     }
 
     function startNextSwap() {
@@ -362,8 +336,7 @@
         if (c && c.id !== state.selectedBoxId) c.lift = Math.min(c.h * 0.8, c.lift + 5);
         if (ts - state.phaseStartedAt > 1200) {
           if (state.selectedBoxId === state.correctBoxId) {
-            state.score++; state.round++; state.boxCount = Math.min(18, 2 + Math.floor(state.score / 1.5));
-            eddie.happyFlash = 0.5; buildRound(); updateHud();
+            state.score++; state.round++; buildRound();
           } else gameOver();
         }
       }
@@ -371,22 +344,12 @@
       if (eddie.happyFlash > 0) eddie.happyFlash = Math.max(0, eddie.happyFlash - 0.03);
     }
 
-    // --- ANGEPASSTE GAMEOVER FUNKTION FÜR DAS EASTER-EGG ---
     function gameOver() {
       state.running = false; setPhase("gameover");
       if (state.score > state.best) { state.best = state.score; localStorage.setItem(BEST_KEY, String(state.best)); }
       finalScoreDisplay.textContent = state.score; bestLineDisplay.textContent = `BEST: ${state.best}`; updateHud();
-      
-      // Elite Reward einblenden, wenn Score hoch genug ist
       const eliteReward = document.getElementById("eliteReward");
-      if (eliteReward) {
-        if (state.score >= 29) {
-          eliteReward.style.display = "block";
-        } else {
-          eliteReward.style.display = "none";
-        }
-      }
-
+      if (eliteReward) eliteReward.style.display = (state.score >= 30) ? "block" : "none";
       if (state.score > 0) { nameOverlay.classList.remove("hidden"); nameInput.value = ""; } else gameOverOverlay.classList.remove("hidden");
     }
 
@@ -396,10 +359,8 @@
     }
 
     function startGame() {
-      state.running = true; state.score = 0; state.round = 1; state.boxCount = 2;
-      buildRound(); updateHud();
+      state.running = true; state.score = 0; state.round = 1; buildRound();
       startOverlay.classList.add("hidden"); gameOverOverlay.classList.add("hidden"); nameOverlay.classList.add("hidden");
-      document.getElementById("eliteReward").style.display = "none";
     }
 
     function getCanvasPos(e) {
@@ -437,7 +398,6 @@
     saveScoreBtn.onclick = saveScore;
     restartBtn.onclick = startGame;
     resetBtn.onclick = () => location.reload();
-
     renderLeaderboard();
     requestAnimationFrame(loop);
   </script>
