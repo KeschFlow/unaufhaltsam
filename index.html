@@ -1,76 +1,561 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Eddie’s World | V6.1</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>EDDIE’S WORLD | UNAUFHALTSAM</title>
+
+  <!-- FIREBASE SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
   <style>
-    :root { --black: #000; --white: #fff; --purpur: #b01fa5; --bg: #f5f5f7; }
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-    body { background: var(--bg); color: var(--black); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
-    .container { text-align: center; max-width: 900px; width: 100%; }
-    h1 { font-size: clamp(32px, 8vw, 64px); font-weight: 900; margin-bottom: 10px; letter-spacing: -1px; }
-    .subtitle { font-size: 18px; opacity: 0.7; margin-bottom: 40px; font-weight: 700; }
-    
-    .hero-actions { display: flex; flex-direction: column; align-items: center; gap: 18px; margin-top: 32px; }
-    .hero-actions-row { display: flex; justify-content: center; align-items: center; gap: 16px; flex-wrap: wrap; width: 100%; margin-top: 10px; }
-    
-    .btn { display: inline-flex; align-items: center; justify-content: center; padding: 16px 24px; border-radius: 16px; font-weight: 900; text-decoration: none; text-transform: uppercase; transition: all 0.2s ease; cursor: pointer; border: none; }
+    :root {
+      --brand-color: #b01fa5; 
+      --bg: #f5f5f7;
+      --black: #000;
+      --white: #fff;
+      --grass: #e7f7e7;
+      --shadow: rgba(0,0,0,.08);
+      --success: #0f9d58;
+      --danger: #d92d20;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; font-family: 'Helvetica Neue', Arial, sans-serif; }
+    body { background: var(--bg); color: var(--black); min-height: 100vh; overflow-x: hidden; }
+
+    .hidden { display: none !important; }
+
+    /* --- LANDING PAGE --- */
+    #landing-page {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 20px; text-align: center;
+    }
+    .landing-container { max-width: 900px; width: 100%; }
+    h1.hero-title { font-size: clamp(32px, 8vw, 64px); font-weight: 900; margin-bottom: 5px; letter-spacing: -1px; text-transform: uppercase;}
+    .marke-sub { font-size: 14px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 40px; opacity: 0.8; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; padding: 16px 24px;
+      border-radius: 16px; font-weight: 900; text-decoration: none; text-transform: uppercase;
+      transition: all 0.2s ease; cursor: pointer; border: none;
+    }
     .btn:active { transform: scale(0.97); }
-    
-    .btn-game { min-width: 320px; padding: 22px 28px; background: var(--white); color: var(--black); border: 3px solid var(--black); font-size: 20px; box-shadow: 0 6px 0 var(--black); position: relative; }
-    .btn-game:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-    
-    .btn-primary { background: var(--purpur); color: var(--white); }
+    .btn-game-trigger {
+      min-width: 320px; padding: 22px 28px; background: var(--white); color: var(--black);
+      border: 3px solid var(--black); font-size: 20px; box-shadow: 0 6px 0 var(--black);
+    }
+    .btn-game-trigger:hover { border-color: var(--brand-color); color: var(--brand-color); }
+    .btn-primary { background: var(--brand-color); color: var(--white); }
     .btn-secondary { background: var(--black); color: var(--white); }
     .btn-dark { background: #333; color: var(--white); }
 
+    /* --- GAME PAGE --- */
+    #game-page { padding: 20px 14px 40px; }
+    .wrap { width: 100%; max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .hud { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+    .stat { border: 2px solid #000; border-radius: 18px; padding: 12px; background: #fff; text-align: center; }
+    .stat .label { font-size: 10px; opacity: .6; text-transform: uppercase; font-weight: 800; margin-bottom: 4px; }
+    .stat .value { font-size: clamp(18px, 4vw, 28px); font-weight: 900; line-height: 1; color: var(--brand-color); }
+
+    .game-shell { position: relative; width: 100%; background: #fff; border: 2px solid #000; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px var(--shadow); }
+    canvas { display: block; width: 100%; height: auto; background: linear-gradient(to bottom, #fff 72%, var(--grass) 72%); touch-action: none; }
+
+    .overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(255,255,255,.95); text-align: center; z-index: 100; }
+    .card { width: min(100%, 480px); background: #fff; border: 2px solid #000; border-radius: 22px; padding: 30px 20px; }
+    
+    .leaderboard-container { background: #fff; border: 2px solid #000; border-radius: 22px; padding: 20px; margin-top: 10px; }
+    .leaderboard-title { font-weight: 900; text-transform: uppercase; margin-bottom: 10px; border-bottom: 2px solid #000; padding-bottom: 5px; }
+    .leaderboard-entry { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-weight: 700; list-style: none; }
+    .lb-rank { opacity: 0.4; margin-right: 10px; font-style: italic; }
+    .lb-needed { font-size: 11px; font-weight: 900; text-align: center; margin-top: 12px; opacity: 0.6; text-transform: uppercase; }
+
+    #nameInput { border: 2px solid #000; padding: 14px; border-radius: 12px; width: 100%; font-size: 18px; font-weight: 900; text-align: center; margin: 15px 0; outline: none; text-transform: uppercase; }
+    .legal-links { margin-top: 40px; display: flex; justify-content: center; gap: 20px; }
+    .legal-links a { font-size: 11px; color: #aaa; text-decoration: none; font-weight: bold; text-transform: uppercase; }
+
     @media (max-width: 720px) {
-      .hero-actions-row { flex-direction: column; }
-      .btn { width: 100%; max-width: 420px; }
-      .btn-game { min-width: 0; box-shadow: 0 4px 0 var(--black); }
+      .btn-game-trigger { min-width: 0; width: 100%; }
+      #game-page .topbar h1 { font-size: 24px; }
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <h1>EDDIE’S WORLD</h1>
-    <p class="subtitle">UNAUFHALTSAM</p>
+  <!-- LANDING PAGE -->
+  <section id="landing-page">
+    <div class="landing-container">
+      <h1 class="hero-title">UNAUFHALTSAM</h1>
+      <p class="marke-sub">LOSING IS INSTANT.</p>
 
-    <div class="hero-actions">
-      
-      <div style="width: 100%; max-width: 420px; margin-bottom: 28px;">
-          <p style="margin-bottom: 12px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; font-size: 16px; color: var(--black);">
-            YOU WON'T LAST LONG.
-          </p>
-          <a class="btn btn-game" href="https://keschflow.github.io/unaufhaltsam/eddie-game.html?v=6.1">
-            START THE GAME
-          </a>
-          <p style="font-size: 12px; opacity: 0.6; font-weight: 700; margin-top: 14px;">
-            Eddie is faster than you think.
-          </p>
+      <div style="margin-bottom: 28px;">
+          <p style="margin-bottom: 12px; font-weight: 900; text-transform: uppercase; font-size: 16px;">YOU WON'T LAST LONG.</p>
+          <button class="btn btn-game-trigger" onclick="switchToGame()">START THE GAME</button>
+          <p style="font-size: 12px; opacity: 0.6; font-weight: 700; margin-top: 14px;">99% FAIL BEFORE 20.</p>
       </div>
 
-      <div class="hero-actions-row">
-        
-        <div style="width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;">
-            <a class="btn btn-secondary" href="https://jutn.creator-spring.com/listing/eddies-world-unaufhaltsam" target="_blank" style="background: var(--black); color: #fff; width: 100%; border: 2px solid var(--black);">
-              🛒 GET EDDIE MERCH
-            </a>
-            <p style="font-size: 11px; opacity: 0.5; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
-              Wear Eddie. Stay Unstoppable.
-            </p>
-        </div>
-
-        <div class="hero-actions-row" style="margin-top: 0;">
-            <a class="btn btn-primary" href="https://ko-fi.com/eddiesworld" style="flex: 1; min-width: 140px; font-size: 14px;">🔐 JOIN</a>
-            <a class="btn btn-dark" href="https://keschflow.github.io/eddies-print-engine-public/?v=6.1" style="flex: 1; min-width: 140px; font-size: 14px;">🚀 CREATE</a>
-        </div>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+        <a class="btn btn-primary" style="width: 100%; max-width: 420px;" href="https://ko-fi.com/eddiesworld" target="_blank">🔐 JOIN STATUS</a>
+        <!-- GATE: Create System now forces the user to play the game and win the code -->
+        <button class="btn btn-dark" style="width: 100%; max-width: 420px;" onclick="switchToGame()">🚀 CREATE SYSTEM</button>
+        <a class="btn btn-secondary" style="width: 100%; max-width: 420px;" href="https://jutn.creator-spring.com/listing/eddies-world-unaufhaltsam" target="_blank">🛒 MERCH</a>
       </div>
 
+      <div class="legal-links">
+        <a href="impressum.html">Imprint</a>
+        <a href="datenschutz.html">Privacy</a>
+      </div>
     </div>
-  </div>
+  </section>
 
+  <!-- GAME PAGE -->
+  <section id="game-page" class="hidden">
+    <main class="wrap">
+      <div class="topbar">
+        <div class="title"><h1>UNAUFHALTSAM</h1></div>
+        <button class="btn btn-secondary" onclick="location.reload()">HOME</button>
+      </div>
+      <section class="hud">
+        <div class="stat"><div class="label">Boxes</div><div class="value" id="boxValue">2</div></div>
+        <div class="stat"><div class="label">Best</div><div class="value" id="bestValue">0</div></div>
+      </section>
+      <section class="game-shell">
+        <canvas id="gameCanvas" width="960" height="540"></canvas>
+        <div class="overlay" id="startOverlay">
+          <div class="card">
+            <h2>FOCUS SYSTEM V1.0</h2>
+            <p>Focus the right box. Losing is instant.</p>
+            <button class="btn btn-primary" id="startBtn" style="margin-top:20px; width:100%;">START SYSTEM</button>
+          </div>
+        </div>
+        <div class="overlay hidden" id="nameOverlay">
+          <div class="card">
+            <h2>FOCUS CONFIRMED!</h2>
+            <p>Enter your name into the global ranking:</p>
+            <input type="text" id="nameInput" placeholder="NAME" maxlength="12" />
+            <button class="btn btn-primary" id="saveScoreBtn" style="width:100%; margin-top:10px;">SAVE RANK</button>
+          </div>
+        </div>
+        <div class="overlay hidden" id="gameOverOverlay">
+          <div class="card">
+            <h2>FOCUS LOST</h2>
+            <div id="finalScore" style="font-size:48px; font-weight:900; color:var(--brand-color); margin:10px 0;">0 BOXES</div>
+            <p id="bestLine" style="font-weight:800; opacity:0.6; margin-bottom:20px;">BEST: 0 BOXES</p>
+            <button class="btn btn-secondary" id="restartBtn" style="width:100%; margin-bottom:12px;">TRY AGAIN</button>
+            
+            <!-- ELITE REWARDS: Strictly gated behind winning 30 boxes -->
+            <div id="promoBox" style="display:none; margin-top:15px; padding:15px; background:rgba(0,0,0,0.03); border-radius:16px;">
+               <p style="font-size:13px; font-weight:800; margin-bottom:10px; line-height:1.4;">ABSOLUTE FOCUS REWARDED:<br>WIN 1 MONTH KO-FI MEMBERSHIP INCL. PRINT ENGINE.</p>
+               <a href="https://ko-fi.com/s/f84c7bff38" target="_blank" class="btn" style="background:var(--brand-color); width:100%;">TO SHOP & CODE</a>
+            </div>
+            <div id="eliteReward" style="display:none; margin-top:15px; padding:15px; background:var(--brand-color); color:#fff; border-radius:16px;">
+              <p style="font-size:12px; font-weight:800; margin-bottom:5px;">ELITE STATUS REACHED</p>
+              <p style="font-size:18px; font-weight:900;">CODE: EDDIE30</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="leaderboard-container">
+        <div id="uiMythTitle" style="font-weight:900; margin-bottom:8px; color:var(--danger);">NOBODY HAS SEEN THE END</div>
+        <div class="leaderboard-title">Global Focus Ranking</div>
+        <ul id="leaderboardList"></ul>
+        <div id="lbNeeded" class="lb-needed">LOADING RANKING...</div>
+      </section>
+    </main>
+  </section>
+
+  <script>
+    // --- SYSTEM MASTER CONFIG ---
+    const CLIENT_CONFIG = {
+        id: "eddie-v1",
+        brandColor: "#b01fa5",
+        easterEggScore: 29 // Score 28 = 30 Boxes defeated -> Score 29 = Victory
+    };
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC0olKESyTP0rXUlnjGstLlGN50I1m_O2A",
+      authDomain: "mg-challenge.firebaseapp.com",
+      projectId: "mg-challenge",
+      storageBucket: "mg-challenge.firebasestorage.app",
+      messagingSenderId: "472289048663",
+      appId: "1:472289048663:web:4d2cdb6f868ac9c32c4b12"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+    const eddieDbRef = db.collection(`leaderboard_${CLIENT_CONFIG.id}`);
+
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const BEST_KEY = "focusBest_" + CLIENT_CONFIG.id;
+
+    let state = {
+      running: false, score: 0, boxCount: 2,
+      best: Number(localStorage.getItem(BEST_KEY) || 0),
+      phase: "idle", phaseStartedAt: 0, selectedBoxId: null,
+      correctBoxId: null, hoverBoxId: null, showBallTime: 1400,
+      swapsRemaining: 0, activeSwap: null, breatherMs: 300,
+      lowestTop10: 0
+    };
+    
+    const boxes = [];
+    const eddie = { x: canvas.width / 2, y: 80, happyFlash: 0 };
+    const imgEddieHead = new Image(); imgEddieHead.src = "eddie_head.png";
+    const imgEddieTongue = new Image(); imgEddieTongue.src = "eddie_tongue.png";
+    const imgBrand = new Image(); imgBrand.src = "unaufhaltsam_brand.png";
+
+    function getBrandColor() {
+      return getComputedStyle(document.documentElement).getPropertyValue('--brand-color').trim();
+    }
+
+    function switchToGame() {
+      document.getElementById('landing-page').classList.add('hidden');
+      document.getElementById('game-page').classList.remove('hidden');
+      auth.onAuthStateChanged(user => { if (user) renderLeaderboard(); });
+      auth.signInAnonymously().catch(e => console.error(e));
+    }
+
+    async function saveScore() {
+      const nameInput = document.getElementById("nameInput");
+      const name = nameInput.value.trim().toUpperCase() || "ANONYMOUS";
+      if (!auth.currentUser) await auth.signInAnonymously();
+      const uid = auth.currentUser.uid;
+      
+      try {
+        const nameCheck = await eddieDbRef.where("name", "==", name).get();
+        let taken = false;
+        nameCheck.forEach(doc => { if (doc.id !== uid) taken = true; });
+        if (taken && name !== "ANONYMOUS") { alert("Name already taken!"); return; }
+        
+        // Anti-Cheat: Hard Cap at Score 29 (Victory over 30 Boxes)
+        const finalScoreValue = Math.min(29, state.score);
+        
+        const userRef = eddieDbRef.doc(uid);
+        const userDoc = await userRef.get();
+        if (userDoc.exists && finalScoreValue <= userDoc.data().score) {
+          await userRef.update({ name: name });
+        } else {
+          await userRef.set({ name: name, score: finalScoreValue, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+        }
+        document.getElementById("nameOverlay").classList.add("hidden");
+        document.getElementById("gameOverOverlay").classList.remove("hidden");
+      } catch (e) { alert("Error saving score!"); }
+    }
+
+    function renderLeaderboard() {
+      eddieDbRef.orderBy("score", "desc").limit(10).onSnapshot(snap => {
+        const list = document.getElementById("leaderboardList");
+        list.innerHTML = "";
+        let count = 1;
+        let lastScore = 0;
+        snap.forEach(doc => {
+          const d = doc.data();
+          // Display Hard Cap: Max 30 Boxes
+          const displayBoxes = Math.min(30, d.score + 2);
+          list.innerHTML += `<li class="leaderboard-entry"><span><span class="lb-rank">#${count}</span> ${d.name}</span><span>${displayBoxes}</span></li>`;
+          lastScore = displayBoxes;
+          count++;
+        });
+        state.lowestTop10 = lastScore;
+        updateHud();
+      }, err => console.error(err));
+    }
+
+    function buildRound() {
+      // VICTORY TRIGGER: Winning 30 Boxes round (Score 28) = Score 29 = System Beaten
+      if (state.score >= 29) {
+        gameOver(true);
+        return;
+      }
+
+      boxes.length = 0; 
+      state.boxCount = Math.min(30, 2 + state.score); 
+      
+      const count = state.boxCount;
+      let cols = Math.ceil(Math.sqrt(count));
+      const boxW = Math.max(45, Math.min(92, (canvas.width - 160) / cols - 24));
+      const gridW = cols * boxW + (cols - 1) * 24;
+      const startX = (canvas.width - gridW) / 2; 
+      const startY = 160 + ((canvas.height - 200) - (Math.ceil(count / cols) * boxW + (Math.ceil(count / cols) - 1) * 24)) / 2;
+      
+      for (let i = 0; i < count; i++) {
+        const r = Math.floor(i / cols); 
+        const c = i % cols;
+        boxes.push({ id: i, x: startX + c * (boxW + 24), y: startY + r * (boxW + 24), w: boxW, h: boxW, lift: 0 });
+      }
+      
+      state.correctBoxId = Math.floor(Math.random() * count);
+      eddie.y = Math.max(65, startY - 95);
+      state.swapsRemaining = Math.max(4, 3 + Math.floor(count * 1.5));
+      
+      state.showBallTime = state.score >= 14 ? 1000 : 1400; // False Hope Timing
+      
+      setPhase("show");
+      updateHud();
+    }
+
+    function startNextSwap() {
+      if (state.swapsRemaining <= 0) { state.activeSwap = null; setPhase("wait"); return; }
+      let a, b;
+      if (Math.random() < 0.6) {
+        a = boxes.findIndex(box => box.id === state.correctBoxId);
+        b = Math.floor(Math.random() * boxes.length);
+        while (b === a) b = Math.floor(Math.random() * boxes.length);
+      } else {
+        a = Math.floor(Math.random() * boxes.length);
+        b = Math.floor(Math.random() * boxes.length);
+        while (b === a) b = Math.floor(Math.random() * boxes.length);
+      }
+      
+      state.activeSwap = {
+        aId: boxes[a].id, bId: boxes[b].id, 
+        aStartX: boxes[a].x, bStartX: boxes[b].x, 
+        aStartY: boxes[a].y, bStartY: boxes[b].y,
+        aTargetX: boxes[b].x, bTargetX: boxes[a].x, 
+        aTargetY: boxes[b].y, bTargetY: boxes[a].y,
+        start: performance.now(), 
+        duration: Math.max(140, (2200 - state.score * 90) / 7.5) // False Hope Speed
+      };
+      state.swapsRemaining--;
+    }
+
+    function updateBoxes(ts) {
+      if (state.phase === "show" && ts - state.phaseStartedAt > state.showBallTime) { 
+        setPhase("shuffle"); 
+        startNextSwap(); 
+      }
+      else if (state.phase === "shuffle") {
+        if (!state.activeSwap) { startNextSwap(); return; }
+        const swap = state.activeSwap; 
+        const p = Math.min(1, (ts - swap.start) / swap.duration); 
+        const e = easeInOutQuad(p);
+        const bA = boxes.find(b => b.id === swap.aId);
+        const bB = boxes.find(b => b.id === swap.bId);
+        
+        if (bA && bB) {
+          bA.x = lerp(swap.aStartX, swap.aTargetX, e); 
+          bB.x = lerp(swap.bStartX, swap.bTargetX, e);
+          bA.y = lerp(swap.aStartY, swap.aTargetY, e); 
+          bB.y = lerp(swap.bStartY, swap.bTargetY, e);
+          if (p >= 1) { 
+            bA.x = swap.aTargetX; bA.y = swap.aTargetY; 
+            bB.x = swap.bTargetX; bB.y = swap.bTargetY; 
+            state.activeSwap = null; 
+          }
+        }
+      } 
+      else if (state.phase === "wait" && ts - state.phaseStartedAt > state.breatherMs) {
+        setPhase("pick");
+      }
+      else if (state.phase === "reveal") {
+        const s = boxes.find(b => b.id === state.selectedBoxId);
+        const c = boxes.find(b => b.id === state.correctBoxId);
+        if (s) s.lift = Math.min(s.h * 0.8, s.lift + 5);
+        if (c && c.id !== state.selectedBoxId) c.lift = Math.min(c.h * 0.8, c.lift + 5);
+        
+        if (ts - state.phaseStartedAt > 1200) {
+          if (state.selectedBoxId === state.correctBoxId) { 
+            state.score++; 
+            eddie.happyFlash = 0.5; 
+            buildRound(); 
+          } else {
+            if (state.score >= 18) {
+              setTimeout(() => gameOver(), 600); // Near Win Pain
+            } else {
+              gameOver();
+            }
+          }
+        }
+      }
+      
+      if (state.phase !== "reveal") {
+        boxes.forEach(b => b.lift = Math.max(0, b.lift - 6));
+      }
+      
+      if (eddie.happyFlash > 0) {
+        eddie.happyFlash = Math.max(0, eddie.happyFlash - 0.03);
+      }
+    }
+
+    function gameOver(victory = false) {
+      state.running = false; 
+      setPhase("gameover");
+      
+      if (state.score > state.best) { 
+        state.best = state.score; 
+        localStorage.setItem(BEST_KEY, String(state.best)); 
+      }
+      
+      const finalBoxes = Math.min(30, state.boxCount);
+      const bestBoxes = Math.min(30, state.best + 2);
+
+      document.getElementById("finalScore").textContent = finalBoxes + " BOXES"; 
+      document.getElementById("bestLine").textContent = `BEST: ${bestBoxes} BOXES`; 
+      
+      updateHud();
+      
+      // ONLY SHOW REWARD AT TRUE 30 BOXES OR VICTORY
+      if (finalBoxes >= 30 || victory) {
+        document.getElementById("eliteReward").style.display = "block";
+        document.getElementById("promoBox").style.display = "block";
+      } else {
+        document.getElementById("eliteReward").style.display = "none";
+        document.getElementById("promoBox").style.display = "none";
+      }
+
+      if (state.score > 0) {
+        document.getElementById("nameOverlay").classList.remove("hidden");
+        document.getElementById("gameOverOverlay").classList.add("hidden");
+      } else {
+        document.getElementById("nameOverlay").classList.add("hidden");
+        document.getElementById("gameOverOverlay").classList.remove("hidden");
+      }
+    }
+
+    function updateHud() { 
+      const currentBoxesValue = Math.min(30, state.boxCount);
+      document.getElementById("boxValue").textContent = currentBoxesValue; 
+      document.getElementById("bestValue").textContent = Math.min(30, state.best + 2); 
+
+      const myth = document.getElementById("uiMythTitle");
+      if (state.score < 15) myth.textContent = "NOBODY HAS SEEN THE END";
+      else if (state.score < 22) myth.textContent = "THE SYSTEM HAS A LIMIT";
+      else myth.textContent = "30 BOXES: NOBODY";
+
+      const diff = (state.lowestTop10 - currentBoxesValue) + 1;
+      document.getElementById("lbNeeded").textContent = diff > 0 ? `YOU NEED +${diff} FOR TOP 10` : "YOU ARE ELITE.";
+    }
+
+    function setPhase(n) { 
+      state.phase = n; 
+      state.phaseStartedAt = performance.now(); 
+    }
+    
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function easeInOutQuad(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+
+    function drawBoxes() {
+      boxes.forEach(box => {
+        const y = box.y - box.lift;
+        const cx = box.x + box.w / 2; 
+        const cy = y + box.h / 2;
+        
+        ctx.save();
+        let tilt = 0;
+        if (state.phase === "shuffle" && state.activeSwap) {
+          if (box.id === state.activeSwap.aId) tilt = -0.06;
+          if (box.id === state.activeSwap.bId) tilt = 0.06;
+        }
+        
+        ctx.translate(cx, cy); 
+        ctx.rotate(tilt); 
+        ctx.translate(-cx, -cy);
+        
+        ctx.fillStyle = "#fff"; 
+        ctx.strokeStyle = "#000"; 
+        ctx.lineWidth = 3;
+        ctx.strokeRect(box.x, y, box.w, box.h); 
+        ctx.fillRect(box.x, y, box.w, box.h);
+        
+        if (imgEddieTongue.complete) {
+          ctx.drawImage(imgEddieTongue, box.x + box.w*0.04, y + box.w*0.04, box.w*0.92, box.h*0.92);
+        }
+        
+        if (state.phase === "show" && box.id === state.correctBoxId) {
+          ctx.save(); 
+          const pulse = Math.sin(performance.now() / 150) * 0.2 + 0.8; 
+          ctx.globalAlpha = pulse;
+          ctx.strokeStyle = getBrandColor(); 
+          ctx.lineWidth = 6; 
+          ctx.strokeRect(box.x - 4, y - 4, box.w + 8, box.h + 8);
+          ctx.fillStyle = "#000"; 
+          ctx.font = `900 ${Math.floor(box.w * 0.18)}px Arial`; 
+          ctx.textAlign = "center";
+          ctx.fillText("FOCUS", cx, cy + (box.w * 0.06)); 
+          ctx.restore();
+        }
+        
+        if (state.phase === "reveal" && state.selectedBoxId === box.id) {
+          ctx.strokeStyle = (state.selectedBoxId === state.correctBoxId ? "#0f9d58" : "#d92d20");
+          ctx.lineWidth = 5; 
+          ctx.strokeRect(box.x - 4, y - 4, box.w + 8, box.h + 8);
+        }
+        
+        if (state.phase === "reveal" && box.id === state.correctBoxId && imgBrand.complete) {
+          const bW = Math.max(box.w * 1.15, 110); 
+          const bH = bW * (imgBrand.height / imgBrand.width);
+          ctx.drawImage(imgBrand, box.x + box.w/2 - bW/2, y + box.h + 10, bW, bH);
+        }
+        ctx.restore();
+      });
+    }
+
+    function handleInteraction(x, y) {
+      if (state.phase === "pick") {
+        boxes.forEach(b => { 
+          if (x >= b.x && x <= b.x + b.w && y >= b.y - b.lift && y <= b.y - b.lift + b.h) { 
+            state.selectedBoxId = b.id; 
+            setPhase("reveal"); 
+          } 
+        });
+      }
+    }
+
+    canvas.onmousedown = e => {
+      const r = canvas.getBoundingClientRect();
+      handleInteraction(((e.clientX - r.left) * (canvas.width / r.width)), ((e.clientY - r.top) * (canvas.height / r.height)));
+    };
+
+    canvas.addEventListener("touchstart", e => {
+      e.preventDefault();
+      const r = canvas.getBoundingClientRect();
+      handleInteraction(((e.touches[0].clientX - r.left) * (canvas.width / r.width)), ((e.touches[0].clientY - r.top) * (canvas.height / r.height)));
+    }, { passive: false });
+
+    function loop(ts) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#eef9ee"; 
+      ctx.fillRect(0, 400, canvas.width, 140);
+      
+      if (state.running) updateBoxes(ts);
+      drawBoxes();
+      
+      ctx.save(); 
+      ctx.translate(eddie.x, eddie.y + Math.sin(ts / 400) * 2); 
+      ctx.scale(0.85, 0.85);
+      
+      if (imgEddieHead.complete) {
+        ctx.drawImage(imgEddieHead, -50, -50, 100, 100);
+      }
+      if (eddie.happyFlash > 0 && imgEddieTongue.complete) {
+        ctx.globalAlpha = Math.min(1, eddie.happyFlash + 0.3); 
+        ctx.drawImage(imgEddieTongue, -14, 4, 28, 34);
+      }
+      ctx.restore();
+      
+      requestAnimationFrame(loop);
+    }
+
+    document.getElementById("startBtn").onclick = () => { 
+      state.running = true; 
+      state.score = 0; 
+      buildRound(); 
+      document.getElementById("startOverlay").classList.add("hidden"); 
+    };
+    
+    document.getElementById("saveScoreBtn").onclick = saveScore;
+    
+    document.getElementById("restartBtn").onclick = () => { 
+      state.running = true; 
+      state.score = 0; 
+      buildRound(); 
+      document.getElementById("gameOverOverlay").classList.add("hidden"); 
+    };
+    
+    requestAnimationFrame(loop);
+  </script>
 </body>
 </html>
