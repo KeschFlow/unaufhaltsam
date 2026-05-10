@@ -163,6 +163,7 @@
         <div id="uiMythTitle" style="font-weight:900; margin-bottom:8px; color:var(--danger);">NOBODY HAS SEEN THE END</div>
         <div class="leaderboard-title">Global Wall Ranking</div>
         <ul id="leaderboardList"></ul>
+        <div id="lbNeeded" class="lb-needed">LOADING RANKING...</div>
       </section>
     </main>
   </section>
@@ -426,7 +427,7 @@
       else myth.textContent = "30 BOXES: NOBODY";
 
       const diff = (state.lowestTop10 - currentBoxesValue) + 1;
-      document.getElementById("lbNeeded").textContent = diff > 0 ? `YOU NEED +${diff} FOR TOP 10` : "YOU ARE ELITE.";
+      document.getElementById("lbNeeded").textContent = diff > 0 ? `YOU NEED +${diff} FOR TOP 10` : "YOU ARE IN THE TOP 10.";
     }
 
     function setPhase(n) { 
