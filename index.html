@@ -96,11 +96,9 @@
           <p style="font-size: 12px; opacity: 0.6; font-weight: 700; margin-top: 14px;">99% FAIL BEFORE 20.</p>
       </div>
 
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
-        <a class="btn btn-primary" style="width: 100%; max-width: 420px;" href="https://ko-fi.com/eddiesworld" target="_blank">🔐 JOIN STATUS</a>
-        <!-- GATE: Create System now forces the user to play the game and win the code -->
-        <button class="btn btn-dark" style="width: 100%; max-width: 420px;" onclick="switchToGame()">🚀 CREATE SYSTEM</button>
-        <a class="btn btn-secondary" style="width: 100%; max-width: 420px;" href="https://jutn.creator-spring.com/listing/eddies-world-unaufhaltsam" target="_blank">🛒 MERCH</a>
+      <div style="display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; margin-top: 20px;">
+        <a href="https://ko-fi.com/eddiesworld" target="_blank" style="font-size: 12px; font-weight: 900; color: #777; text-transform: uppercase; text-decoration: none;">Support Eddie</a>
+        <a href="https://jutn.creator-spring.com/listing/eddies-world-unaufhaltsam" target="_blank" style="font-size: 12px; font-weight: 900; color: #777; text-transform: uppercase; text-decoration: none;">Merch</a>
       </div>
 
       <div class="legal-links">
@@ -147,11 +145,15 @@
             
             <!-- ELITE REWARDS: Strictly gated behind winning 30 boxes -->
             <div id="promoBox" style="display:none; margin-top:15px; padding:15px; background:rgba(0,0,0,0.03); border-radius:16px;">
-               <p style="font-size:13px; font-weight:800; margin-bottom:10px; line-height:1.4;">ABSOLUTE FOCUS REWARDED:<br>WIN 1 MONTH KO-FI MEMBERSHIP INCL. PRINT ENGINE.</p>
-               <a href="https://ko-fi.com/s/f84c7bff38" target="_blank" class="btn" style="background:var(--brand-color); width:100%;">TO SHOP & CODE</a>
+               <p style="font-size:13px; font-weight:800; margin-bottom:10px; line-height:1.4;">
+                 THE WALL IS DOWN.<br>
+                 STATUS EARNED.<br>
+                 Unlock Eddie’s World Access on Ko-fi.
+               </p>
+               <a href="https://ko-fi.com/eddiesworld" target="_blank" class="btn" style="background:var(--brand-color); width:100%;">UNLOCK ACCESS</a>
             </div>
             <div id="eliteReward" style="display:none; margin-top:15px; padding:15px; background:var(--brand-color); color:#fff; border-radius:16px;">
-              <p style="font-size:12px; font-weight:800; margin-bottom:5px;">ELITE STATUS REACHED</p>
+              <p style="font-size:12px; font-weight:800; margin-bottom:5px;">LEVEL 30 VERIFIED</p>
               <p style="font-size:18px; font-weight:900;">CODE: EDDIE30</p>
             </div>
           </div>
@@ -159,9 +161,8 @@
       </section>
       <section class="leaderboard-container">
         <div id="uiMythTitle" style="font-weight:900; margin-bottom:8px; color:var(--danger);">NOBODY HAS SEEN THE END</div>
-        <div class="leaderboard-title">Global Focus Ranking</div>
-        <ul id="leaderboardList"></ul>
         <div class="leaderboard-title">Global Wall Ranking</div>
+        <ul id="leaderboardList"></ul>
       </section>
     </main>
   </section>
