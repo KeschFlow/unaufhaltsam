@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Unaufhaltsam</title>
+<style>
+body{margin:0;background:#050505;color:#fff;font-family:system-ui,-apple-system,Segoe UI,sans-serif}main{width:min(900px,calc(100% - 28px));margin:auto;padding:28px 0}h1{font-size:clamp(44px,10vw,96px);line-height:.85;letter-spacing:-.08em;text-transform:uppercase;margin:0 0 18px}.top{display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap}.btn{border:1px solid #333;background:#fff;color:#050505;border-radius:16px;padding:14px 18px;font-weight:900;text-transform:uppercase;text-decoration:none;cursor:pointer}.btn.dark{background:#111;color:#fff}.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}.stat{border:1px solid #333;background:#111;border-radius:18px;padding:14px;text-align:center}.label{color:#aaa;font-size:12px;text-transform:uppercase;font-weight:900}.value{font-size:38px;font-weight:950;color:#7C3AED}.board{position:relative;border:1px solid #333;background:#111;border-radius:24px;padding:18px;min-height:420px}.grid{display:grid;gap:12px;place-items:center;margin-top:16px}.box{width:74px;height:74px;background:#fff;color:#050505;border:4px solid #050505;border-radius:14px;display:grid;place-items:center;font-weight:950;cursor:pointer;user-select:none}.box.focus{outline:6px solid #7C3AED}.box.good{outline:6px solid #22c55e}.box.bad{outline:6px solid #ef4444}.center{text-align:center}.muted{color:#aaa}.footer{margin-top:18px;color:#aaa;font-weight:800;text-transform:uppercase;font-size:12px}.hide{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><div><h1>Unaufhaltsam</h1><div class="muted">Focus the right box.</div></div><a class="btn dark" href="../">Eddie’s World</a></div>
+<div class="stats"><div class="stat"><div class="label">Boxes</div><div id="boxes" class="value">2</div></div><div class="stat"><div class="label">Best</div><div id="best" class="value">0</div></div></div>
+<section class="board"><div class="center"><button id="start" class="btn">Start the Game</button><p id="msg" class="muted">Merke dir die markierte Box. Danach wird gemischt.</p></div><div id="grid" class="grid"></div></section>
+<div class="footer">Eddie’s World · Real life. No staging.</div>
+</main>
+<script>
+let score=0,best=Number(localStorage.getItem('unaufhaltsam_best')||0),correct=0,locked=true;const grid=document.getElementById('grid'),msg=document.getElementById('msg'),boxesEl=document.getElementById('boxes'),bestEl=document.getElementById('best');function hud(){boxesEl.textContent=2+score;bestEl.textContent=2+best}function build(){locked=true;grid.innerHTML='';let n=2+score,cols=Math.ceil(Math.sqrt(n));grid.style.gridTemplateColumns='repeat('+cols+',74px)';correct=Math.floor(Math.random()*n);for(let i=0;i<n;i++){let b=document.createElement('button');b.className='box'+(i===correct?' focus':'');b.textContent='';b.onclick=()=>pick(i,b);grid.appendChild(b)}hud();msg.textContent='Merken...';setTimeout(()=>{[...grid.children].forEach(x=>x.classList.remove('focus'));shuffle(8+score);},900)}function shuffle(times){let arr=[...grid.children];let t=0;let iv=setInterval(()=>{let a=Math.floor(Math.random()*arr.length),b=Math.floor(Math.random()*arr.length);grid.insertBefore(arr[a],arr[b]);arr=[...grid.children];t++;if(t>=times){clearInterval(iv);locked=false;msg.textContent='Wähle die richtige Box.'}},120)}function pick(i,el){if(locked)return;locked=true;if(i===correct){el.classList.add('good');score++;msg.textContent='Richtig.';setTimeout(build,650)}else{el.classList.add('bad');best=Math.max(best,score);localStorage.setItem('unaufhaltsam_best',best);msg.textContent='Vorbei. Ergebnis: '+(2+score)+' Boxen.';hud();document.getElementById('start').textContent='Nochmal';document.getElementById('start').classList.remove('hide')}}document.getElementById('start').onclick=()=>{score=0;document.getElementById('start').classList.add('hide');build()};hud();
+</script>
+</body>
+</html>
