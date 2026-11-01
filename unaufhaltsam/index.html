@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -78,6 +78,7 @@
       #game-page .topbar h1 { font-size: 24px; }
     }
   </style>
+  <link rel="stylesheet" href="../results.css">
 </head>
 <body>
 
@@ -129,14 +130,13 @@
             <p>Enter your name into the global ranking:</p>
             <input type="text" id="nameInput" placeholder="NAME" maxlength="12" />
             <button class="btn btn-primary" id="saveScoreBtn" style="width:100%; margin-top:10px;">SAVE RANK</button>
+            <button class="btn btn-secondary" id="cancelRankBtn" style="width:100%; margin-top:10px;">Zurück zum Ergebnis</button>
+            <p id="rankStatus" role="status"></p>
           </div>
         </div>
         <div class="overlay hidden" id="gameOverOverlay">
           <div class="card">
-            <h2>FOCUS LOST</h2>
-            <div id="finalScore" style="font-size:48px; font-weight:900; color:var(--brand-color); margin:10px 0;">0 BOXES</div>
-            <p id="bestLine" style="font-weight:800; opacity:0.6; margin-bottom:20px;">BEST: 0 BOXES</p>
-            <button class="btn btn-secondary" id="restartBtn" style="width:100%; margin-bottom:12px;">TRY AGAIN</button>
+            <div id="resultContent" class="result-content"></div>
             <div id="promoBox" style="display:none; margin-top:15px; padding:15px; background:rgba(0,0,0,0.03); border-radius:16px;">
                <p style="font-size:13px; font-weight:800; margin-bottom:10px; line-height:1.4;">
                  THE WALL IS DOWN.<br>
@@ -161,6 +161,7 @@
     </main>
   </section>
 
+  <script src="../results.js"></script>
   <script>
     const CLIENT_CONFIG = { id: "eddie-v1", brandColor: "#b01fa5", easterEggScore: 29 };
 
@@ -184,12 +185,25 @@
 
     let state = {
       running: false, score: 0, boxCount: 2,
-      best: Number(localStorage.getItem(BEST_KEY) || 0),
+      best: UnaufhaltsamResults.bestScore(BEST_KEY),
       phase: "idle", phaseStartedAt: 0, selectedBoxId: null,
       correctBoxId: null, hoverBoxId: null, showBallTime: 1400,
       swapsRemaining: 0, activeSwap: null, breatherMs: 300,
       lowestTop10: 0
     };
+    let pendingGameOver = null, rankingCandidate = null, savingRank = false;
+    const results = UnaufhaltsamResults.create({
+      host: document.getElementById('resultContent'), bestKey: BEST_KEY, variant: 'firebase',
+      retryId: 'restartBtn', scoreId: 'finalScore', bestId: 'bestLine',
+      levelForScore: score => Math.min(30, score + 2), onRetry: startRun,
+      onRank: result => {
+        rankingCandidate = result;
+        document.getElementById('gameOverOverlay').classList.add('hidden');
+        document.getElementById('nameOverlay').classList.remove('hidden');
+        document.getElementById('rankStatus').textContent = '';
+        document.getElementById('nameInput').focus();
+      }
+    });
     const boxes = [];
     const eddie = { x: canvas.width / 2, y: 80, happyFlash: 0 };
     const imgEddieHead = new Image(); imgEddieHead.src = "../eddie_head.png";
@@ -206,26 +220,38 @@
     }
 
     async function saveScore() {
-      const nameInput = document.getElementById("nameInput");
-      const name = nameInput.value.trim().toUpperCase() || "ANONYMOUS";
-      if (!auth.currentUser) await auth.signInAnonymously();
-      const uid = auth.currentUser.uid;
+      const candidate = rankingCandidate;
+      if (!candidate || !candidate.isNewBest || savingRank) return;
+      savingRank = true;
+      document.getElementById('saveScoreBtn').disabled = true;
+      const name = document.getElementById('nameInput').value.trim().toUpperCase() || 'ANONYMOUS';
+      const status = document.getElementById('rankStatus');
       try {
-        const nameCheck = await eddieDbRef.where("name", "==", name).get();
+        if (!auth.currentUser) await auth.signInAnonymously();
+        const uid = auth.currentUser.uid;
+        const nameCheck = await eddieDbRef.where('name', '==', name).get();
         let taken = false;
         nameCheck.forEach(doc => { if (doc.id !== uid) taken = true; });
-        if (taken && name !== "ANONYMOUS") { alert("Name already taken!"); return; }
-        const finalScoreValue = Math.min(29, state.score);
+        if (taken && name !== 'ANONYMOUS') { status.textContent = 'Name bereits vergeben.'; return; }
+        const finalScoreValue = Math.min(29, candidate.score);
         const userRef = eddieDbRef.doc(uid);
         const userDoc = await userRef.get();
-        if (userDoc.exists && finalScoreValue <= userDoc.data().score) {
-          await userRef.update({ name: name });
-        } else {
-          await userRef.set({ name: name, score: finalScoreValue, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+        if (!userDoc.exists || finalScoreValue > userDoc.data().score) {
+          await userRef.set({ name, score: finalScoreValue, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
         }
-        document.getElementById("nameOverlay").classList.add("hidden");
-        document.getElementById("gameOverOverlay").classList.remove("hidden");
-      } catch (e) { alert("Error saving score!"); }
+        if (rankingCandidate === candidate) closeRanking();
+      } catch (_) {
+        if (rankingCandidate === candidate) status.textContent = 'Ranking nicht erreichbar. Dein lokaler Rekord bleibt erhalten.';
+      } finally {
+        savingRank = false; document.getElementById('saveScoreBtn').disabled = false;
+      }
+    }
+
+    function closeRanking() {
+      rankingCandidate = null;
+      document.getElementById('nameOverlay').classList.add('hidden');
+      document.getElementById('gameOverOverlay').classList.remove('hidden');
+      results.focus();
     }
 
     function renderLeaderboard() {
@@ -322,7 +348,9 @@
         if (c && c.id !== state.selectedBoxId) c.lift = Math.min(c.h * 0.8, c.lift + 5);
         if (ts - state.phaseStartedAt > 1200) {
           if (state.selectedBoxId === state.correctBoxId) { state.score++; eddie.happyFlash = 0.5; buildRound(); }
-          else { if (state.score >= 18) setTimeout(() => gameOver(), 600); else gameOver(); }
+          else if (state.score >= 18) {
+            if (pendingGameOver === null) pendingGameOver = setTimeout(() => gameOver(), 600);
+          } else gameOver();
         }
       }
       if (state.phase !== "reveal") boxes.forEach(b => b.lift = Math.max(0, b.lift - 6));
@@ -330,27 +358,31 @@
     }
 
     function gameOver(victory = false) {
-      state.running = false; setPhase("gameover");
-      if (state.score > state.best) { state.best = state.score; localStorage.setItem(BEST_KEY, String(state.best)); }
+      if (!state.running) return;
+      clearTimeout(pendingGameOver); pendingGameOver = null;
+      state.running = false; setPhase('gameover');
       const finalBoxes = Math.min(30, state.boxCount);
-      const bestBoxes = Math.min(30, state.best + 2);
-      document.getElementById("finalScore").textContent = finalBoxes + " BOXES"; 
-      document.getElementById("bestLine").textContent = `BEST: ${bestBoxes} BOXES`; 
+      const result = results.finish(state.score, finalBoxes);
+      state.best = result.bestScore;
       updateHud();
-      if (finalBoxes >= 30 || victory) {
-        document.getElementById("eliteReward").style.display = "block";
-        document.getElementById("promoBox").style.display = "block";
-      } else {
-        document.getElementById("eliteReward").style.display = "none";
-        document.getElementById("promoBox").style.display = "none";
-      }
-      if (state.score > 0) {
-        document.getElementById("nameOverlay").classList.remove("hidden");
-        document.getElementById("gameOverOverlay").classList.add("hidden");
-      } else {
-        document.getElementById("nameOverlay").classList.add("hidden");
-        document.getElementById("gameOverOverlay").classList.remove("hidden");
-      }
+      document.querySelector('.game-shell').classList.add('showing-result');
+      document.getElementById('eliteReward').style.display = finalBoxes >= 30 || victory ? 'block' : 'none';
+      document.getElementById('promoBox').style.display = finalBoxes >= 30 || victory ? 'block' : 'none';
+      document.getElementById('nameOverlay').classList.add('hidden');
+      document.getElementById('gameOverOverlay').classList.remove('hidden');
+      results.focus();
+    }
+
+    function startRun() {
+      clearTimeout(pendingGameOver); pendingGameOver = null;
+      rankingCandidate = null;
+      state.score = 0; state.boxCount = 2;
+      state.selectedBoxId = null; state.correctBoxId = null; state.hoverBoxId = null;
+      state.activeSwap = null; state.swapsRemaining = 0;
+      eddie.happyFlash = 0;
+      document.querySelector('.game-shell').classList.remove('showing-result');
+      ['startOverlay', 'nameOverlay', 'gameOverOverlay'].forEach(id => document.getElementById(id).classList.add('hidden'));
+      results.start(); state.running = true; buildRound();
     }
 
     function updateHud() { 
@@ -440,9 +472,9 @@
       requestAnimationFrame(loop);
     }
 
-    document.getElementById("startBtn").onclick = () => { state.running = true; state.score = 0; buildRound(); document.getElementById("startOverlay").classList.add("hidden"); };
-    document.getElementById("saveScoreBtn").onclick = saveScore;
-    document.getElementById("restartBtn").onclick = () => { state.running = true; state.score = 0; buildRound(); document.getElementById("gameOverOverlay").classList.add("hidden"); };
+    document.getElementById('startBtn').onclick = startRun;
+    document.getElementById('saveScoreBtn').onclick = saveScore;
+    document.getElementById('cancelRankBtn').onclick = closeRanking;
     requestAnimationFrame(loop);
   </script>
 </body>

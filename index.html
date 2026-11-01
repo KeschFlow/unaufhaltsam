@@ -8,15 +8,85 @@
 <style>
 :root{--bg:#050505;--panel:#101014;--line:#2a2a33;--text:#fff;--muted:#aaa;--accent:#7C3AED;--bad:#ef4444;--good:#22c55e}*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif}body{background:var(--bg);color:var(--text);min-height:100vh}a{color:inherit;text-decoration:none}.hide{display:none!important}main{width:min(920px,calc(100% - 28px));margin:auto;padding:28px 0 44px}.top{display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap}.kicker{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.16em;font-weight:900;margin-bottom:10px}h1{font-size:clamp(44px,10vw,104px);line-height:.84;letter-spacing:-.08em;text-transform:uppercase;margin:0 0 14px}.btn{border:1px solid #333;background:#fff;color:#050505;border-radius:16px;padding:14px 18px;font-weight:900;text-transform:uppercase;text-decoration:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;min-height:48px}.btn.dark{background:#111;color:#fff}.btn.purple{background:var(--accent);border-color:var(--accent);color:#fff}.btn:active{transform:scale(.98)}.links{display:flex;gap:10px;flex-wrap:wrap}.intro{min-height:42vh;display:grid;align-items:end;padding:48px 0 24px}.intro p{color:var(--muted);font-size:18px;max-width:620px;margin:0 0 24px}.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}.stat{border:1px solid #333;background:#111;border-radius:18px;padding:14px;text-align:center}.label{color:#aaa;font-size:12px;text-transform:uppercase;font-weight:900}.value{font-size:38px;font-weight:950;color:var(--accent)}.board{position:relative;border:1px solid #333;background:#111;border-radius:24px;padding:18px;min-height:430px}.grid{display:grid;gap:12px;place-items:center;margin-top:16px}.box{width:74px;height:74px;background:#fff;color:#050505;border:4px solid #050505;border-radius:14px;display:grid;place-items:center;font-weight:950;cursor:pointer;user-select:none}.box.focus{outline:6px solid var(--accent)}.box.good{outline:6px solid var(--good)}.box.bad{outline:6px solid var(--bad)}.center{text-align:center}.muted{color:#aaa}.footer{margin-top:18px;color:#aaa;font-weight:800;text-transform:uppercase;font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 </style>
+<link rel="stylesheet" href="results.css">
 </head>
 <body>
 <main>
 <div class="top"><div><div class="kicker">Eddie's World · Real life. No staging.</div></div><nav class="links"><a class="btn dark" href="https://eddiesworld.de/">HQ</a><a class="btn dark" href="https://www.youtube.com/@Eddie-Unaufhaltsam" target="_blank" rel="noopener">YouTube</a><a class="btn dark" href="https://jutn.creator-spring.com/listing/eddies-world-unaufhaltsam" target="_blank" rel="noopener">Merch</a></nav></div>
 <section class="intro"><div><h1>Unaufhaltsam</h1><p>Der Fokus-Test. Merke dir die markierte Box. Danach wird gemischt. Ein Fehler, vorbei.</p><button id="startTop" class="btn purple">Start the Game</button></div></section>
-<section id="gameArea" class="hide"><div class="stats"><div class="stat"><div class="label">Boxes</div><div id="boxes" class="value">2</div></div><div class="stat"><div class="label">Best</div><div id="best" class="value">0</div></div></div><section class="board"><div class="center"><button id="start" class="btn">Start</button><p id="msg" class="muted">Merke dir die markierte Box. Danach wird gemischt.</p></div><div id="grid" class="grid"></div></section><div class="footer"><span>Eddie's World</span><span>Local best saved on this device.</span></div></section>
+<section id="gameArea" class="hide"><div class="stats"><div class="stat"><div class="label">Boxes</div><div id="boxes" class="value">2</div></div><div class="stat"><div class="label">Best</div><div id="best" class="value">0</div></div></div><section class="board"><div class="center"><button id="start" class="btn">Start</button><p id="msg" class="muted">Merke dir die markierte Box. Danach wird gemischt.</p></div><div id="grid" class="grid"></div><section id="resultPanel" class="result-panel hide" aria-label="Dein Ergebnis"><div id="resultContent" class="result-content"></div></section></section><div class="footer"><span>Eddie's World</span><span>Local best saved on this device.</span></div></section>
 </main>
+<script src="results.js"></script>
 <script>
-let score=0,best=Number(localStorage.getItem('unaufhaltsam_best')||0),correct=0,locked=true;const grid=document.getElementById('grid'),msg=document.getElementById('msg'),boxesEl=document.getElementById('boxes'),bestEl=document.getElementById('best'),gameArea=document.getElementById('gameArea');function hud(){boxesEl.textContent=2+score;bestEl.textContent=2+best}function showGame(){gameArea.classList.remove('hide');document.getElementById('start').click();gameArea.scrollIntoView({behavior:'smooth',block:'start'})}function build(){locked=true;grid.innerHTML='';let n=2+score,cols=Math.ceil(Math.sqrt(n));grid.style.gridTemplateColumns='repeat('+cols+',74px)';correct=Math.floor(Math.random()*n);for(let i=0;i<n;i++){let b=document.createElement('button');b.className='box'+(i===correct?' focus':'');b.onclick=()=>pick(i,b);grid.appendChild(b)}hud();msg.textContent='Merken...';setTimeout(()=>{[...grid.children].forEach(x=>x.classList.remove('focus'));shuffle(8+score)},900)}function shuffle(times){let arr=[...grid.children],t=0;let iv=setInterval(()=>{let a=Math.floor(Math.random()*arr.length),b=Math.floor(Math.random()*arr.length);grid.insertBefore(arr[a],arr[b]);arr=[...grid.children];t++;if(t>=times){clearInterval(iv);locked=false;msg.textContent='Wähle die richtige Box.'}},120)}function pick(i,el){if(locked)return;locked=true;if(i===correct){el.classList.add('good');score++;msg.textContent='Richtig.';setTimeout(build,650)}else{el.classList.add('bad');best=Math.max(best,score);localStorage.setItem('unaufhaltsam_best',best);msg.textContent='Vorbei. Ergebnis: '+(2+score)+' Boxen.';hud();document.getElementById('start').textContent='Nochmal';document.getElementById('start').classList.remove('hide')}}document.getElementById('start').onclick=()=>{score=0;document.getElementById('start').classList.add('hide');build()};document.getElementById('startTop').onclick=showGame;hud();
+let score = 0, correct = 0, locked = true;
+const BEST_KEY = 'unaufhaltsam_best';
+let best = UnaufhaltsamResults.bestScore(BEST_KEY), generation = 0;
+let revealTimer, roundTimer, shuffleTimer;
+const grid = document.getElementById('grid'), msg = document.getElementById('msg');
+const boxesEl = document.getElementById('boxes'), bestEl = document.getElementById('best');
+const panel = document.getElementById('resultPanel');
+const results = UnaufhaltsamResults.create({
+  host: document.getElementById('resultContent'), bestKey: BEST_KEY,
+  variant: 'standalone', levelForScore: value => value + 2, onRetry: startRun
+});
+function hud() { boxesEl.textContent = 2 + score; bestEl.textContent = 2 + best; }
+function startRun() {
+  clearTimeout(revealTimer); clearTimeout(roundTimer); clearInterval(shuffleTimer);
+  generation++;
+  score = 0;
+  panel.classList.add('hide');
+  document.getElementById('start').classList.add('hide');
+  results.start(); build();
+}
+function build() {
+  locked = true; grid.innerHTML = '';
+  const n = 2 + score, cols = Math.ceil(Math.sqrt(n)), current = generation;
+  grid.style.gridTemplateColumns = 'repeat(' + cols + ',74px)';
+  correct = Math.floor(Math.random() * n);
+  for (let i = 0; i < n; i++) {
+    const box = document.createElement('button');
+    box.className = 'box' + (i === correct ? ' focus' : '');
+    box.onclick = () => pick(i, box); grid.appendChild(box);
+  }
+  hud(); msg.textContent = 'Merken...';
+  revealTimer = setTimeout(() => {
+    if (current !== generation) return;
+    [...grid.children].forEach(box => box.classList.remove('focus'));
+    shuffle(8 + score);
+  }, 900);
+}
+function shuffle(times) {
+  let arr = [...grid.children], ticks = 0;
+  const current = generation;
+  shuffleTimer = setInterval(() => {
+    if (current !== generation) return;
+    const a = Math.floor(Math.random() * arr.length), b = Math.floor(Math.random() * arr.length);
+    grid.insertBefore(arr[a], arr[b]); arr = [...grid.children];
+    if (++ticks >= times) {
+      clearInterval(shuffleTimer); locked = false; msg.textContent = 'Wähle die richtige Box.';
+    }
+  }, 120);
+}
+function pick(i, box) {
+  if (locked) return;
+  locked = true;
+  if (i === correct) {
+    box.classList.add('good'); score++; msg.textContent = 'Richtig.';
+    roundTimer = setTimeout(build, 650);
+  } else {
+    box.classList.add('bad');
+    const result = results.finish(score, 2 + score);
+    best = result.bestScore; hud();
+    panel.classList.remove('hide'); results.focus();
+  }
+}
+document.getElementById('start').onclick = startRun;
+const startTop = document.getElementById('startTop');
+if (startTop) startTop.onclick = () => {
+  const area = document.getElementById('gameArea');
+  area.classList.remove('hide'); startRun(); area.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+hud();
 </script>
 </body>
 </html>
